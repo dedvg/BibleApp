@@ -14,6 +14,7 @@ __Optional problems:__
 * When reading the Bible, one translation can differ a lot from the other. However it can add quite some meaning to the text.
 By reading different translations side by side this can be done quite easy to get a better understanding of the text. 
   * For example by comparing the dutch and english text.
+  * A user can select which translations he wishes to compare.
 * Notes and boommarks are separated. They can be combined.
   * these notes and boommarks can be orderly sorted.
 * Enable the user to share bible verses without adds.
