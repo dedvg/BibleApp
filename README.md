@@ -48,9 +48,10 @@ __MVP__
 * Be able to read the bible
 * Add a text to favorites (with a chosen subject)
 * Lookup the favorites of the correspondending user
+* another bible translation
+
 
 __optional__ 
-* another bible translation
 * alowing the user to see 2 translations side by side
 * adding notes when adding a text to favorites
 
