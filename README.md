@@ -36,10 +36,10 @@ __Hardest parts:__
   
   ![draft](/doc/draft.jpg)
 
-__ MVP __
+__MVP__
 * Be able to read the bible
 * Add a text to favorites (with a chosen subject)
 * Lookup the favorites of the correspondending user
 
-__ optional __ 
+__optional__ 
 * another bible translation
