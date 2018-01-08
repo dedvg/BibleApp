@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "378509090135",
+    "firebase_url": "https://bibleapp-94a26.firebaseio.com",
+    "project_id": "bibleapp-94a26",
+    "storage_bucket": "bibleapp-94a26.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:378509090135:android:c3f0756d80ff291e",
+        "android_client_info": {
+          "package_name": "com.example.david.bibleapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "378509090135-tg8m9iqrkhrt37p53lel1qbf0qtd29rs.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.david.bibleapp",
+            "certificate_hash": "cd7e209b86f1024085dec45f6cc3155c034b057a"
+          }
+        },
+        {
+          "client_id": "378509090135-hol32nfh38vrmmiv2frkkojvl2self6s.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBUhfsAIcRactSwMMpb1-MhYJBT91hoLng"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "378509090135-hol32nfh38vrmmiv2frkkojvl2self6s.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
