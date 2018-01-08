@@ -35,3 +35,11 @@ __Hardest parts:__
   * https://firebase.google.com/
   
   ![draft](/doc/draft.jpg)
+
+__ MVP __
+* Be able to read the bible
+* Add a text to favorites (with a chosen subject)
+* Lookup the favorites of the correspondending user
+
+__ optional __ 
+* another bible translation
