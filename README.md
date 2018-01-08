@@ -34,5 +34,4 @@ __Hardest parts:__
 * the ability to login/register a user and keep track of their favorites (firebase)
   * https://firebase.google.com/
   
-  
-  
+  ![draft](/doc/draft.jpg)
