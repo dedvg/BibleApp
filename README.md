@@ -9,6 +9,7 @@ Currently there are bible apps for example: Bijbel - Statenvertaling.
 But they lack this.
 
 __Optional problem:__
+
 When reading the Bible, one translation can differ a lot from the other. However it can add quite some meaning to the text.
 By reading different translations side by side this can be done quite easy to get a better understanding of the text. 
 For example by comparing the dutch and english text.
