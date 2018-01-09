@@ -8,12 +8,13 @@
     tools:context="com.example.david.bibleapp.MainActivity">
 
     <Button
-        android:id="@+id/registerBTN"
+        android:id="@+id/loginBTN"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
+        android:onClick="LoginUser"
         android:text="LOGIN"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -46,7 +47,7 @@
         android:ems="10"
         android:hint="password"
         android:inputType="textPassword"
-        app:layout_constraintBottom_toTopOf="@+id/registerBTN"
+        app:layout_constraintBottom_toTopOf="@+id/loginBTN"
         app:layout_constraintEnd_toEndOf="@+id/usernameED"
         app:layout_constraintStart_toStartOf="@+id/usernameED" />
 
@@ -57,12 +58,13 @@
         android:layout_marginBottom="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
+        android:onClick="register"
         android:fontFamily="monospace"
         android:text="Click here if you have no account"
         android:textColor="@color/common_google_signin_btn_text_dark_default"
         android:textSize="14sp"
         android:textStyle="bold"
-        app:layout_constraintBottom_toTopOf="@+id/registerBTN"
+        app:layout_constraintBottom_toTopOf="@+id/loginBTN"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 </android.support.constraint.ConstraintLayout>
