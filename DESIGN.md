@@ -59,5 +59,53 @@ __7.	FavoriteActivity__
   b.	Firebase list results (From the UserClass)
   
 ### Functions
-__MainActivity
-### Data 
+__MainActivity__
+* Check_Input: 
+Will check if the username and password are valid. (If they look like an email and password), if valid Check_User will be executed.
+* Check_User:
+Will check if the user exists in Firebase, if the user exists go to the UserActivity
+*Register:
+Will go to a new Activity (RegisterActivity)
+
+__RegisterActivity__
+* Check_Input: 
+Will check if the username and password are valid. (If they look like an email and password), if valid Register_User will be executed.
+* Register_User:
+Will register the user in firebase.
+
+__UserActivity__
+* Log_Out:
+Logs out the user
+* Get suggestions_names:
+Will enable the user to select the wanted book.
+* Get_chapters:
+Will enable the user to select which chapter.
+* Get Text:
+Get text from the api, and fill the listview.
+* Go_to_favorites:
+Will go to the FavoriteActivity of the current user.
+* Longtapped:
+Will keep track of the verse number which is long tapped and will start Get Favorites
+* Get Favorites:
+Will get the user Favorite subjects to enable selecting one.
+* Add to Favorites:
+Adds the long tapped verse to the selected subject.
+
+__FavoriteActivity__
+* Log_Out:
+Logs out the user
+* Get_Favorites:
+Will get the user Favorite subjects to enable selecting one.
+* Get_texts:
+Will get the verses belonging to the subject and fill a listview with them. 
+* Back
+will send the user back to the subjects or to the UserActivity
+### Database Structure
+The user will have a list of SubjectClasses
+
+
+SubjectClass| 
+------------ | 
+name|
+Verses[] | 
+
