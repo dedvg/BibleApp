@@ -58,5 +58,6 @@ __7.	FavoriteActivity__
   
   b.	Firebase list results (From the UserClass)
   
-
+### Functions
+__MainActivity
 ### Data 
