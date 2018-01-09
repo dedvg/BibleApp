@@ -46,7 +46,8 @@ __Hardest parts:__
 
 __MVP__
 * Be able to read the bible
-* Add a text to favorites (with a chosen subject)
+* Add a text to favorites (with a chosen subject) with use of Firebase
+* Allow the user to make a new subject and delete one
 * another bible translation
 
 
