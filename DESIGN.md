@@ -26,6 +26,9 @@ Allows the user to register. And log in with the given information.
 __3.	UserActivity__
 
 Allows the user to read the Bible, add verses to his/her favorites and allows the user to add and delete subjects.
+With use of a listview the Bible will be readable.
+Navigating trough the bible and adding to favorites will be done with use of popups with a listview if needed.
+Firebase will be updated if a verse is added.
 
   a.	Returns the user to MainActivity
   
@@ -41,7 +44,7 @@ __4.	UserActivity__
   
 __5.	FavoriteActivity__
 
-Navigate trough favorites and delete from it.
+Navigate trough favorites and delete from it. This will be done by retrieving information belonging to the current user in firebase.
 
   a.	Go back to the Text you came from
   
@@ -56,4 +59,4 @@ __7.	FavoriteActivity__
   b.	Firebase list results (From the UserClass)
   
 
-
+### Data 
