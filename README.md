@@ -46,14 +46,15 @@ __Hardest parts:__
 
 __MVP__
 * Be able to read the bible
-* Add a text to favorites (with a chosen subject)
-* Lookup the favorites of the correspondending user
+* Add a text to favorites (with a chosen subject) with use of Firebase
+* Allow the user to make a new subject and delete one
 * another bible translation
 
 
 __optional__ 
 * alowing the user to see 2 translations side by side
 * adding notes when adding a text to favorites
+* Lookup the favorites of the correspondending user
 
 
   ![draft](/doc/draft.jpg)
