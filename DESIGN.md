@@ -101,7 +101,8 @@ Will get the verses belonging to the subject and fill a listview with them.
 * Back
 will send the user back to the subjects or to the UserActivity
 ### Database Structure
-The user will have a list of SubjectClasses
+The user will have a list of SubjectClasses in FireBase (and local).
+To add another subject wifi is needed.
 
 
 SubjectClass| 
