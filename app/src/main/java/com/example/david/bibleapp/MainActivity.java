@@ -12,10 +12,12 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 public class MainActivity extends AppCompatActivity {
     EditText userT, passwordT;
     private FirebaseAuth mAuth;
+    private FirebaseAuth.AuthStateListener mAuthListener;
 
 
     @Override
@@ -27,6 +29,10 @@ public class MainActivity extends AppCompatActivity {
         passwordT = findViewById(R.id.passwordED);
 
         mAuth = FirebaseAuth.getInstance();
+
+        // set a listener that checks if the user is already logged in
+        setListener();
+
     }
 
     public void register(View view) {
@@ -69,4 +75,44 @@ public class MainActivity extends AppCompatActivity {
         // starts the new activity
         startActivity(intent);
     }
+
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        // Check if user is signed in
+        mAuth.addAuthStateListener(mAuthListener);
+    }
+
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        if (mAuthListener != null) {
+            mAuth.removeAuthStateListener(mAuthListener);
+        }
+    }
+
+    private void setListener() {
+        mAuthListener = new FirebaseAuth.AuthStateListener() {
+            @Override
+            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+                FirebaseUser user = firebaseAuth.getCurrentUser();
+                if (user != null) {
+
+                    // if the user is singed in
+
+                    Toast.makeText(getApplicationContext(), "logging in again",
+                            Toast.LENGTH_SHORT).show();
+                    Intent intent = new Intent(MainActivity.this,
+                            UserActivity.class);
+
+                    // starts the new activity
+                    startActivity(intent);
+                    finish();
+                }
+            }
+        };
+    }
+
 }

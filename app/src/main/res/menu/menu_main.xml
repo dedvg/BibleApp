@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+
+<button
+
+    />
+    <item android:id="@+id/new_text"
+        android:title="new text"
+        android:orderInCategory="100"
+        android:icon="@drawable/downbutton"
+        app:showAsAction="always"
+        />
+
+
+    <item android:id="@+id/favorites"
+        android:title="favorites"
+        android:orderInCategory="100"
+        app:showAsAction="never"
+        />
+
+    <item android:id="@+id/logout"
+        android:title="logout"
+        android:orderInCategory="100"
+        app:showAsAction="never"
+        />
+</menu>
