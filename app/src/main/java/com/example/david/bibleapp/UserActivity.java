@@ -102,8 +102,9 @@ public class UserActivity extends AppCompatActivity {
 
     private void new_text() {
         // TODO: 10-1-2018
-       Toast.makeText(UserActivity.this, "For now only matthew 3 is available", Toast.LENGTH_SHORT).show();
-        volley();
+//       Toast.makeText(UserActivity.this, "For now only matthew 3 is available", Toast.LENGTH_SHORT).show();
+//        volley();
+        show_books();
     }
 
     private void GoToFavorites() {
@@ -175,27 +176,39 @@ public class UserActivity extends AppCompatActivity {
 
     public void show_books(){
         // done with use of https://www.youtube.com/watch?v=h71Ia9iFWfI
+        JSONObject jsonObject = null;
+        JSONArray jsonArray;
+        String testString;
+
         try {
-            InputStream booksIn = getAssets().open("books.json");
-            int size = booksIn.available();
+            InputStream is = getAssets().open("books.json");
+            int size = is.available();
             byte[] buffer = new byte[size];
-            booksIn.read();
-            booksIn.close();
+            is.read(buffer);
+            is.close();
 
             String json = new String(buffer, "UTF-8");
 
-            JSONArray jsonArray = new JSONArray(json);
+            jsonObject = new JSONObject(json);
 
-            testT.setText(jsonArray.toString());
+
+            testString = jsonObject.getJSONObject("sections").toString();
+            testT.setText(testString);
+            System.out.println(testString);
+
+
+
+
         } catch (IOException e) {
             e.printStackTrace();
-            testT.setText("hello");
+            Toast.makeText(UserActivity.this, "Fault1", Toast.LENGTH_SHORT).show();
+
         }
         catch (JSONException e) {
             e.printStackTrace();
-            testT.setText("bye");
-
+            Toast.makeText(UserActivity.this, "Fault2", Toast.LENGTH_SHORT).show();
         }
+
 
     }
 }
