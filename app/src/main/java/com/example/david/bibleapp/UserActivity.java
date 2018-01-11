@@ -25,6 +25,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,6 +36,8 @@ public class UserActivity extends AppCompatActivity {
     TextView testT;
     ListView listView;
     List<String> ListText = new ArrayList<String>();
+
+    ArrayList<String > booksList = new ArrayList<String>();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -55,7 +59,9 @@ public class UserActivity extends AppCompatActivity {
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(UserActivity.this, "Button not yet functional", Toast.LENGTH_SHORT).show();
+                Toast.makeText(UserActivity.this, "clearing text", Toast.LENGTH_SHORT).show();
+                ListText.clear();
+                fill_list();
             }
         });
     }
@@ -96,14 +102,14 @@ public class UserActivity extends AppCompatActivity {
 
     private void new_text() {
         // TODO: 10-1-2018
-       Toast.makeText(UserActivity.this, "API not yet functional", Toast.LENGTH_SHORT).show();
+       Toast.makeText(UserActivity.this, "For now only matthew 3 is available", Toast.LENGTH_SHORT).show();
         volley();
     }
 
     private void GoToFavorites() {
-        // TODO: 10-1-2018
-
-        Toast.makeText(UserActivity.this, "NOT AVAILABLE YET", Toast.LENGTH_SHORT).show();
+        Intent intent = new Intent(this, FavoriteActivity.class);
+        // starts the new activity
+        startActivity(intent);
     }
 
 
@@ -156,10 +162,41 @@ public class UserActivity extends AppCompatActivity {
             String verse = i + 1 +  ": " + jsonArray.getJSONObject(i).getString("text");
             ListText.add(verse);
         }
+        fill_list();
+    }
 
+    public void fill_list ()
+    {
         ArrayAdapter theAdapter = new ArrayAdapter(this, android.R.layout.simple_list_item_1, ListText);
         listView.setAdapter(theAdapter);
         listView.setVisibility(View.VISIBLE);
+
+    }
+
+    public void show_books(){
+        // done with use of https://www.youtube.com/watch?v=h71Ia9iFWfI
+        try {
+            InputStream booksIn = getAssets().open("books.json");
+            int size = booksIn.available();
+            byte[] buffer = new byte[size];
+            booksIn.read();
+            booksIn.close();
+
+            String json = new String(buffer, "UTF-8");
+
+            JSONArray jsonArray = new JSONArray(json);
+
+            testT.setText(jsonArray.toString());
+        } catch (IOException e) {
+            e.printStackTrace();
+            testT.setText("hello");
+        }
+        catch (JSONException e) {
+            e.printStackTrace();
+            testT.setText("bye");
+
+        }
+
     }
 }
 

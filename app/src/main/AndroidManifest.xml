@@ -23,7 +23,8 @@
         <activity
             android:name=".UserActivity"
             android:label="@string/title_activity_user"
-            android:theme="@style/AppTheme"></activity>
+            android:theme="@style/AppTheme" />
+        <activity android:name=".FavoriteActivity"></activity>
     </application>
 
 </manifest>
