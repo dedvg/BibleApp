@@ -8,6 +8,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -36,8 +37,13 @@ public class UserActivity extends AppCompatActivity {
     TextView testT;
     ListView listView;
     List<String> ListText = new ArrayList<String>();
+    Integer layer = 0, chapters = 0, clicked_pos, selected_chapter;
+    Boolean old = true;
+    JSONArray BOOKSjson;
+    String selected_book;
 
-    ArrayList<String > booksList = new ArrayList<String>();
+    ArrayList<String> booksList = new ArrayList<String>();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -49,24 +55,32 @@ public class UserActivity extends AppCompatActivity {
         toolbar.setSubtitle("chapter 3");
         testT = findViewById(R.id.testTXT);
         listView = findViewById(R.id.listView);
-        toolbar.setLogo(R.drawable.common_google_signin_btn_icon_dark);
+
+//        toolbar.setLogo(R.drawable.common_google_signin_btn_icon_dark);
 
         // add backbutton
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
 
-
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(UserActivity.this, "clearing text", Toast.LENGTH_SHORT).show();
-                ListText.clear();
-                fill_list();
+                layer -= 2;
+                select_layer();
             }
         });
+
+        set_click_listener();
     }
 
+    public void set_click_listener(){
+        listView.setOnItemClickListener(new clicklistener());
+    }
 
+    public void remove_click_listener(){
+        listView.setOnItemClickListener(null);
+
+    }
     public void logout() {
 
         FirebaseAuth.getInstance().signOut();
@@ -85,7 +99,7 @@ public class UserActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
 
-        switch (item.getItemId()){
+        switch (item.getItemId()) {
             case R.id.logout:
                 logout();
                 break;
@@ -95,16 +109,14 @@ public class UserActivity extends AppCompatActivity {
             case R.id.new_text:
                 new_text();
                 break;
-
         }
         return super.onOptionsItemSelected(item);
     }
 
     private void new_text() {
-        // TODO: 10-1-2018
-//       Toast.makeText(UserActivity.this, "For now only matthew 3 is available", Toast.LENGTH_SHORT).show();
-//        volley();
-        show_books();
+        layer = 1;
+        select_layer();
+
     }
 
     private void GoToFavorites() {
@@ -118,7 +130,9 @@ public class UserActivity extends AppCompatActivity {
 
         // Initialize a new RequestQueue instance
         RequestQueue requestQueue = Volley.newRequestQueue(getApplicationContext());
-        String mJSONURLString = "https://bible-api.com/matthew%203";
+        String mJSONURLString = "https://bible-api.com/" + selected_book + "%20" + selected_chapter;
+        System.out.println("HIIIIER");
+        System.out.println(mJSONURLString);
 
         // Initialize a new JsonObjectRequest instance
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(
@@ -128,10 +142,9 @@ public class UserActivity extends AppCompatActivity {
                     public void onResponse(JSONObject response) {
 
                         try {
-                           JSONArray jsonArray = response.getJSONArray("verses");
+                            JSONArray jsonArray = response.getJSONArray("verses");
 
                             read_chapter(jsonArray);
-
 
 
                         } catch (JSONException e) {
@@ -159,29 +172,28 @@ public class UserActivity extends AppCompatActivity {
 
     public void read_chapter(JSONArray jsonArray) throws JSONException {
         ListText.clear();
-        for (int i = 0; i < jsonArray.length(); i ++){
-            String verse = i + 1 +  ": " + jsonArray.getJSONObject(i).getString("text");
+        for (int i = 0; i < jsonArray.length(); i++) {
+            String verse = i + 1 + ": " + jsonArray.getJSONObject(i).getString("text");
             ListText.add(verse);
         }
         fill_list();
     }
 
-    public void fill_list ()
-    {
+    public void fill_list() {
         ArrayAdapter theAdapter = new ArrayAdapter(this, android.R.layout.simple_list_item_1, ListText);
         listView.setAdapter(theAdapter);
         listView.setVisibility(View.VISIBLE);
 
     }
 
-    public void show_books(){
+    public void show_books() {
         // done with use of https://www.youtube.com/watch?v=h71Ia9iFWfI
         JSONObject jsonObject = null;
         JSONArray jsonArray;
         String testString;
 
         try {
-            InputStream is = getAssets().open("books.json");
+            InputStream is = getAssets().open("books2.json");
             int size = is.available();
             byte[] buffer = new byte[size];
             is.read(buffer);
@@ -190,27 +202,112 @@ public class UserActivity extends AppCompatActivity {
             String json = new String(buffer, "UTF-8");
 
             jsonObject = new JSONObject(json);
+            String search;
+            if (old == true)
+            {
+                search = "Old";
+            }
+            else{
+                search = "New";
+            }
+            System.out.println(search);
+            System.out.println(old);
+            System.out.println("HIIIIIIIIIIIIIIIER");
 
+            BOOKSjson = jsonObject.getJSONObject("sections").getJSONArray(search);
 
-            testString = jsonObject.getJSONObject("sections").toString();
-            testT.setText(testString);
-            System.out.println(testString);
+            ListText.clear();
+            for (int i = 0; i < BOOKSjson.length(); i++) {
+                String verse = BOOKSjson.getJSONObject(i).getString("key");
 
+//                verse += "   " + BOOKSjson.getJSONObject(i).getString("val");
 
+                ListText.add(verse);
+            }
+            fill_list();
 
 
         } catch (IOException e) {
             e.printStackTrace();
             Toast.makeText(UserActivity.this, "Fault1", Toast.LENGTH_SHORT).show();
 
-        }
-        catch (JSONException e) {
+        } catch (JSONException e) {
             e.printStackTrace();
             Toast.makeText(UserActivity.this, "Fault2", Toast.LENGTH_SHORT).show();
         }
 
 
     }
+
+    private class clicklistener implements AdapterView.OnItemClickListener {
+        @Override
+        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
+            clicked_pos = position;
+            select_layer();
+        }
+    }
+
+public void show_chapters(Integer chapters){
+        ListText.clear();
+        for (int i = 0; i < chapters; i ++){
+            ListText.add(String.valueOf(i + 1));
+        }
+        fill_list();
+}
+
+
+
+public void select_layer()  {
+
+    getSupportActionBar().setTitle("layer = " + layer);
+
+    if (layer <= 0){
+       ListText.clear();
+       fill_list();
+        // to make sure the layer is never below 0
+       layer = 0;
+   }
+   else if (layer == 1 ){
+       ListText.clear();
+       ListText.add("Old");
+       ListText.add("New");
+       fill_list();
+   }
+    else if (layer == 2){
+       if (clicked_pos == 0)
+       {
+           old = true;
+       }
+       else
+       {
+           old = false;
+       }
+        show_books();
+    }
+   if (layer == 3){
+
+       try {
+           chapters = BOOKSjson.getJSONObject(clicked_pos).getInt("val");
+           selected_book = BOOKSjson.getJSONObject(clicked_pos).getString("key");
+
+       } catch (JSONException e) {
+           e.printStackTrace();
+       }
+       show_chapters(chapters);
+   }
+    if (layer == 4){
+
+       selected_chapter = clicked_pos + 1;
+        volley();
+
+    }
+
+   if (layer <4){
+        layer += 1;
+   }
+
+}
 }
 
 
