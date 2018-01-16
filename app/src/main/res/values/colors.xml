@@ -1,8 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#94916438</color>
-    <!--todo assign color for upper part-->
+
+    <color name="colorPrimaryDark">#FF9800</color>
+    <color name="colorPrimary">#607D8B</color>
+    <!--todo use these colours again-->
+    <!--<color name="colorPrimary">#94916438</color>-->
+    <!--<color name="colorPrimaryDark">#9b513204</color>-->
     <color name="toolbarColor">#94916438</color>
-    <color name="colorPrimaryDark">#9b513204</color>
     <color name="colorAccent">#870209</color>
 </resources>
