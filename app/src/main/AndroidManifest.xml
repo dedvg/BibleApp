@@ -24,7 +24,8 @@
             android:name=".UserActivity"
             android:label="@string/title_activity_user"
             android:theme="@style/AppTheme" />
-        <activity android:name=".FavoriteActivity"></activity>
+        <activity android:name=".FavoriteActivity" />
+        <activity android:name=".TranslationActivity"></activity>
     </application>
 
 </manifest>
