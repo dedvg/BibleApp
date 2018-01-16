@@ -55,8 +55,8 @@ public class UserActivity extends AppCompatActivity {
 
         toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        getSupportActionBar().setTitle("Matthew");
-        toolbar.setSubtitle("chapter 3");
+        getSupportActionBar().setTitle("Bible App");
+        toolbar.setSubtitle("made with love");
         testT = findViewById(R.id.testTXT);
         listView = findViewById(R.id.listView);
         theDatabase = TranslationDatabase.getInstance(this.getApplicationContext());
@@ -69,13 +69,14 @@ public class UserActivity extends AppCompatActivity {
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (layer <= 0)
+                if (layer <= 1)
                 {
                     before_logout();
                 }
                 else {
-                    layer -= 1;
+                    layer = 1;
                     select_layer();
+                    click_listener(true);
                 }
             }
         });
@@ -105,20 +106,16 @@ public class UserActivity extends AppCompatActivity {
                 GoToFavorites();
                 break;
             case R.id.get_table:
+                get_table();
                 click_listener(false);
-                read_data();
                 break;
             case R.id.test_function:
                 test_function_1();
                 break;
 
-            case R.id.test_function2:
-                try {
-                    volley_biblebook();
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-                break;
+            case R.id.switch_translation:
+                go_to_translation();
+              break;
             case R.id.new_text:
                 click_listener(true);
 
@@ -127,6 +124,13 @@ public class UserActivity extends AppCompatActivity {
                 break;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void go_to_translation() {
+        Intent intent = new Intent(this, TranslationActivity.class);
+        // starts the new activity
+        startActivity(intent);
+        finish();
     }
 
     private void test_function_1() {
@@ -141,51 +145,39 @@ public class UserActivity extends AppCompatActivity {
         }
     }
 
-    public void volley_biblebook() throws JSONException {
-        chapters = BOOKSjson.getJSONObject(1).getInt("val");
-        String book = "Genesis";
-
-        Toast.makeText(UserActivity.this, chapters.toString(), Toast.LENGTH_SHORT).show();
-        for (int i = 0; i < chapters; i ++){
-            int chapter = i + 1;
-            volley_chapter(book , chapter);
-        }
-
-    }
 
 
-    public void add_chapter_toDB(String Book, int chapter, JSONArray jsonArray, Integer translation)throws JSONException{
-
-        if (!theDatabase.check_chapter_existence_WEB(Book, chapter)){
-            String text;
-            for (int i = 0; i < jsonArray.length(); i++) {
-                text =  jsonArray.getJSONObject(i).getString("text");
-                ListText.add(text);
-
-                if (translation == 1){
-                    theDatabase.addItem(Book, chapter,i + 1,text);
-
-                }
-
-            }
-        }
-        else {
-            Toast.makeText(UserActivity.this, "hiiiiier ", Toast.LENGTH_SHORT).show();
-        }
-
-    }
-
-    public void read_data(){
+    public void get_table(){
         ListText.clear();
         Cursor theCursor = theDatabase.getData();
 
         while (theCursor.moveToNext()){
             String book = theCursor.getString(0);
-
             String chapter = theCursor.getString(1);
             String number = theCursor.getString(2);
             String verse = theCursor.getString(3);
             ListText.add(book + "  "+ chapter+ "  " + number + "  "+ verse);
+        }
+        fill_list();
+
+
+    }
+
+
+    public void read_chapter(String book, Integer chapter){
+        ListText.clear();
+
+
+        Cursor theCursor = theDatabase.getchapter(book, chapter);
+
+        getSupportActionBar().setTitle(selected_book);
+        toolbar.setSubtitle("chapter " + selected_chapter);
+
+        while (theCursor.moveToNext()){
+
+            String number = theCursor.getString(2);
+            String verse = theCursor.getString(3);
+            ListText.add(number + ":  "+ verse);
         }
         fill_list();
 
@@ -227,97 +219,7 @@ public class UserActivity extends AppCompatActivity {
         // starts the new activity
         startActivity(intent);
     }
-    public void volley_chapter(final String book, final int chapter) {
 
-        // Initialize a new RequestQueue instance
-        RequestQueue requestQueue = Volley.newRequestQueue(getApplicationContext());
-        String mJSONURLString = "https://bible-api.com/" + book + "%20" + chapter;
-
-        // Initialize a new JsonObjectRequest instance
-        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(
-                Request.Method.GET, mJSONURLString, null,
-                new Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(JSONObject response) {
-
-                        try {
-                            JSONArray jsonArray = response.getJSONArray("verses");
-
-                            add_chapter_toDB(book, chapter, jsonArray, 1);
-
-                        } catch (JSONException e) {
-                            // if this shows something changed in the JSON
-                            Toast.makeText(UserActivity.this,
-                                    "problem with accesing the JSON",
-                                    Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        // prompt the user to start again
-                        Toast.makeText(UserActivity.this,
-                                "No connection please restart the app with internet acces",
-                                Toast.LENGTH_SHORT).show();
-                    }
-                }
-        );
-
-        // Add JsonObjectRequest to the RequestQueue
-        requestQueue.add(jsonObjectRequest);
-    }
-
-    public void volley() {
-
-        // Initialize a new RequestQueue instance
-        RequestQueue requestQueue = Volley.newRequestQueue(getApplicationContext());
-        String mJSONURLString = "https://bible-api.com/" + selected_book + "%20" + selected_chapter;
-
-        // Initialize a new JsonObjectRequest instance
-        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(
-                Request.Method.GET, mJSONURLString, null,
-                new Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(JSONObject response) {
-
-                        try {
-                            JSONArray jsonArray = response.getJSONArray("verses");
-
-                            read_chapter(jsonArray);
-
-                        } catch (JSONException e) {
-                            // if this shows something changed in the JSON
-                            Toast.makeText(UserActivity.this,
-                                    "problem with accesing the JSON",
-                                    Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        // prompt the user to start again
-                        Toast.makeText(UserActivity.this,
-                                "No connection please restart the app with internet acces",
-                                Toast.LENGTH_SHORT).show();
-                    }
-                }
-        );
-
-        // Add JsonObjectRequest to the RequestQueue
-        requestQueue.add(jsonObjectRequest);
-    }
-
-    public void read_chapter(JSONArray jsonArray) throws JSONException {
-        ListText.clear();
-        for (int i = 0; i < jsonArray.length(); i++) {
-            String verse = i + 1 + ": " + jsonArray.getJSONObject(i).getString("text");
-            ListText.add(verse);
-
-        }
-        fill_list();
-    }
 
     public void fill_list() {
         ArrayAdapter theAdapter = new ArrayAdapter(this, android.R.layout.simple_list_item_1, ListText);
@@ -331,7 +233,7 @@ public class UserActivity extends AppCompatActivity {
         JSONObject jsonObject = null;
 
 
-            InputStream is = getAssets().open("books2.json");
+            InputStream is = getAssets().open("books.json");
             int size = is.available();
             byte[] buffer = new byte[size];
             is.read(buffer);
@@ -340,25 +242,28 @@ public class UserActivity extends AppCompatActivity {
             String json = new String(buffer, "UTF-8");
 
             jsonObject = new JSONObject(json);
-            String search;
-            if (old == true) {
-                search = "Old";
-            } else {
-                search = "New";
-            }
-
-            BOOKSjson = jsonObject.getJSONObject("sections").getJSONArray(search);
+            BOOKSjson = jsonObject.getJSONObject("sections").getJSONArray("whole_bible");
 
 
 
     }
     public void show_books() {
+            Integer upper_bound, add_factor;
+
+            if (old){
+                add_factor = 0;
+                upper_bound = 39;
+            }
+            else {
+                add_factor = 39;
+                upper_bound = 27;
+            }
 
             ListText.clear();
-            for (int i = 0; i < BOOKSjson.length(); i++) {
+            for (int i = 0; i < upper_bound; i++) {
                 String verse = null;
                 try {
-                    verse = BOOKSjson.getJSONObject(i).getString("key");
+                    verse = BOOKSjson.getJSONObject(i + add_factor).getString("key");
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -390,6 +295,9 @@ public class UserActivity extends AppCompatActivity {
     }
 
     public void select_layer()  {
+        toolbar.setSubtitle(layer.toString());
+
+
         if (layer <= 0){
             ListText.clear();
             fill_list();
@@ -428,7 +336,8 @@ public class UserActivity extends AppCompatActivity {
             click_listener(false);
 
             selected_chapter = clicked_pos + 1;
-            volley();
+            read_chapter(selected_book, selected_chapter);
+            Toast.makeText(UserActivity.this, selected_book + selected_chapter.toString(), Toast.LENGTH_SHORT).show();
         }
     }
 }

@@ -62,19 +62,31 @@ public class TranslationDatabase extends SQLiteOpenHelper {
         cursor.close();
         return true;
     }
+    public boolean check_chapter_existence_KJV(String book, int chapter){
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        Cursor cursor = null;
+        String Query = "SELECT * FROM " + TABLE_NAME + " WHERE " + COL1 + " = '" + book+ "' AND " + COL2 + "= " + chapter +  ";";
+        cursor= db.rawQuery(Query,null);
+
+        if(cursor.getCount() <= 0){
+            cursor.close();
+            return false;
+        }
+        cursor.close();
+        return true;
+    }
 
 
 
     // update the table
     public void addItem( String book, int chapter, int verse, String text) {
         SQLiteDatabase db = this.getWritableDatabase();
-        System.out.println("hier komt hij ook");
         String query;
 
 
             query = "INSERT INTO " + TABLE_NAME + "(" + COL1 + ", " + COL2 + ", " + COL3 + ", " + COL4 + ") VALUES( '" + book + "', " + chapter + ", " + verse + ", '" + text + "');";
 
-        System.out.println(query);
         db.execSQL(query);
     }
 
@@ -82,8 +94,16 @@ public class TranslationDatabase extends SQLiteOpenHelper {
     // get the whole table
     public Cursor getData() {
         SQLiteDatabase db = this.getWritableDatabase();
-        String all = "SELECT * FROM " + TABLE_NAME;
-        Cursor entries = db.rawQuery(all, null);
+        String query = "SELECT * FROM " + TABLE_NAME;
+        Cursor entries = db.rawQuery(query, null);
+        return entries;
+    }
+
+    public Cursor getchapter(String book, Integer chapter) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        String query = "SELECT * FROM " + TABLE_NAME + " WHERE " + COL1 + " = '" +  book + "' AND " + COL2 + " = " + chapter + ";";
+        System.out.println(query);
+        Cursor entries = db.rawQuery(query, null);
         return entries;
     }
 

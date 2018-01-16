@@ -25,12 +25,12 @@
         />
 
     <item android:id="@+id/test_function"
-        android:title="test1"
+        android:title="test function"
         android:orderInCategory="100"
         app:showAsAction="never"
         />
-    <item android:id="@+id/test_function2"
-        android:title="test2"
+    <item android:id="@+id/switch_translation"
+        android:title="switch_translation"
         android:orderInCategory="100"
         app:showAsAction="never"
         />
