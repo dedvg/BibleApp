@@ -25,3 +25,13 @@ __decicions__
 __progress__
 * new activity is made
 * One biblebook is downloadable with a volley
+
+
+# day 3
+__decicions__
+* Decided to enable the user to download book by book instead of by bible translation due to insufficient memmory errors when trying.
+
+__progress__
+* Made check functions to check whether a translation is present in the database.
+* Made a button to download the book when the book is not yet downloaded.
+
