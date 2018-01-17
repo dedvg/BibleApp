@@ -34,4 +34,5 @@ __decicions__
 __progress__
 * Made check functions to check whether a translation is present in the database.
 * Made a button to download the book when the book is not yet downloaded.
+* Started commenting the functions
 
