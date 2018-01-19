@@ -34,7 +34,7 @@ public class UserActivity extends AppCompatActivity {
     TextView testT;
     ListView listView;
     List<String> ListText = new ArrayList<String>();
-    Integer layer = 0, chapters = 0, clicked_pos, selected_chapter, add_factor, selected_book_int;
+    Integer layer = 0, chapters = 0, translation = 0, clicked_pos, selected_chapter, add_factor, selected_book_int;
     Boolean old = true;
     Button download_btn;
     JSONArray BOOKSjson;
@@ -141,8 +141,7 @@ public class UserActivity extends AppCompatActivity {
 
      */
     public void download_book(View view) {
-        System.out.println(selected_book_int);
-        System.out.println("HIIIIIIIIIIIIIIIIIIIIIIIIER");
+
         go_to_translation(selected_book, selected_book_int);
     }
     /*
@@ -203,9 +202,8 @@ public class UserActivity extends AppCompatActivity {
 
     public void read_chapter(String book, Integer chapter){
         ListText.clear();
-
-        Cursor theCursor = theDatabase.getchapter(book, chapter);
-
+        Integer verse_column = 3 + translation;
+        Cursor theCursor = theDatabase.getchapter(book, chapter, translation);
         Integer rows = theCursor.getCount();
 
         if (rows >= 1){
@@ -215,7 +213,7 @@ public class UserActivity extends AppCompatActivity {
             while (theCursor.moveToNext()){
 
                 String number = theCursor.getString(2);
-                String verse = theCursor.getString(3);
+                String verse = theCursor.getString(verse_column);
                 ListText.add(number + ":  "+ verse);
             }
         }
@@ -235,9 +233,11 @@ public class UserActivity extends AppCompatActivity {
                 switch (choice) {
                     case DialogInterface.BUTTON_POSITIVE:
                         Toast.makeText(UserActivity.this, "WEB selected", Toast.LENGTH_SHORT).show();
+                        translation = 0;
                         break;
                     case DialogInterface.BUTTON_NEGATIVE:
                         Toast.makeText(UserActivity.this, "KJV selected", Toast.LENGTH_SHORT).show();
+                        translation = 1;
 
                         break;
                     case DialogInterface.BUTTON_NEUTRAL:

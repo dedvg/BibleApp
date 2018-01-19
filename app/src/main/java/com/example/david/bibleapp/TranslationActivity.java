@@ -100,8 +100,7 @@ public class TranslationActivity extends AppCompatActivity {
 
         Intent intent = getIntent();
         given_book = intent.getStringExtra("book");
-        given_book_int = intent.getIntExtra("selected_book_int", 0);
-        System.out.println(given_book + given_book_int);
+        given_book_int = intent.getIntExtra("book_int", 0);
         get_books();
         listView.setOnItemClickListener(new TranslationActivity.clicklistener());
         check_downloadreference(given_book_int, given_book);

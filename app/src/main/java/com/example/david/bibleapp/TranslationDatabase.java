@@ -103,9 +103,16 @@ public class TranslationDatabase extends SQLiteOpenHelper {
         return entries;
     }
 
-    public Cursor getchapter(String book, Integer chapter) {
+    public Cursor getchapter(String book, Integer chapter, Integer translation) {
+
+        String variable_column = COL4;
+
+        if (translation == 1){
+            variable_column = COL5;
+        }
+
         SQLiteDatabase db = this.getWritableDatabase();
-        String query = "SELECT * FROM " + TABLE_NAME + " WHERE " + COL1 + " = '" +  book + "' AND " + COL2 + " = " + chapter + ";";
+        String query = "SELECT * FROM " + TABLE_NAME + " WHERE " + COL1 + " = '" +  book + "' AND " + COL2 + " = " + chapter + " AND " + variable_column + " IS NOT NULL;";
         System.out.println(query);
         Cursor entries = db.rawQuery(query, null);
         return entries;
