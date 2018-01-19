@@ -2,7 +2,7 @@
 David van Grinsven
 
 
-# day 1
+# day 1 (10-1-18
 
 __decicions__
 I decided to enable the user to safe a bible translation in SQL. 
@@ -35,4 +35,25 @@ __progress__
 * Made check functions to check whether a translation is present in the database.
 * Made a button to download the book when the book is not yet downloaded.
 * Started commenting the functions
+
+# day 4
+__decicions__
+* When a book or chapter is not present in the database the user will see a download button and brings the user to another activity to download it.
+__progress__
+* Tried to make a listview with buttons but did not work
+* Enabled passing on the clicked biblebook and chapter to the new activity.
+
+
+# day 5
+Roof of UvA collapsed
+
+# day 6 (19-1-2018)
+__decicions__
+
+__progress__
+* Made check functions to check whether a translation is present in the database.
+* Made a button to download the book when the book is not yet downloaded.
+* Started commenting the functions
+
+
 
