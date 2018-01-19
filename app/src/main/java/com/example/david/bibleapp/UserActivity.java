@@ -34,13 +34,12 @@ public class UserActivity extends AppCompatActivity {
     TextView testT;
     ListView listView;
     List<String> ListText = new ArrayList<String>();
-    Integer layer = 0, chapters = 0, clicked_pos, selected_chapter, add_factor;
+    Integer layer = 0, chapters = 0, clicked_pos, selected_chapter, add_factor, selected_book_int;
     Boolean old = true;
     Button download_btn;
     JSONArray BOOKSjson;
     String selected_book;
     TranslationDatabase theDatabase;
-    ArrayList<String> booksList = new ArrayList<String>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,14 +51,16 @@ public class UserActivity extends AppCompatActivity {
         testT = findViewById(R.id.testTXT);
         listView = findViewById(R.id.listView);
         theDatabase = TranslationDatabase.getInstance(this.getApplicationContext());
+
+        setSupportActionBar(toolbar);
         getSupportActionBar().setTitle("Bible App");
+        toolbar.setSubtitle("made with love");
+        download_btn.setVisibility(View.INVISIBLE);
 
         // Todo set a nice image for this part
 //        toolbar.setLogo(R.drawable.common_google_signin_btn_icon_dark);
 
-        setSupportActionBar(toolbar);
-        toolbar.setSubtitle("made with love");
-        download_btn.setVisibility(View.INVISIBLE);
+
 
         // add backbutton to the toolbar
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -120,11 +121,11 @@ public class UserActivity extends AppCompatActivity {
                 click_listener(false);
                 break;
             case R.id.test_function:
-                test_function_1();
+                go_to_translation("", 0);
                 break;
 
             case R.id.switch_translation:
-                go_to_translation();
+                switch_translation();
               break;
             case R.id.new_text:
                 click_listener(true);
@@ -134,6 +135,15 @@ public class UserActivity extends AppCompatActivity {
                 break;
         }
         return super.onOptionsItemSelected(item);
+    }
+    /*
+    will bring the user to translationActivity to download the new book
+
+     */
+    public void download_book(View view) {
+        System.out.println(selected_book_int);
+        System.out.println("HIIIIIIIIIIIIIIIIIIIIIIIIER");
+        go_to_translation(selected_book, selected_book_int);
     }
     /*
     will create a clicklistener on the listview
@@ -152,9 +162,7 @@ public class UserActivity extends AppCompatActivity {
     /*
     function for testing purposes
     */
-    private void test_function_1() {
-        theDatabase.addItem("Genesis", 3, 2, "hello");
-    }
+
 
 
     /*
@@ -197,6 +205,7 @@ public class UserActivity extends AppCompatActivity {
         ListText.clear();
 
         Cursor theCursor = theDatabase.getchapter(book, chapter);
+
         Integer rows = theCursor.getCount();
 
         if (rows >= 1){
@@ -213,11 +222,36 @@ public class UserActivity extends AppCompatActivity {
         else {
             download_btn.setVisibility(View.VISIBLE);
         }
-
-
             fill_list();
         }
 
+    /*
+    allows the user to read from a different translation
+     */
+    public void switch_translation(){
+        DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int choice) {
+                switch (choice) {
+                    case DialogInterface.BUTTON_POSITIVE:
+                        Toast.makeText(UserActivity.this, "WEB selected", Toast.LENGTH_SHORT).show();
+                        break;
+                    case DialogInterface.BUTTON_NEGATIVE:
+                        Toast.makeText(UserActivity.this, "KJV selected", Toast.LENGTH_SHORT).show();
+
+                        break;
+                    case DialogInterface.BUTTON_NEUTRAL:
+                        break;
+                }
+            }
+        };
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(UserActivity.this);
+        builder.setMessage("Do you want to log out?")
+                .setNeutralButton("No", dialogClickListener)
+                .setPositiveButton("WEB", dialogClickListener)
+                .setNegativeButton("KJV", dialogClickListener).show();
+    }
 
     /*
     determines what happens with the created dialog and enables logging out
@@ -348,6 +382,9 @@ public class UserActivity extends AppCompatActivity {
             try {
                 chapters = BOOKSjson.getJSONObject(clicked_pos).getInt("val");
                 selected_book = BOOKSjson.getJSONObject(clicked_pos + add_factor).getString("key");
+                selected_book_int = clicked_pos + add_factor;
+                Toast.makeText(UserActivity.this, selected_book + selected_book_int.toString(), Toast.LENGTH_SHORT).show();
+
 
             } catch (JSONException e) {
                 e.printStackTrace();
@@ -384,8 +421,13 @@ public class UserActivity extends AppCompatActivity {
     /*
        Goes to TranslationActivity
     */
-    private void go_to_translation() {
+    private void go_to_translation(String book, Integer selected_book_int) {
         Intent intent = new Intent(this, TranslationActivity.class);
+        intent.putExtra("book", book);
+        intent.putExtra("book_int", selected_book_int);
+
+
+        System.out.println("before : " +book + selected_book_int);
         // starts the new activity
         startActivity(intent);
         finish();

@@ -36,7 +36,7 @@ public class TranslationDatabase extends SQLiteOpenHelper {
     // create the table on create
     @Override
     public void onCreate(SQLiteDatabase db) {
-        String createTable = "CREATE TABLE " + TABLE_NAME + " (" + COL1 + " TEXT, " + COL2 + " INT, " + COL3 + " INT," + COL4 + " TEXT);" ;
+        String createTable = "CREATE TABLE " + TABLE_NAME + " (" + COL1 + " TEXT, " + COL2 + " INT, " + COL3 + " INT," + COL4 + " TEXT," + COL5 + " TEXT);" ;
         db.execSQL(createTable);
 
     }
@@ -48,11 +48,11 @@ public class TranslationDatabase extends SQLiteOpenHelper {
 
     }
 
-    public boolean check_chapter_existence_WEB(String book, int chapter){
+    public boolean check_chapter1_existence_WEB(String book){
         SQLiteDatabase db = this.getWritableDatabase();
 
         Cursor cursor = null;
-        String Query = "SELECT * FROM " + TABLE_NAME + " WHERE " + COL1 + " = '" + book+ "' AND " + COL2 + "= " + chapter +  ";";
+        String Query = "SELECT * FROM " + TABLE_NAME + " WHERE " + COL1 + " = '" + book+ "' AND " + COL2 + "=  1" +  " AND " + COL4 + " IS NOT NULL;";
         cursor= db.rawQuery(Query,null);
 
         if(cursor.getCount() <= 0){
@@ -62,14 +62,14 @@ public class TranslationDatabase extends SQLiteOpenHelper {
         cursor.close();
         return true;
     }
-    public boolean check_chapter_existence_KJV(String book, int chapter){
+    public boolean check_chapter1_existence_KJV(String book){
         SQLiteDatabase db = this.getWritableDatabase();
 
         Cursor cursor = null;
-        String Query = "SELECT * FROM " + TABLE_NAME + " WHERE " + COL1 + " = '" + book+ "' AND " + COL2 + "= " + chapter +  ";";
+        String Query = "SELECT * FROM " + TABLE_NAME + " WHERE " + COL1 + " = '" + book+ "' AND " + COL2 + "=  1" +  " AND " + COL5 + " IS NOT NULL;";
         cursor= db.rawQuery(Query,null);
 
-        if(cursor.getCount() <= 0){
+        if(cursor.getCount() == 0){
             cursor.close();
             return false;
         }
@@ -80,12 +80,16 @@ public class TranslationDatabase extends SQLiteOpenHelper {
 
 
     // update the table
-    public void addItem( String book, int chapter, int verse, String text) {
+    public void addItem( String book, int chapter, int verse, String text, int translation) {
         SQLiteDatabase db = this.getWritableDatabase();
         String query;
+        String variable_column = COL4;
 
+        if (translation == 1){
+            variable_column = COL5;
+        }
 
-            query = "INSERT INTO " + TABLE_NAME + "(" + COL1 + ", " + COL2 + ", " + COL3 + ", " + COL4 + ") VALUES( '" + book + "', " + chapter + ", " + verse + ", '" + text + "');";
+        query = "INSERT INTO " + TABLE_NAME + "(" + COL1 + ", " + COL2 + ", " + COL3 + ", " + variable_column + ") VALUES( '" + book + "', " + chapter + ", " + verse + ", '" + text + "');";
 
         db.execSQL(query);
     }
