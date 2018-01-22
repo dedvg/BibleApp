@@ -204,7 +204,7 @@ public class UserActivity extends AppCompatActivity {
     /*
     test dialog made with use of https://stackoverflow.com/questions/10903754/input-text-dialog-android
      */
-    public void Add_To_Favortes(Integer begin_verse, Integer end_verse){
+    public void Add_To_Favortes(final Integer begin_verse, final Integer end_verse){
         final String[] m_Text = {""};
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -221,8 +221,19 @@ public class UserActivity extends AppCompatActivity {
         builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
+                ListText.clear();
                 m_Text[0] = input.getText().toString();
                 Toast.makeText(UserActivity.this, m_Text[0], Toast.LENGTH_SHORT).show();
+                Integer row = translation + 3;
+//                TODO verse by verse is added, but the verses are stored seperatly in the SQL need to fix this
+                Cursor theCursor = theDatabase.get_verses(selected_book, selected_chapter, begin_verse, end_verse, translation);
+                String verse;
+                while (theCursor.moveToNext()){
+                    verse = theCursor.getString(row);
+                    System.out.println(verse);
+                    ListText.add(verse);
+                }
+                fill_list();
             }
         });
         builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {

@@ -103,6 +103,14 @@ public class TranslationDatabase extends SQLiteOpenHelper {
         Cursor entries = db.rawQuery(query, null);
         return entries;
     }
+
+    public Cursor get_verses (String book, int chapter, int begin_verse, int end_verse, int translation){
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        String query = "SELECT * FROM " + TABLE_NAME + " WHERE " + COL1 + " = '" + book+ "' AND " + COL3 + " BETWEEN " + begin_verse + " AND " + end_verse + " AND " + COL2 + " = " + chapter + ";";
+        Cursor entries = db.rawQuery(query, null);
+        return entries;
+    }
     // get the whole table
     public Cursor getData() {
         SQLiteDatabase db = this.getWritableDatabase();
