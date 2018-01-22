@@ -106,30 +106,34 @@ public class TranslationActivity extends AppCompatActivity {
         given_book = intent.getStringExtra("book");
         given_book_int = intent.getIntExtra("book_int", 0);
         String jsonArray = intent.getStringExtra("jsonArray");
+
+        //  make BOOKSjson to enable getting the right values again
         try {
             BOOKSjson = new JSONArray(jsonArray);
-            System.out.println(BOOKSjson.toString(2));
         } catch (JSONException e) {
             e.printStackTrace();
         }
         listView.setOnItemClickListener(new TranslationActivity.clicklistener());
-        check_downloadreference(given_book_int, given_book);
         get_books();
-
-
+        check_downloadreference(given_book_int, given_book);
     }
 
+    /*
+    checks if the intent gave a book to download, if so enable the user to download the selected book
+     */
     private void check_downloadreference(Integer given_book_int, String given_book) {
         if (!Objects.equals(given_book, "")) {
             book = given_book;
             clicked_book = given_book_int;
-            Toast.makeText(TranslationActivity.this, clicked_book.toString(), Toast.LENGTH_SHORT).show();
             show_download(true);
         } else {
             return;
         }
     }
 
+    /*
+    will download the selected book in the WEB
+     */
     public void BTN_WEB(View view) {
         add_factor = "";
         translation = 0;
@@ -140,6 +144,9 @@ public class TranslationActivity extends AppCompatActivity {
         }
     }
 
+    /*
+    will download the selected book in the KJV
+     */
     public void BTN1_KJV(View view) {
         add_factor = "?translation=kjv";
         translation = 1;
@@ -150,6 +157,9 @@ public class TranslationActivity extends AppCompatActivity {
         }
     }
 
+    /*
+    sets a click listener on the list and if clicked enables downloading the book
+     */
     private class clicklistener implements AdapterView.OnItemClickListener {
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -157,20 +167,25 @@ public class TranslationActivity extends AppCompatActivity {
                 book = BOOKSjson.getJSONObject(position).getString("key");
                 clicked_book = position;
                 show_download(true);
-
                 System.out.println("the book is" + book);
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-
         }
     }
+
+    /*
+    enables custom menu
+     */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
     }
 
+    /*
+    shows the layout to enabling a download of a book
+     */
     public void show_download(Boolean show){
 
         if(show  == true){
@@ -197,24 +212,31 @@ public class TranslationActivity extends AppCompatActivity {
             layer = 0;
         }
     }
+    /*
+    will set the layout depending on which translations are present
 
+     */
     private void set_text() {
+        title_txt.setText("KJV = King James Version and WEB = World English Bible");
         if (theDatabase.check_chapter1_existence_WEB(book)) {
-            translation_txt.setText(book + " WEB already downloaded");
+            translation_txt.setText(" WEB version of " + book + " is already downloaded");
         }
         else{
-            translation_txt.setText(book + " does not exist in WEB");
+            translation_txt.setText(book + "(WEB)");
             translation_btn.setVisibility(View.VISIBLE);
         }
         if (theDatabase.check_chapter1_existence_KJV(book)) {
-            translation1_txt.setText(book + " KJV already downloaded");
+            translation1_txt.setText(" KJV version of " + book + " is already downloaded");
         }
         else{
-            translation1_txt.setText(book + " does not exist in KJV");
+            translation1_txt.setText(book + "(KJV)");
             translation1_btn.setVisibility(View.VISIBLE);
         }
     }
 
+    /*
+    handles which menu item is clicked and what to do
+     */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
 // TODO stuff needs to be ordered
@@ -233,8 +255,11 @@ public class TranslationActivity extends AppCompatActivity {
         }
         return super.onOptionsItemSelected(item);
     }
-   
 
+    /*
+
+    asks the user if the user really wants to logout, if yes logout
+     */
     public void before_logout(){
         DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
             @Override
@@ -256,6 +281,9 @@ public class TranslationActivity extends AppCompatActivity {
                 .setPositiveButton("Yes", dialogClickListener)
                 .setNegativeButton("No", dialogClickListener).show();
     }
+    /*
+    handle the actual logout
+     */
     public void logout() {
         FirebaseAuth.getInstance().signOut();
         Intent intent = new Intent(this, MainActivity.class);
@@ -264,25 +292,37 @@ public class TranslationActivity extends AppCompatActivity {
         finish();
     }
 
+    /*
+    will go back to userActivity
+     */
     private void go_back() {
         Intent intent = new Intent(this, UserActivity.class);
         // starts the new activity
         startActivity(intent);
         finish();
     }
+
+    /*
+    preperation of the volley which will get the biblebook
+     */
     public void volley_translation_0_books() throws JSONException {
         chapters = BOOKSjson.getJSONObject(clicked_book).getInt("val");
         volley_translation_1_chapters(book);
     }
-
+    /*
+    function that will volley all chapters of the book one by one
+     */
     public void volley_translation_1_chapters(String book) throws JSONException {
-        //        for now only genesis
 
         for (int i = 0; i < chapters; i++) {
             int chapter = i + 1;
             volley_translation_2_chapter(book, chapter);
         }
     }
+
+    /*
+    will show all available books in the listview
+     */
     public void get_books() {
         Integer upper_bound;
         ListText.clear();
@@ -298,6 +338,9 @@ public class TranslationActivity extends AppCompatActivity {
         fill_list();
     }
 
+    /*
+    will volley the chapter given by volley_translatio_1_chapters
+     */
     public void volley_translation_2_chapter(final String book, final int chapter) {
 
         // Initialize a new RequestQueue instance
@@ -336,10 +379,10 @@ public class TranslationActivity extends AppCompatActivity {
         // Add JsonObjectRequest to the RequestQueue
         requestQueue.add(jsonObjectRequest);
     }
-
+    /*
+    will set the textresult in the database verse by verse
+     */
     public void volley_translation_3_db(String Book, int chapter, JSONArray jsonArray)throws JSONException{
-
-
             String text;
             for (int i = 0; i < jsonArray.length(); i++) {
                 text =  jsonArray.getJSONObject(i).getString("text");
@@ -347,13 +390,10 @@ public class TranslationActivity extends AppCompatActivity {
                 System.out.println(Book + chapter);
             }
     }
+
     /*
-    done with https://www.youtube.com/watch?v=ZEEYYvVwJGY
-    makes the custom adapter to enable a listview with a download button
+    will fill the list with what is currently in ListText
      */
-
-
-
     public void fill_list() {
 
         ArrayAdapter theAdapter = new ArrayAdapter(this, android.R.layout.simple_list_item_1, ListText);
