@@ -66,7 +66,7 @@ public class TranslationDatabase extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
 
         Cursor cursor = null;
-        String Query = "SELECT * FROM " + TABLE_NAME + " WHERE " + COL1 + " = '" + book+ "' AND " + COL2 + "=  1" +  " AND " + COL5 + " IS NOT NULL;";
+        String Query = "SELECT * FROM " + TABLE_NAME + " WHERE " + COL1 + " = '" + book+ "' AND " + COL2 + "=  1 AND " + COL5 + " IS NOT NULL;";
         cursor= db.rawQuery(Query,null);
 
         if(cursor.getCount() == 0){
@@ -94,7 +94,15 @@ public class TranslationDatabase extends SQLiteOpenHelper {
         db.execSQL(query);
     }
 
+    public Cursor get_max_verse(String book, int chapter, int verse, int translation){
+        SQLiteDatabase db = this.getWritableDatabase();
+        String query;
 
+
+        query = "SELECT MAX (" + COL3 + ") FROM " + TABLE_NAME + " WHERE " + COL1 + " = '" + book+ "' AND " + COL2 + "= " + chapter + " ;";
+        Cursor entries = db.rawQuery(query, null);
+        return entries;
+    }
     // get the whole table
     public Cursor getData() {
         SQLiteDatabase db = this.getWritableDatabase();
@@ -118,13 +126,7 @@ public class TranslationDatabase extends SQLiteOpenHelper {
         return entries;
     }
 
-    // delete all from one item
-    public void deleteItem(long id){
-        SQLiteDatabase db = this.getWritableDatabase();
-        String query = "DELETE FROM " + TABLE_NAME + " WHERE " + COL1 + " = '" +  id + "';";
-        System.out.println(query);
-        db.execSQL(query);
-    }
+
 
 
 
@@ -135,19 +137,7 @@ public class TranslationDatabase extends SQLiteOpenHelper {
         String query ="DELETE FROM " + TABLE_NAME +";";
         db.execSQL(query);
     }
-    // calculate the total price
-    public String totalPrice() {
-        int priceCol = 2;
-        int amountCol = 3;
-        SQLiteDatabase db = this.getWritableDatabase();
-        String query = "SELECT * FROM " + TABLE_NAME;
-        Cursor cursor = db.rawQuery(query, null);
-        float total = 0;
-        while (cursor.moveToNext()) {
-            total = total + cursor.getFloat(priceCol) * cursor.getFloat(amountCol);
-        }
-        return "€ " + total;
-    }
+
 
 
 

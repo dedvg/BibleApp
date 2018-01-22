@@ -7,11 +7,14 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.text.InputType;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Button;
@@ -32,7 +35,7 @@ public class UserActivity extends AppCompatActivity {
 
     Toolbar toolbar;
     TextView testT;
-    ListView listView;
+    ListView listView ,row_list ;
     List<String> ListText = new ArrayList<String>();
     Integer layer = 0, chapters = 0, translation = 0, clicked_pos, selected_chapter, add_factor, selected_book_int, upper_bound;
     Boolean old = true;
@@ -191,17 +194,97 @@ public class UserActivity extends AppCompatActivity {
     private class LongClickListener implements AdapterView.OnItemLongClickListener {
         @Override
         public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-
-            Toast.makeText(UserActivity.this, "LONG CLICKED", Toast.LENGTH_SHORT).show();
+            Integer verse = position + 1;
+            Add_To_Favorites_Verses(verse);
+            Toast.makeText(UserActivity.this, "add " + selected_book + " " + selected_chapter.toString() + ":  " + verse.toString() , Toast.LENGTH_SHORT).show();
             return false;
         }
     }
+    /*
+    test dialog made with use of https://stackoverflow.com/questions/10903754/input-text-dialog-android
+     */
+    public void Add_To_Favortes(Integer begin_verse, Integer end_verse){
+        final String[] m_Text = {""};
 
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage("Under which name do you want to add this to firebase?");
+        builder.setTitle("Selected " + selected_book + " chapter " + selected_chapter + " verses :" + begin_verse + " - " + end_verse);
 
+        // Set up the input
+        final EditText input = new EditText(this);
+        // Specify the type of input expected; this, for example, sets the input as a password, and will mask the text
+        input.setInputType(InputType.TYPE_CLASS_TEXT);
+        builder.setView(input);
 
+        // Set up the buttons
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                m_Text[0] = input.getText().toString();
+            }
+        });
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
+
+        builder.show();
+    }
+    /*
+    helper function for adding to favorites, done with:
+    https://www.youtube.com/watch?v=0gTXUHDz6BM
+     */
+
+    public void Add_To_Favorites_Verses(final Integer verse ){
+        Integer max_verse = 0;
+        List<String> verses = new ArrayList<>();
+        System.out.println("BOOK " +  selected_book + " chapter " + selected_chapter + " verse " + verse);
+        Cursor theCursor = theDatabase.get_max_verse(selected_book, selected_chapter, verse, translation);
+        while (theCursor.moveToNext()){
+            max_verse = theCursor.getInt(0);
+            System.out.println(max_verse.toString());
+        }
+
+        for (int i = verse; i <= max_verse ; i ++)
+        {
+            verses.add(String.valueOf(i));
+        }
+        row_list = new ListView(this);
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, R.layout.row_custom_dialog, R.id.list_item_text, verses);
+        row_list.setAdapter(adapter);
+        row_list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                ViewGroup vg = (ViewGroup)view;
+                TextView txt = vg.findViewById(R.id.list_item_text);
+                Integer option_clicked = verse + position;
+                Toast.makeText(UserActivity.this, "clicked " + option_clicked.toString(), Toast.LENGTH_SHORT).show();
+                Add_To_Favortes(verse, option_clicked);
+            }
+        });
+        show_dialog_listview();
+    }
+    /*
+    actually showing the dialog
+     */
+    public void show_dialog_listview(){
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setCancelable(true);
+        builder.setTitle("Add to Favorties");
+        builder.setMessage("till which verse do you want to add? ");
+
+        final EditText input = new EditText(this);
+        // Specify the type of input expected; this, for example, sets the input as a password, and will mask the text
+        input.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_CLASS_NUMBER);
+        builder.setView(row_list);
+        AlertDialog dialog = builder.create();
+        dialog.show();
+
+    }
     /*
     function to set an on click listener to the list or a longclicklistener
-
     */
     public void click_listener(Boolean set){
         if (set == true){
