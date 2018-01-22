@@ -57,6 +57,8 @@ public class TranslationActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_translation);
 
+
+        // creating references
         translation_btn = findViewById(R.id.transBTN);
         translation1_btn = findViewById(R.id.transBTN1);
         translation2_btn = findViewById(R.id.transBTN2);
@@ -67,16 +69,23 @@ public class TranslationActivity extends AppCompatActivity {
         translation2_txt = findViewById(R.id.transTXT2);
 
         toolbar = findViewById(R.id.toolbar);
+        listView = findViewById(R.id.ListView);
+
+
+        // create the toolbar
         setSupportActionBar(toolbar);
         getSupportActionBar().setTitle("Current translation = WEB");
         toolbar.setSubtitle("test");
         theDatabase = TranslationDatabase.getInstance(this.getApplicationContext());
-        listView = findViewById(R.id.ListView);
         // add backbutton
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
+
+        // layout function
         show_download(false);
 
+        // when pressing back the user will be brought back to select between all books
+        // or back to UserActivity
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -90,20 +99,22 @@ public class TranslationActivity extends AppCompatActivity {
                 }
             }
         });
-        try {
-            load_booksJSON();
-        } catch (JSONException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
 
+
+        // get the variables needed from the intent
         Intent intent = getIntent();
         given_book = intent.getStringExtra("book");
         given_book_int = intent.getIntExtra("book_int", 0);
-        get_books();
+        String jsonArray = intent.getStringExtra("jsonArray");
+        try {
+            BOOKSjson = new JSONArray(jsonArray);
+            System.out.println(BOOKSjson.toString(2));
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
         listView.setOnItemClickListener(new TranslationActivity.clicklistener());
         check_downloadreference(given_book_int, given_book);
+        get_books();
 
 
     }
@@ -222,18 +233,7 @@ public class TranslationActivity extends AppCompatActivity {
         }
         return super.onOptionsItemSelected(item);
     }
-    public void load_booksJSON() throws JSONException, IOException {
-        // done with use of https://www.youtube.com/watch?v=h71Ia9iFWfI
-        JSONObject jsonObject;
-        InputStream is = getAssets().open("books.json");
-        int size = is.available();
-        byte[] buffer = new byte[size];
-        is.read(buffer);
-        is.close();
-        String json = new String(buffer, "UTF-8");
-        jsonObject = new JSONObject(json);
-        BOOKSjson = jsonObject.getJSONObject("sections").getJSONArray("whole_bible");
-    }
+   
 
     public void before_logout(){
         DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {

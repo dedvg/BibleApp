@@ -421,6 +421,7 @@ public class UserActivity extends AppCompatActivity {
         Intent intent = new Intent(this, TranslationActivity.class);
         intent.putExtra("book", book);
         intent.putExtra("book_int", selected_book_int);
+        intent.putExtra("jsonArray", BOOKSjson.toString());
 
 
         System.out.println("before : " +book + selected_book_int);
