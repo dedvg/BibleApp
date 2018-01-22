@@ -34,7 +34,7 @@ public class UserActivity extends AppCompatActivity {
     TextView testT;
     ListView listView;
     List<String> ListText = new ArrayList<String>();
-    Integer layer = 0, chapters = 0, translation = 0, clicked_pos, selected_chapter, add_factor, selected_book_int;
+    Integer layer = 0, chapters = 0, translation = 0, clicked_pos, selected_chapter, add_factor, selected_book_int, upper_bound;
     Boolean old = true;
     Button download_btn;
     JSONArray BOOKSjson;
@@ -45,26 +45,29 @@ public class UserActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_user);
-
+        // create references
         download_btn = findViewById(R.id.downloadBTN);
         toolbar = findViewById(R.id.toolbar);
         testT = findViewById(R.id.testTXT);
         listView = findViewById(R.id.listView);
         theDatabase = TranslationDatabase.getInstance(this.getApplicationContext());
 
+
+        // set up the action bar
         setSupportActionBar(toolbar);
         getSupportActionBar().setTitle("Bible App");
-        toolbar.setSubtitle("made with love");
+        toolbar.setSubtitle("made by David");
+
+        // initialize some varioables
         download_btn.setVisibility(View.INVISIBLE);
-
-        // Todo set a nice image for this part
-//        toolbar.setLogo(R.drawable.common_google_signin_btn_icon_dark);
-
-
 
         // add backbutton to the toolbar
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
+
+
+        // Todo set a nice image for this part
+        //        toolbar.setLogo(R.drawable.common_google_signin_btn_icon_dark);
 
 
         /*
@@ -74,19 +77,16 @@ public class UserActivity extends AppCompatActivity {
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (layer <= 1)
-                {
-                    before_logout();
-                }
-                else {
-                    layer = 1;
+                if (layer > 0){
+                    layer -= 1;
                     select_layer();
                     click_listener(true);
                 }
             }
         });
+
+        // will make all info available from the local JSON
         try {
-//            will return a JsonArray with all books and how much chapters.
             load_booksJSON();
         } catch (JSONException e) {
             e.printStackTrace();
@@ -108,7 +108,6 @@ public class UserActivity extends AppCompatActivity {
     */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-
         switch (item.getItemId()) {
             case R.id.logout:
                 before_logout();
@@ -116,20 +115,14 @@ public class UserActivity extends AppCompatActivity {
             case R.id.favorites:
                 GoToFavorites();
                 break;
-            case R.id.get_table:
-                get_table();
-                click_listener(false);
-                break;
             case R.id.test_function:
                 go_to_translation("", 0);
                 break;
-
             case R.id.switch_translation:
                 switch_translation();
               break;
             case R.id.new_text:
                 click_listener(true);
-
                 layer = 1;
                 select_layer();
                 break;
@@ -137,8 +130,7 @@ public class UserActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
     /*
-    will bring the user to translationActivity to download the new book
-
+    will bring the user to translationActivity to download the new book the user does not have
      */
     public void download_book(View view) {
 
@@ -146,72 +138,101 @@ public class UserActivity extends AppCompatActivity {
     }
     /*
     will create a clicklistener on the listview
+    it keeps track of the layer and changes variables to make navigation possible
+
+    add factor and upper bound determine which books need to be shown
+
+    old testament = 0 -39
+    new testament = 40 - 66
+
      */
 
     private class clicklistener implements AdapterView.OnItemClickListener {
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            if (layer <4){
-                layer += 1;
-            }
             clicked_pos = position;
+
+            // to remember wheteher old or new is clicked
+            if (layer == 1 && clicked_pos == 0)
+            {
+                old = true;
+                add_factor = 0;
+                upper_bound = 39;
+            }
+            else if(layer == 1){
+                add_factor = 39;
+                upper_bound = 27;
+                old = false;
+            }
+            if (layer == 2){
+                selected_book_int = clicked_pos + add_factor;
+                try {
+                    selected_book = BOOKSjson.getJSONObject(selected_book_int).getString("key");
+                    chapters = BOOKSjson.getJSONObject(selected_book_int).getInt("val");
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+            if (layer == 3){
+                selected_chapter = clicked_pos + 1;
+            }
+
+            // something is clicked so the layer will become 1 higher and select layer will handle the layout
+            layer += 1;
+
             select_layer();
         }
     }
     /*
-    function for testing purposes
+    this function will enable adding the clicked text to the favorites of the user
+    TODO enable adding to favorites
     */
+    private class LongClickListener implements AdapterView.OnItemLongClickListener {
+        @Override
+        public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+
+            Toast.makeText(UserActivity.this, "LONG CLICKED", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+    }
 
 
 
     /*
-    function to set an on click listener to the list
-    TODO this will need to be removed eventually
+    function to set an on click listener to the list or a longclicklistener
+
     */
     public void click_listener(Boolean set){
         if (set == true){
             listView.setOnItemClickListener(new clicklistener());
+            listView.setOnItemLongClickListener(null);
         }
         else{
             listView.setOnItemClickListener(null);
+            listView.setOnItemLongClickListener(new LongClickListener());
         }
     }
 
-    /*
-    function for testing purposes that returns the whole database
-    */
 
-    public void get_table(){
-        ListText.clear();
-        Cursor theCursor = theDatabase.getData();
-
-        while (theCursor.moveToNext()){
-            String book = theCursor.getString(0);
-            String chapter = theCursor.getString(1);
-            String number = theCursor.getString(2);
-            String verse = theCursor.getString(3);
-            ListText.add(book + "  "+ chapter+ "  " + number + "  "+ verse);
-        }
-        fill_list();
-    }
     /*
     gets the selected chapter from the database and presents it at the list
-
     if the database does not contain the information a download button will appear
     */
 
     public void read_chapter(String book, Integer chapter){
+        // clear the listview
         ListText.clear();
+
+        // afther column 3 the translations are present
         Integer verse_column = 3 + translation;
         Cursor theCursor = theDatabase.getchapter(book, chapter, translation);
         Integer rows = theCursor.getCount();
 
+        // if there are multiple rows make the text readable else show a download button
+        // the results depend on the selected translation
         if (rows >= 1){
-            getSupportActionBar().setTitle(selected_book);
-            toolbar.setSubtitle("chapter " + selected_chapter);
-
             while (theCursor.moveToNext()){
-
                 String number = theCursor.getString(2);
                 String verse = theCursor.getString(verse_column);
                 ListText.add(number + ":  "+ verse);
@@ -220,10 +241,13 @@ public class UserActivity extends AppCompatActivity {
         else {
             download_btn.setVisibility(View.VISIBLE);
         }
-            fill_list();
-        }
+
+        // will create an empty listview or full with verses
+        fill_list();
+    }
 
     /*
+    popup which allows the user to select a different translation
     allows the user to read from a different translation
      */
     public void switch_translation(){
@@ -238,7 +262,6 @@ public class UserActivity extends AppCompatActivity {
                     case DialogInterface.BUTTON_NEGATIVE:
                         Toast.makeText(UserActivity.this, "KJV selected", Toast.LENGTH_SHORT).show();
                         translation = 1;
-
                         break;
                     case DialogInterface.BUTTON_NEUTRAL:
                         break;
@@ -247,14 +270,14 @@ public class UserActivity extends AppCompatActivity {
         };
 
         AlertDialog.Builder builder = new AlertDialog.Builder(UserActivity.this);
-        builder.setMessage("Do you want to log out?")
-                .setNeutralButton("No", dialogClickListener)
+        builder.setMessage("Which translation do you want to use?")
+                .setNeutralButton("current translation", dialogClickListener)
                 .setPositiveButton("WEB", dialogClickListener)
                 .setNegativeButton("KJV", dialogClickListener).show();
     }
 
     /*
-    determines what happens with the created dialog and enables logging out
+    creates a popup which asks the user if the user really wants to logout
     */
     public void before_logout(){
         DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
@@ -262,9 +285,7 @@ public class UserActivity extends AppCompatActivity {
             public void onClick(DialogInterface dialog, int choice) {
                 switch (choice) {
                     case DialogInterface.BUTTON_POSITIVE:
-
                         logout();
-
                         break;
                     case DialogInterface.BUTTON_NEGATIVE:
                         break;
@@ -292,36 +313,25 @@ public class UserActivity extends AppCompatActivity {
     public void load_booksJSON() throws JSONException, IOException {
         // done with use of https://www.youtube.com/watch?v=h71Ia9iFWfI
         JSONObject jsonObject = null;
-
-
-            InputStream is = getAssets().open("books.json");
-            int size = is.available();
-            byte[] buffer = new byte[size];
-            is.read(buffer);
-            is.close();
-
-            String json = new String(buffer, "UTF-8");
-
-            jsonObject = new JSONObject(json);
-            BOOKSjson = jsonObject.getJSONObject("sections").getJSONArray("whole_bible");
-
-
-
+        InputStream is = getAssets().open("books.json");
+        int size = is.available();
+        byte[] buffer = new byte[size];
+        is.read(buffer);
+        is.close();
+        String json = new String(buffer, "UTF-8");
+        jsonObject = new JSONObject(json);
+        BOOKSjson = jsonObject.getJSONObject("sections").getJSONArray("whole_bible");
     }
     /*
-    will show all books dependent whether the user selected old or new testament
+    will fill the listview with books from the old or new testament
+
+    add factor and upper bound determine which books will be shown
+
+    0-39 old testament books
+
+    40-66 new testament books
      */
     public void show_books() {
-        Integer upper_bound;
-        if (old){
-            add_factor = 0;
-            upper_bound = 39;
-        }
-        else {
-            add_factor = 39;
-            upper_bound = 27;
-        }
-
         ListText.clear();
         for (int i = 0; i < upper_bound; i++) {
             String verse = null;
@@ -334,74 +344,60 @@ public class UserActivity extends AppCompatActivity {
         }
         fill_list();
     }
+
     /*
     will show all chapters depending on the selected book
+
      */
-
-
     public void show_chapters(Integer chapters){
         ListText.clear();
         for (int i = 0; i < chapters; i ++){
+
+            // +1 because the chapters in the bible do not start with 0
             ListText.add(String.valueOf(i + 1));
         }
         fill_list();
     }
 
     /*
-    will handle the listview
-    */
+    will handle the listview layout and which functions need to be run
 
+    layer 0 = empty list
+    layer 1 = choice between old and new testament
+    layer 2 = choice between books of the old or new testament
+    layer 3 = choice between the chapters of the selected book
+    layer 4 = reading and adding to favorites of the selected chapter
+    */
     public void select_layer()  {
         download_btn.setVisibility(View.INVISIBLE);
-
-        if (layer <= 0){
-            ListText.clear();
-            fill_list();
-            // to make sure the layer is never below 0
-            layer = 0;
-        }
-        else if (layer == 1 ){
-            ListText.clear();
-            ListText.add("Old");
-            ListText.add("New");
-            fill_list();
-        }
-        else if (layer == 2){
-            if (clicked_pos == 0)
-            {
-                old = true;
-            }
-            else
-            {
-                old = false;
-            }
-            show_books();
-        }
-        if (layer == 3){
-
-            try {
-                chapters = BOOKSjson.getJSONObject(clicked_pos).getInt("val");
-                selected_book = BOOKSjson.getJSONObject(clicked_pos + add_factor).getString("key");
-                selected_book_int = clicked_pos + add_factor;
-                Toast.makeText(UserActivity.this, selected_book + selected_book_int.toString(), Toast.LENGTH_SHORT).show();
-
-
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-            show_chapters(chapters);
-        }
-        if (layer == 4){
-            click_listener(false);
-
-            selected_chapter = clicked_pos + 1;
-            read_chapter(selected_book, selected_chapter);
-            Toast.makeText(UserActivity.this, selected_book + selected_chapter.toString(), Toast.LENGTH_SHORT).show();
+        switch (layer) {
+            case 0:
+                ListText.clear();
+                fill_list();
+                break;
+            case 1:
+                ListText.clear();
+                ListText.add("Old");
+                ListText.add("New");
+                fill_list();
+                break;
+            case 2:
+                show_books();
+                break;
+            case 3:
+                show_chapters(chapters);
+                getSupportActionBar().setTitle(selected_book);
+                break;
+            case 4:
+                getSupportActionBar().setSubtitle(selected_chapter.toString());
+                click_listener(false);
+                read_chapter(selected_book, selected_chapter);
+                break;
         }
     }
 
     /*
-    will go back to enable the user to login
+    will logout the user from firebase and go back to the MainActivity
     */
     public void logout() {
         FirebaseAuth.getInstance().signOut();
@@ -419,7 +415,7 @@ public class UserActivity extends AppCompatActivity {
         startActivity(intent);
     }
     /*
-       Goes to TranslationActivity
+       Goes to TranslationActivity with selected book and needed information to download it
     */
     private void go_to_translation(String book, Integer selected_book_int) {
         Intent intent = new Intent(this, TranslationActivity.class);

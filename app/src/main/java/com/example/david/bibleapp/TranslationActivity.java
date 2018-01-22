@@ -120,11 +120,23 @@ public class TranslationActivity extends AppCompatActivity {
     }
 
     public void BTN_WEB(View view) {
-        WEB_download();
+        add_factor = "";
+        translation = 0;
+        try {
+            volley_translation_0_books();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 
     public void BTN1_KJV(View view) {
-        KJV_download();
+        add_factor = "?translation=kjv";
+        translation = 1;
+        try {
+            volley_translation_0_books();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 
     private class clicklistener implements AdapterView.OnItemClickListener {
@@ -200,8 +212,6 @@ public class TranslationActivity extends AppCompatActivity {
                 before_logout();
                 break;
             case R.id.favorites:
-                break;
-            case R.id.get_table:
                 break;
             case R.id.test_function:
                 break;
@@ -342,25 +352,8 @@ public class TranslationActivity extends AppCompatActivity {
     makes the custom adapter to enable a listview with a download button
      */
 
-    public void KJV_download() {
-        add_factor = "?translation=kjv";
-        translation = 1;
-        try {
-            volley_translation_0_books();
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-    }
 
-    public void WEB_download() {
-        add_factor = "";
-        translation = 0;
-        try {
-            volley_translation_0_books();
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-    }
+
     public void fill_list() {
 
         ArrayAdapter theAdapter = new ArrayAdapter(this, android.R.layout.simple_list_item_1, ListText);
