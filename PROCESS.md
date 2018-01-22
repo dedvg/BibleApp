@@ -52,5 +52,14 @@ __progress__
 * Made a button to download the book when the book is not yet downloaded.
 * Started commenting the functions
 
+# day 6 (22-1-2018)
+__decicions__
+Thinking about changing translationActivity to an activity where you can only download the seleced book from UserActivity.
+This is due to selecting a book in UserActivity which is not present in the database will bring the user to the corect book to download in TranslateActivity. But not yet sure because if the user wants to download multiple translations of the same book this function can still be usefull (which translationActivity currently has).
+
+__progress__
+* commented UserActivity
+* made navigation with back button easier
+* deletion of testing code
 
 
