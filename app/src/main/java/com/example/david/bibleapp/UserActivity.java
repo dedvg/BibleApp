@@ -43,6 +43,7 @@ public class UserActivity extends AppCompatActivity {
     JSONArray BOOKSjson;
     String selected_book;
     TranslationDatabase theDatabase;
+    AlertDialog dialog_verses;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -208,7 +209,7 @@ public class UserActivity extends AppCompatActivity {
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setMessage("Under which name do you want to add this to firebase?");
-        builder.setTitle("Selected " + selected_book + " chapter " + selected_chapter + " verses :" + begin_verse + " - " + end_verse);
+        builder.setTitle("Selected " + selected_book + " " + selected_chapter + " verse :" + begin_verse + " - " + end_verse);
 
         // Set up the input
         final EditText input = new EditText(this);
@@ -221,6 +222,7 @@ public class UserActivity extends AppCompatActivity {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 m_Text[0] = input.getText().toString();
+                Toast.makeText(UserActivity.this, m_Text[0], Toast.LENGTH_SHORT).show();
             }
         });
         builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -240,7 +242,7 @@ public class UserActivity extends AppCompatActivity {
     public void Add_To_Favorites_Verses(final Integer verse ){
         Integer max_verse = 0;
         List<String> verses = new ArrayList<>();
-        System.out.println("BOOK " +  selected_book + " chapter " + selected_chapter + " verse " + verse);
+        System.out.println("BOOK " +  selected_book + " " + selected_chapter + " vers " + verse);
         Cursor theCursor = theDatabase.get_max_verse(selected_book, selected_chapter, verse, translation);
         while (theCursor.moveToNext()){
             max_verse = theCursor.getInt(0);
@@ -262,6 +264,7 @@ public class UserActivity extends AppCompatActivity {
                 Integer option_clicked = verse + position;
                 Toast.makeText(UserActivity.this, "clicked " + option_clicked.toString(), Toast.LENGTH_SHORT).show();
                 Add_To_Favortes(verse, option_clicked);
+                dialog_verses.cancel();
             }
         });
         show_dialog_listview();
@@ -279,8 +282,9 @@ public class UserActivity extends AppCompatActivity {
         // Specify the type of input expected; this, for example, sets the input as a password, and will mask the text
         input.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_CLASS_NUMBER);
         builder.setView(row_list);
-        AlertDialog dialog = builder.create();
-        dialog.show();
+        dialog_verses = builder.create();
+        dialog_verses.show();
+
 
     }
     /*
