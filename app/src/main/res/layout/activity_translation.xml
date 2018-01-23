@@ -69,8 +69,8 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="408dp"
         android:layout_marginEnd="16dp"
-        android:text="download"
         android:onClick="BTN_WEB"
+        android:text="download"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
@@ -80,8 +80,8 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="250dp"
         android:layout_marginEnd="16dp"
-        android:text="download"
         android:onClick="BTN1_KJV"
+        android:text="download"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
@@ -110,6 +110,21 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/toolbar" />
+
+    <ProgressBar
+        android:id="@+id/progressBar1"
+        style="?android:attr/progressBarStyleLarge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        app:layout_constraintBottom_toBottomOf="@+id/ListView"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/titleTXT" />
 
 
 </android.support.constraint.ConstraintLayout>

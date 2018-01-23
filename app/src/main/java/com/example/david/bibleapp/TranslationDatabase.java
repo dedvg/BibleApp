@@ -83,13 +83,24 @@ public class TranslationDatabase extends SQLiteOpenHelper {
     public void addItem( String book, int chapter, int verse, String text, int translation) {
         SQLiteDatabase db = this.getWritableDatabase();
         String query;
+        boolean existence = false;
+
         String variable_column = COL4;
 
         if (translation == 1){
             variable_column = COL5;
         }
 
-        query = "INSERT INTO " + TABLE_NAME + "(" + COL1 + ", " + COL2 + ", " + COL3 + ", " + variable_column + ") VALUES( '" + book + "', " + chapter + ", " + verse + ", '" + text + "');";
+        if (check_chapter1_existence_KJV(book) && check_chapter1_existence_WEB(book))
+        {
+            System.out.println("ALEADY PRESEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEENT");
+            query = "UPDATE " + TABLE_NAME + " SET " + variable_column + " = '" + text + "' WHERE " + COL1 + " = '" + book+ "' AND " + COL2 + " = " + chapter + " AND " + COL3 + " = " + verse +  ";";
+        }
+        else{
+
+            query = "INSERT INTO " + TABLE_NAME + "(" + COL1 + ", " + COL2 + ", " + COL3 + ", " + variable_column + ") VALUES( '" + book + "', " + chapter + ", " + verse + ", '" + text + "');";
+
+        }
 
         db.execSQL(query);
     }

@@ -19,6 +19,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -49,13 +50,16 @@ public class TranslationActivity extends AppCompatActivity {
     Toolbar toolbar;
     TranslationDatabase theDatabase;
     JSONArray BOOKSjson;
-    Integer chapters, translation, given_book_int, layer, clicked_book;
+    Integer chapters, translation, given_book_int, layer, clicked_book, load_chapter = 0;
     String add_factor, given_book ,book;
+    ProgressBar spinner;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_translation);
+        spinner = findViewById(R.id.progressBar1);
 
 
         // creating references
@@ -83,7 +87,7 @@ public class TranslationActivity extends AppCompatActivity {
 
         // layout function
         show_download(false);
-
+        spinner.setVisibility(View.GONE);
         // when pressing back the user will be brought back to select between all books
         // or back to UserActivity
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
@@ -306,6 +310,7 @@ public class TranslationActivity extends AppCompatActivity {
     preperation of the volley which will get the biblebook
      */
     public void volley_translation_0_books() throws JSONException {
+        spinner.setVisibility(View.VISIBLE);
         chapters = BOOKSjson.getJSONObject(clicked_book).getInt("val");
         volley_translation_1_chapters(book);
     }
@@ -383,6 +388,11 @@ public class TranslationActivity extends AppCompatActivity {
     will set the textresult in the database verse by verse
      */
     public void volley_translation_3_db(String Book, int chapter, JSONArray jsonArray)throws JSONException{
+        load_chapter += 1;
+        if (load_chapter == chapters){
+            spinner.setVisibility(View.GONE);
+            Toast.makeText(TranslationActivity.this, "Finished downloading", Toast.LENGTH_SHORT).show();
+        }
             String text;
             for (int i = 0; i < jsonArray.length(); i++) {
                 text =  jsonArray.getJSONObject(i).getString("text");
