@@ -61,5 +61,15 @@ __progress__
 * commented UserActivity
 * made navigation with back button easier
 * deletion of testing code
+* enabling of selecting multiple verses
 
+# day 6 (23-1-2018)
+__decicions__
+* __BUGG__ when adding a translation new rows are made, it is supposed to be in the same row this needs to be fixed
+* will remove functions from translation activity, navigating which book to download will only be available in UserActivity
+    * to do so UserActivity needs to pass on which translation is used and TranslationActivity will change accordingly
+    
+__progress__
+* will update the table if another translation is present instead of always inserting in sql
+* 
 
