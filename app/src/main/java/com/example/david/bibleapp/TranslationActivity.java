@@ -43,8 +43,8 @@ import java.util.Objects;
 
 public class TranslationActivity extends AppCompatActivity {
 
-    TextView title_txt, translation_txt, translation1_txt, translation2_txt;
-    Button translation_btn, translation1_btn, translation2_btn;
+    TextView title_txt, translation_txt;
+    Button translation_btn;
     ListView listView;
     List<String> ListText = new ArrayList<String>();
     Toolbar toolbar;
@@ -64,13 +64,10 @@ public class TranslationActivity extends AppCompatActivity {
 
         // creating references
         translation_btn = findViewById(R.id.transBTN);
-        translation1_btn = findViewById(R.id.transBTN1);
-        translation2_btn = findViewById(R.id.transBTN2);
 
         title_txt = findViewById(R.id.titleTXT);
         translation_txt = findViewById(R.id.transTXT);
-        translation1_txt = findViewById(R.id.transTXT1);
-        translation2_txt = findViewById(R.id.transTXT2);
+
 
         toolbar = findViewById(R.id.toolbar);
         listView = findViewById(R.id.ListView);
@@ -80,6 +77,8 @@ public class TranslationActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         getSupportActionBar().setTitle("Current translation = WEB");
         toolbar.setSubtitle("test");
+
+
         theDatabase = TranslationDatabase.getInstance(this.getApplicationContext());
         // add backbutton
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -93,14 +92,8 @@ public class TranslationActivity extends AppCompatActivity {
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (layer == 0){
                     go_back();
-                }
-                else{
-                    show_download(false);
-                    get_books();
-                    layer = 0;
-                }
+
             }
         });
 
@@ -109,6 +102,8 @@ public class TranslationActivity extends AppCompatActivity {
         Intent intent = getIntent();
         given_book = intent.getStringExtra("book");
         given_book_int = intent.getIntExtra("book_int", 0);
+        translation = intent.getIntExtra("translation", 0);
+
         String jsonArray = intent.getStringExtra("jsonArray");
 
         //  make BOOKSjson to enable getting the right values again
@@ -134,31 +129,59 @@ public class TranslationActivity extends AppCompatActivity {
             return;
         }
     }
-
     /*
-    will download the selected book in the WEB
+    will handle the onclick of the download button
      */
-    public void BTN_WEB(View view) {
-        add_factor = "";
-        translation = 0;
-        try {
-            volley_translation_0_books();
-        } catch (JSONException e) {
-            e.printStackTrace();
+    public void download_btn (View view){
+        if (translation == 0){
+            add_factor = "";
+            try {
+                volley_translation_0_books();
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+        else if (translation == 1){
+            add_factor = "?translation=kjv";
+            translation = 1;
+            try {
+                volley_translation_0_books();
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
         }
     }
 
     /*
-    will download the selected book in the KJV
+
+    will switch translation depending on the selected part
      */
-    public void BTN1_KJV(View view) {
-        add_factor = "?translation=kjv";
-        translation = 1;
-        try {
-            volley_translation_0_books();
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
+    public void switch_translation(){
+        DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int choice) {
+                switch (choice) {
+                    case DialogInterface.BUTTON_POSITIVE:
+                        Toast.makeText(TranslationActivity.this, "WEB selected", Toast.LENGTH_SHORT).show();
+                        translation = 0;
+                        show_download(true);
+                        break;
+                    case DialogInterface.BUTTON_NEGATIVE:
+                        Toast.makeText(TranslationActivity.this, "KJV selected", Toast.LENGTH_SHORT).show();
+                        translation = 1;
+                        show_download(true);
+                        break;
+                    case DialogInterface.BUTTON_NEUTRAL:
+                        break;
+                }
+            }
+        };
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(TranslationActivity.this);
+        builder.setMessage("Which translation do you want to use?")
+                .setNeutralButton("current translation", dialogClickListener)
+                .setPositiveButton("WEB", dialogClickListener)
+                .setNegativeButton("KJV", dialogClickListener).show();
     }
 
     /*
@@ -184,6 +207,12 @@ public class TranslationActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_main, menu);
+
+        // to find a menuitem it has to be set here
+        MenuItem new_text = menu.findItem(R.id.new_text);
+        MenuItem test_function = menu.findItem(R.id.test_function);
+        test_function.setVisible(false);
+        new_text.setVisible(false);
         return true;
     }
 
@@ -194,9 +223,6 @@ public class TranslationActivity extends AppCompatActivity {
 
         if(show  == true){
             translation_txt.setVisibility(View.VISIBLE);
-            translation1_txt.setVisibility(View.VISIBLE);
-            translation2_txt.setVisibility(View.VISIBLE);
-
             title_txt.setVisibility(View.VISIBLE);
             listView.setVisibility(View.INVISIBLE);
             set_text();
@@ -204,13 +230,7 @@ public class TranslationActivity extends AppCompatActivity {
         }
         else{
             translation_btn.setVisibility(View.INVISIBLE);
-            translation1_btn.setVisibility(View.INVISIBLE);
-            translation2_btn.setVisibility(View.INVISIBLE);
-
             translation_txt.setVisibility(View.INVISIBLE);
-            translation1_txt.setVisibility(View.INVISIBLE);
-            translation2_txt.setVisibility(View.INVISIBLE);
-
             title_txt.setVisibility(View.INVISIBLE);
             listView.setVisibility(View.VISIBLE);
             layer = 0;
@@ -222,20 +242,26 @@ public class TranslationActivity extends AppCompatActivity {
      */
     private void set_text() {
         title_txt.setText("KJV = King James Version and WEB = World English Bible");
-        if (theDatabase.check_chapter1_existence_WEB(book)) {
-            translation_txt.setText(" WEB version of " + book + " is already downloaded");
+        if (translation == 0 ){
+            if (theDatabase.check_chapter1_existence_WEB(book)) {
+                translation_txt.setText(" WEB version of " + book + " is already downloaded");
+            }
+            else{
+                translation_txt.setText(book + "(WEB)");
+            }
         }
-        else{
-            translation_txt.setText(book + "(WEB)");
-            translation_btn.setVisibility(View.VISIBLE);
+        else if (translation == 1)
+        {
+            if (theDatabase.check_chapter1_existence_KJV(book)) {
+                translation_txt.setText(" KJV version of " + book + " is already downloaded");
+            }
+            else{
+                translation_txt.setText(book + "(KJV)");
+            }
         }
-        if (theDatabase.check_chapter1_existence_KJV(book)) {
-            translation1_txt.setText(" KJV version of " + book + " is already downloaded");
-        }
-        else{
-            translation1_txt.setText(book + "(KJV)");
-            translation1_btn.setVisibility(View.VISIBLE);
-        }
+        translation_txt.setVisibility(View.VISIBLE);
+        translation_btn.setVisibility(View.VISIBLE);
+
     }
 
     /*
@@ -249,12 +275,11 @@ public class TranslationActivity extends AppCompatActivity {
                 before_logout();
                 break;
             case R.id.favorites:
+                GoToFavorites();
                 break;
-            case R.id.test_function:
-                break;
+
             case R.id.switch_translation:
-                break;
-            case R.id.new_text:
+                switch_translation();
                 break;
         }
         return super.onOptionsItemSelected(item);
@@ -409,6 +434,14 @@ public class TranslationActivity extends AppCompatActivity {
         ArrayAdapter theAdapter = new ArrayAdapter(this, android.R.layout.simple_list_item_1, ListText);
         listView.setAdapter(theAdapter);
         listView.setVisibility(View.VISIBLE);
+    }
+    /*
+   will go to the favoritesActivity
+   */
+    private void GoToFavorites() {
+        Intent intent = new Intent(this, FavoriteActivity.class);
+        // starts the new activity
+        startActivity(intent);
     }
 }
 
