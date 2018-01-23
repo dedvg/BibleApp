@@ -61,5 +61,9 @@ __progress__
 * commented UserActivity
 * made navigation with back button easier
 * deletion of testing code
+* enabling of selecting multiple verses
 
+# day 6 (23-1-2018)
+__decicions__
+* __BUGG__ when adding a translation new rows are made, it is supposed to be in the same row this needs to be fixed
 
