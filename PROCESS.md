@@ -68,8 +68,10 @@ __decicions__
 * __BUGG__ when adding a translation new rows are made, it is supposed to be in the same row this needs to be fixed
 * will remove functions from translation activity, navigating which book to download will only be available in UserActivity
     * to do so UserActivity needs to pass on which translation is used and TranslationActivity will change accordingly
+    * only one button and textfield are neccesary for downloading independent of the translation
     
 __progress__
-* will update the table if another translation is present instead of always inserting in sql
-* 
+* will update the table if another translation is present instead of always inserting in sql.
+* switching from translation is now possible in TranslationActivity
+      * __BUGG__ when switching in the list, it will crash. The list part will probally be removed though.
 
