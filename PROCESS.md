@@ -71,6 +71,7 @@ __decicions__
     * only one button and textfield are neccesary for downloading independent of the translation
     
 __progress__
-* will update the table if another translation is present instead of always inserting in sql
-* 
+* will update the table if another translation is present instead of always inserting in sql.
+* switching from translation is now possible in TranslationActivity
+      * __BUGG__ when switching in the list, it will crash. The list part will probally be removed though.
 
