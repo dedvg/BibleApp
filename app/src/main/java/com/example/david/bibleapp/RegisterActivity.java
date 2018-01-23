@@ -64,7 +64,7 @@ public class RegisterActivity extends AppCompatActivity {
     public void add_user_firebase(){
         FirebaseUser user = mAuth.getCurrentUser();
         String Uid = user.getUid();
-        mDatabase.child("users").child(Uid).setValue(email);
+        mDatabase.child("users").child(Uid).setValue(new UserClass(email, null));
     }
     private void logged_in() {
         Intent intent = new Intent(this, UserActivity.class);

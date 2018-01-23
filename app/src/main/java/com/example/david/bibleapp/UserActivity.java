@@ -3,6 +3,8 @@ package com.example.david.bibleapp;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
+import android.os.Build;
+import android.support.annotation.RequiresApi;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -21,15 +23,25 @@ import android.widget.Button;
 
 import android.widget.Toast;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.w3c.dom.Text;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+
+import javax.security.auth.Subject;
 
 public class UserActivity extends AppCompatActivity {
 
@@ -44,6 +56,11 @@ public class UserActivity extends AppCompatActivity {
     String selected_book;
     TranslationDatabase theDatabase;
     AlertDialog dialog_verses;
+    FirebaseAuth authTest;
+    UserClass to_change;
+    DatabaseReference mDatabase;
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,6 +72,8 @@ public class UserActivity extends AppCompatActivity {
         testT = findViewById(R.id.testTXT);
         listView = findViewById(R.id.listView);
         theDatabase = TranslationDatabase.getInstance(this.getApplicationContext());
+        authTest = FirebaseAuth.getInstance();
+        mDatabase = FirebaseDatabase.getInstance().getReference();
 
 
         // set up the action bar
@@ -120,7 +139,6 @@ public class UserActivity extends AppCompatActivity {
                 GoToFavorites();
                 break;
             case R.id.test_function:
-                go_to_translation("", 0);
                 break;
             case R.id.switch_translation:
                 switch_translation();
@@ -221,7 +239,7 @@ public class UserActivity extends AppCompatActivity {
         builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                ListText.clear();
+                ArrayList<String> VersesList = new ArrayList<String>();
                 m_Text[0] = input.getText().toString();
                 Toast.makeText(UserActivity.this, m_Text[0], Toast.LENGTH_SHORT).show();
                 Integer row = translation + 3;
@@ -231,9 +249,9 @@ public class UserActivity extends AppCompatActivity {
                 while (theCursor.moveToNext()){
                     verse = theCursor.getString(row);
                     System.out.println(verse);
-                    ListText.add(verse);
+                    VersesList.add(verse);
                 }
-                fill_list();
+                add_text_to_firebase2(m_Text[0],selected_book,selected_chapter,begin_verse, end_verse,VersesList);
             }
         });
         builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -492,6 +510,53 @@ public class UserActivity extends AppCompatActivity {
                 read_chapter(selected_book, selected_chapter);
                 break;
         }
+    }
+
+
+    public void add_text_to_firebase2(final String subject, final String book, final int chapter, final int begin_verse, final int end_verse, final ArrayList verses_list) {
+        ValueEventListener postListener = new ValueEventListener() {
+            @RequiresApi(api = Build.VERSION_CODES.KITKAT)
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                VerseClass VerseText = new VerseClass(book, chapter,begin_verse, end_verse, verses_list);
+                boolean found = false;
+                // get the userclass from firebase (from the current user)
+                FirebaseUser user = authTest.getCurrentUser();
+                to_change = dataSnapshot.child("users").child(user.getUid()).getValue(UserClass.class);
+                SubjectClass Subject_to_change;
+                ArrayList<SubjectClass> SubjectList = to_change.subjects;
+                ArrayList<VerseClass> verses_to_change = new ArrayList<VerseClass>();
+                if(SubjectList == null)
+                {
+                    SubjectList = new ArrayList<SubjectClass>();
+                }
+                else {
+                    for (int i = 0; i < SubjectList.size(); i++) {
+                        if (Objects.equals(SubjectList.get(i).name, subject)) {
+                            Toast.makeText(UserActivity.this, "found", Toast.LENGTH_SHORT).show();
+                            verses_to_change = SubjectList.get(i).verses;
+                            verses_to_change.add(VerseText);
+                            SubjectList.get(i).verses = verses_to_change;
+                            found = true;
+                        }
+                    }
+                }
+                if (!found){
+                    verses_to_change.add(VerseText);
+                    SubjectClass new_subject = new SubjectClass(subject,verses_to_change);
+                    SubjectList.add(new_subject);
+                }
+                to_change.subjects = SubjectList;
+                mDatabase.child("users").child(user.getUid()).setValue(to_change);
+            }
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                // if not possible toast it
+                Toast.makeText(UserActivity.this, " error in adding",
+                        Toast.LENGTH_SHORT).show();
+            }
+        };
+        mDatabase.addListenerForSingleValueEvent(postListener);
     }
 
     /*
