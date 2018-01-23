@@ -33,7 +33,6 @@ import com.google.firebase.database.ValueEventListener;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.w3c.dom.Text;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -511,7 +510,9 @@ public class UserActivity extends AppCompatActivity {
                 break;
         }
     }
-
+    /*
+    will add the selected verses to firebase
+     */
 
     public void add_text_to_firebase2(final String subject, final String book, final int chapter, final int begin_verse, final int end_verse, final ArrayList verses_list) {
         ValueEventListener postListener = new ValueEventListener() {
