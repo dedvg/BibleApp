@@ -63,7 +63,7 @@ __progress__
 * deletion of testing code
 * enabling of selecting multiple verses
 
-# day 6 (23-1-2018)
+# day 7 (23-1-2018)
 __decicions__
 * __BUGG__ when adding a translation new rows are made, it is supposed to be in the same row this needs to be fixed
 * will remove functions from translation activity, navigating which book to download will only be available in UserActivity
@@ -75,3 +75,17 @@ __progress__
 * switching from translation is now possible in TranslationActivity
       * __BUGG__ when switching in the list, it will crash. The list part will probally be removed though.
 
+# day 8 (24-1-2018)
+__decicions__
+* removing of the navigation to TranslateActivity, when a book is not present in the selected translation the user is immeadiatelly brought to TranslateActivity to download the book instead of first selecting chapters.
+* when deleting the last verses of a subject, the whole subject will be deleted from firebase and from the users favorites
+* need to prevent users from filling an empty subject name
+* for Favorites a Custom adapter is made so users can see
+   * which book they added
+   * which translation the verses are from
+   * begin verse and end verse that where added
+    
+__progress__
+* Multiple classes are made to enable saving verses to a subject in Firebase
+* Check statements are present to check whether the subject already exist and if so insert it there
+* Favorites is now working and readable
