@@ -14,6 +14,7 @@ public class VerseClass {
     public Integer begin_verse;
     public Integer end_verse;
     public Integer chapter;
+    public String translation;
 
 
     // set default constructor needed for firebase
@@ -26,5 +27,6 @@ public class VerseClass {
         this.begin_verse = Begin_Verse;
         this.end_verse = End_Verse;
         this.book = Book;
+        this.translation ="";
     }
 }

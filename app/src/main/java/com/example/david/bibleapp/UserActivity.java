@@ -106,7 +106,9 @@ public class UserActivity extends AppCompatActivity {
                 }
             }
         });
+        click_listener(true);
 
+        select_layer();
         // will make all info available from the local JSON
         try {
             load_booksJSON();
@@ -144,7 +146,7 @@ public class UserActivity extends AppCompatActivity {
               break;
             case R.id.new_text:
                 click_listener(true);
-                layer = 1;
+                layer = 0;
                 select_layer();
                 break;
         }
@@ -174,18 +176,18 @@ public class UserActivity extends AppCompatActivity {
             clicked_pos = position;
 
             // to remember wheteher old or new is clicked
-            if (layer == 1 && clicked_pos == 0)
+            if (layer == 0 && clicked_pos == 0)
             {
                 old = true;
                 add_factor = 0;
                 upper_bound = 39;
             }
-            else if(layer == 1){
+            else if(layer == 0){
                 add_factor = 39;
                 upper_bound = 27;
                 old = false;
             }
-            if (layer == 2){
+            else if (layer == 1){
                 selected_book_int = clicked_pos + add_factor;
                 try {
                     selected_book = BOOKSjson.getJSONObject(selected_book_int).getString("key");
@@ -195,7 +197,7 @@ public class UserActivity extends AppCompatActivity {
                     e.printStackTrace();
                 }
             }
-            if (layer == 3){
+            else if (layer == 2){
                 selected_chapter = clicked_pos + 1;
             }
 
@@ -334,7 +336,6 @@ public class UserActivity extends AppCompatActivity {
     gets the selected chapter from the database and presents it at the list
     if the database does not contain the information a download button will appear
     */
-
     public void read_chapter(String book, Integer chapter){
         // clear the listview
         ListText.clear();
@@ -346,17 +347,12 @@ public class UserActivity extends AppCompatActivity {
 
         // if there are multiple rows make the text readable else show a download button
         // the results depend on the selected translation
-        if (rows >= 1){
-            while (theCursor.moveToNext()){
-                String number = theCursor.getString(2);
-                String verse = theCursor.getString(verse_column);
-                ListText.add(number + ":  "+ verse);
-            }
-        }
-        else {
-            download_btn.setVisibility(View.VISIBLE);
-        }
 
+        while (theCursor.moveToNext()){
+            String number = theCursor.getString(2);
+            String verse = theCursor.getString(verse_column);
+            ListText.add(number + ":  "+ verse);
+        }
         // will create an empty listview or full with verses
         fill_list();
     }
@@ -477,36 +473,44 @@ public class UserActivity extends AppCompatActivity {
     /*
     will handle the listview layout and which functions need to be run
 
-    layer 0 = empty list
-    layer 1 = choice between old and new testament
-    layer 2 = choice between books of the old or new testament
-    layer 3 = choice between the chapters of the selected book
-    layer 4 = reading and adding to favorites of the selected chapter
+    layer 0 = choice between old and new testament
+    layer 1 = choice between books of the old or new testament
+    layer 2 = choice between the chapters of the selected book
+    layer 3 = reading and adding to favorites of the selected chapter
     */
     public void select_layer()  {
         download_btn.setVisibility(View.INVISIBLE);
         switch (layer) {
             case 0:
                 ListText.clear();
-                fill_list();
-                break;
-            case 1:
-                ListText.clear();
                 ListText.add("Old");
                 ListText.add("New");
                 fill_list();
                 break;
-            case 2:
+            case 1:
                 show_books();
                 break;
-            case 3:
-                show_chapters(chapters);
-                getSupportActionBar().setTitle(selected_book);
+            case 2:
+                Cursor theCursor = theDatabase.getchapter(selected_book, 1, translation);
+                Integer rows = theCursor.getCount();
+                if (rows >= 1) {
+                    show_chapters(chapters);
+                    getSupportActionBar().setTitle(selected_book);
+                }
+                else{
+                    go_to_translation(selected_book, selected_book_int);
+                    layer = 1;
+                }
+
                 break;
-            case 4:
+            case 3:
                 getSupportActionBar().setSubtitle(selected_chapter.toString());
                 click_listener(false);
-                read_chapter(selected_book, selected_chapter);
+
+                // test if the book is already downloaded
+
+                    read_chapter(selected_book, selected_chapter);
+
                 break;
         }
     }
@@ -520,6 +524,9 @@ public class UserActivity extends AppCompatActivity {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 VerseClass VerseText = new VerseClass(book, chapter,begin_verse, end_verse, verses_list);
+                if (translation == 0){VerseText.translation = "(WEB)";}
+                else {VerseText.translation = "(KJV)";}
+
                 boolean found = false;
                 // get the userclass from firebase (from the current user)
                 FirebaseUser user = authTest.getCurrentUser();

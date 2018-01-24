@@ -20,4 +20,12 @@ public class SubjectClass {
         this.name =Name;
 
     }
+
+    @Override
+    public String toString() {
+        return "SubjectClass{" +
+                "verses=" + verses +
+                ", name='" + name + '\'' +
+                '}';
+    }
 }
