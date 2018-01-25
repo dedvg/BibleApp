@@ -265,9 +265,7 @@ public class UserActivity extends AppCompatActivity {
         row_list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                ViewGroup vg = (ViewGroup)view;
                 Integer option_clicked = verse + position;
-                Toast.makeText(UserActivity.this, "clicked " + option_clicked.toString(), Toast.LENGTH_SHORT).show();
                 dialogAddFavorites1(verse, option_clicked);
                 dialog_verses.cancel();
             }
@@ -484,7 +482,7 @@ public class UserActivity extends AppCompatActivity {
     public void layer3Layout(){
         getSupportActionBar().setTitle(navigatorClass.selected_book + " " + navigatorClass.selected_chapter.toString());
         clickListener(false);
-        toolbar.setSubtitle("add item to favorites by long tapping");
+        toolbar.setSubtitle("long tap to add to favorites");
         // clear the listview
         ListText.clear();
 

@@ -98,9 +98,6 @@ public class MainActivity extends AppCompatActivity {
                 if (user != null) {
 
                     // if the user is singed in
-
-                    Toast.makeText(getApplicationContext(), "logging in again",
-                            Toast.LENGTH_SHORT).show();
                     Intent intent = new Intent(MainActivity.this,
                             UserActivity.class);
 

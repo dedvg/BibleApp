@@ -102,6 +102,11 @@ public class FavoriteActivity extends AppCompatActivity {
                 FirebaseUser user = authTest.getCurrentUser();
                 current_user = dataSnapshot.child("users").child(user.getUid()).getValue(UserClass.class);
                 if (current_user.subjects != null) {refresh_subjects();}
+                else{
+                    Toast.makeText(FavoriteActivity.this, "Nothing added to favorites", Toast.LENGTH_SHORT).show();
+                    ListText.clear();
+                    fill_list();
+                }
             }
             @Override
             public void onCancelled(DatabaseError databaseError) {
@@ -150,13 +155,7 @@ public class FavoriteActivity extends AppCompatActivity {
     private class LongClickListener implements AdapterView.OnItemLongClickListener {
         @Override
         public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-            if (clicked_subject == null)
-            {
-                delteSubjectMsg(position);
-            }
-            else {
-                delteVerseMsg(position);
-            }
+            delteMsg(position);
             return true;
         }
     }
@@ -218,13 +217,19 @@ public class FavoriteActivity extends AppCompatActivity {
     /*
     deletes subject from firebase
      */
-    private void delteSubjectMsg(final int position) {
+    private void delteMsg(final int position) {
         DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int choice) {
                 switch (choice) {
                     case DialogInterface.BUTTON_POSITIVE:
-                        deleteSubject(position);
+                        if (clicked_subject == null)
+                        {
+                            deleteSubject(position);
+                        }
+                        else {
+                            delete_verses(position);
+                        }
                         break;
                     case DialogInterface.BUTTON_NEGATIVE:
                         break;

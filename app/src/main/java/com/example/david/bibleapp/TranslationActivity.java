@@ -247,7 +247,6 @@ public class TranslationActivity extends AppCompatActivity {
      */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-// TODO stuff needs to be ordered
         switch (item.getItemId()) {
             case R.id.logout:
                 before_logout();
@@ -384,7 +383,6 @@ public class TranslationActivity extends AppCompatActivity {
             for (int i = 0; i < jsonArray.length(); i++) {
                 text =  jsonArray.getJSONObject(i).getString("text");
                     theDatabase.addItem(Book, chapter,i + 1,text, translation);
-                System.out.println(Book + chapter);
             }
     }
 
