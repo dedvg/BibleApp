@@ -96,6 +96,7 @@ __decicions__
 * will try to change messages so the current translation is not an option
 * will try to make a class from the navigation part in useractivity
 * the translation should always be in the subtitle
+* the translation should be passed on from activity to activity
 
 __progress__
 * extra functions in TranslateActivity are deleted
