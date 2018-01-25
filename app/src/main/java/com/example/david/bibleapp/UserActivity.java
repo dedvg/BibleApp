@@ -368,11 +368,21 @@ public class UserActivity extends AppCompatActivity {
                 switch (choice) {
                     case DialogInterface.BUTTON_POSITIVE:
                         Toast.makeText(UserActivity.this, "WEB selected", Toast.LENGTH_SHORT).show();
+                        toolbar.setSubtitle("WEB");
                         translation = 0;
+                        if (!book_present()) {
+                            layer = 1;
+                        }
+                        select_layer();
                         break;
                     case DialogInterface.BUTTON_NEGATIVE:
                         Toast.makeText(UserActivity.this, "KJV selected", Toast.LENGTH_SHORT).show();
+                        toolbar.setSubtitle("KJV");
                         translation = 1;
+                        if (!book_present()) {
+                            layer = 1;
+                        }
+                        select_layer();
                         break;
                     case DialogInterface.BUTTON_NEUTRAL:
                         break;
@@ -480,6 +490,7 @@ public class UserActivity extends AppCompatActivity {
     */
     public void select_layer()  {
         download_btn.setVisibility(View.INVISIBLE);
+        click_listener(true);
         switch (layer) {
             case 0:
                 ListText.clear();
@@ -491,28 +502,33 @@ public class UserActivity extends AppCompatActivity {
                 show_books();
                 break;
             case 2:
-                Cursor theCursor = theDatabase.getchapter(selected_book, 1, translation);
-                Integer rows = theCursor.getCount();
-                if (rows >= 1) {
+                if (book_present()){
                     show_chapters(chapters);
                     getSupportActionBar().setTitle(selected_book);
                 }
-                else{
+                else {
                     go_to_translation(selected_book, selected_book_int);
                     layer = 1;
                 }
-
                 break;
             case 3:
-                getSupportActionBar().setSubtitle(selected_chapter.toString());
+                getSupportActionBar().setTitle(selected_book + " " + selected_chapter.toString());
                 click_listener(false);
 
                 // test if the book is already downloaded
 
                     read_chapter(selected_book, selected_chapter);
-
                 break;
         }
+    }
+
+    public boolean book_present (){
+        Cursor theCursor = theDatabase.getchapter(selected_book, 1, translation);
+        Integer rows = theCursor.getCount();
+        if (rows >= 1) {
+            return true;
+        }
+        return false;
     }
     /*
     will add the selected verses to firebase

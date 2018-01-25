@@ -45,12 +45,11 @@ public class TranslationActivity extends AppCompatActivity {
 
     TextView title_txt, translation_txt;
     Button translation_btn;
-    ListView listView;
     List<String> ListText = new ArrayList<String>();
     Toolbar toolbar;
     TranslationDatabase theDatabase;
     JSONArray BOOKSjson;
-    Integer chapters, translation, given_book_int, layer, clicked_book, load_chapter = 0;
+    Integer chapters, translation, given_book_int, clicked_book, load_chapter = 0;
     String add_factor, given_book ,book;
     ProgressBar spinner;
 
@@ -70,7 +69,6 @@ public class TranslationActivity extends AppCompatActivity {
 
 
         toolbar = findViewById(R.id.toolbar);
-        listView = findViewById(R.id.ListView);
 
 
         // create the toolbar
@@ -85,7 +83,6 @@ public class TranslationActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayShowHomeEnabled(true);
 
         // layout function
-        show_download(false);
         spinner.setVisibility(View.GONE);
         // when pressing back the user will be brought back to select between all books
         // or back to UserActivity
@@ -103,6 +100,7 @@ public class TranslationActivity extends AppCompatActivity {
         given_book = intent.getStringExtra("book");
         given_book_int = intent.getIntExtra("book_int", 0);
         translation = intent.getIntExtra("translation", 0);
+        show_download();
 
         String jsonArray = intent.getStringExtra("jsonArray");
 
@@ -112,8 +110,6 @@ public class TranslationActivity extends AppCompatActivity {
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        listView.setOnItemClickListener(new TranslationActivity.clicklistener());
-        get_books();
         check_downloadreference(given_book_int, given_book);
     }
 
@@ -124,9 +120,9 @@ public class TranslationActivity extends AppCompatActivity {
         if (!Objects.equals(given_book, "")) {
             book = given_book;
             clicked_book = given_book_int;
-            show_download(true);
+            show_download();
         } else {
-            return;
+            go_back();
         }
     }
     /*
@@ -164,12 +160,12 @@ public class TranslationActivity extends AppCompatActivity {
                     case DialogInterface.BUTTON_POSITIVE:
                         Toast.makeText(TranslationActivity.this, "WEB selected", Toast.LENGTH_SHORT).show();
                         translation = 0;
-                        show_download(true);
+                        show_download();
                         break;
                     case DialogInterface.BUTTON_NEGATIVE:
                         Toast.makeText(TranslationActivity.this, "KJV selected", Toast.LENGTH_SHORT).show();
                         translation = 1;
-                        show_download(true);
+                        show_download();
                         break;
                     case DialogInterface.BUTTON_NEUTRAL:
                         break;
@@ -184,22 +180,7 @@ public class TranslationActivity extends AppCompatActivity {
                 .setNegativeButton("KJV", dialogClickListener).show();
     }
 
-    /*
-    sets a click listener on the list and if clicked enables downloading the book
-     */
-    private class clicklistener implements AdapterView.OnItemClickListener {
-        @Override
-        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            try {
-                book = BOOKSjson.getJSONObject(position).getString("key");
-                clicked_book = position;
-                show_download(true);
-                System.out.println("the book is" + book);
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-        }
-    }
+
 
     /*
     enables custom menu
@@ -219,22 +200,10 @@ public class TranslationActivity extends AppCompatActivity {
     /*
     shows the layout to enabling a download of a book
      */
-    public void show_download(Boolean show){
-
-        if(show  == true){
+    public void show_download(){
             translation_txt.setVisibility(View.VISIBLE);
             title_txt.setVisibility(View.VISIBLE);
-            listView.setVisibility(View.INVISIBLE);
             set_text();
-            layer = 1;
-        }
-        else{
-            translation_btn.setVisibility(View.INVISIBLE);
-            translation_txt.setVisibility(View.INVISIBLE);
-            title_txt.setVisibility(View.INVISIBLE);
-            listView.setVisibility(View.VISIBLE);
-            layer = 0;
-        }
     }
     /*
     will set the layout depending on which translations are present
@@ -350,23 +319,7 @@ public class TranslationActivity extends AppCompatActivity {
         }
     }
 
-    /*
-    will show all available books in the listview
-     */
-    public void get_books() {
-        Integer upper_bound;
-        ListText.clear();
-        for (int i = 0; i < 66; i++) {
-            String verse = null;
-            try {
-                verse = BOOKSjson.getJSONObject(i).getString("key");
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-            ListText.add(verse);
-        }
-        fill_list();
-    }
+
 
     /*
     will volley the chapter given by volley_translatio_1_chapters
@@ -426,15 +379,7 @@ public class TranslationActivity extends AppCompatActivity {
             }
     }
 
-    /*
-    will fill the list with what is currently in ListText
-     */
-    public void fill_list() {
 
-        ArrayAdapter theAdapter = new ArrayAdapter(this, android.R.layout.simple_list_item_1, ListText);
-        listView.setAdapter(theAdapter);
-        listView.setVisibility(View.VISIBLE);
-    }
     /*
    will go to the favoritesActivity
    */
