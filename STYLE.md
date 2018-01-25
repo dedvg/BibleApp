@@ -11,3 +11,5 @@
   * use of camelcase
 * __Activities__
     * comment on top of each java file of the Activity with use of /* */
+* __variables__ 
+    * always lowercase with _ deviding the words
