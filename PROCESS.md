@@ -95,7 +95,8 @@ __progress__
 __decicions__
 * will try to change messages so the current translation is not an option
 * will try to make a class from the navigation part in useractivity
-    
+* the translation should always be in the subtitle
+
 __progress__
 * extra functions in TranslateActivity are deleted
 * If the book is not present the user does not have to select a chapter and click download first to go to TranslateActivity. This will go automatically
