@@ -89,3 +89,15 @@ __progress__
 * Multiple classes are made to enable saving verses to a subject in Firebase
 * Check statements are present to check whether the subject already exist and if so insert it there
 * Favorites is now working and readable
+
+
+# day 9 (25-1-2018)
+__decicions__
+* will try to change messages so the current translation is not an option
+* will try to make a class from the navigation part in useractivity
+* the translation should always be in the subtitle
+* the translation should be passed on from activity to activity
+
+__progress__
+* extra functions in TranslateActivity are deleted
+* If the book is not present the user does not have to select a chapter and click download first to go to TranslateActivity. This will go automatically
