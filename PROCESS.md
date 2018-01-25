@@ -102,3 +102,4 @@ __progress__
 * extra functions in TranslateActivity are deleted
 * If the book is not present the user does not have to select a chapter and click download first to go to TranslateActivity. This will go automatically
 * navigation class is made
+* translation is passed on in each activity
