@@ -73,8 +73,6 @@ public class TranslationActivity extends AppCompatActivity {
 
         // create the toolbar
         setSupportActionBar(toolbar);
-        getSupportActionBar().setTitle("Current translation = WEB");
-        toolbar.setSubtitle("test");
 
 
         theDatabase = TranslationDatabase.getInstance(this.getApplicationContext());
@@ -100,6 +98,14 @@ public class TranslationActivity extends AppCompatActivity {
         given_book = intent.getStringExtra("book");
         given_book_int = intent.getIntExtra("book_int", 0);
         translation = intent.getIntExtra("translation", 0);
+
+        if (translation == 1){
+            getSupportActionBar().setTitle("Current translation = KJV");
+        }
+        else {
+            getSupportActionBar().setTitle("Current translation = WEB");
+        }
+
         show_download();
 
         String jsonArray = intent.getStringExtra("jsonArray");
@@ -159,11 +165,14 @@ public class TranslationActivity extends AppCompatActivity {
                 switch (choice) {
                     case DialogInterface.BUTTON_POSITIVE:
                         Toast.makeText(TranslationActivity.this, "WEB selected", Toast.LENGTH_SHORT).show();
+                        getSupportActionBar().setTitle("Current translation = WEB");
+
                         translation = 0;
                         show_download();
                         break;
                     case DialogInterface.BUTTON_NEGATIVE:
                         Toast.makeText(TranslationActivity.this, "KJV selected", Toast.LENGTH_SHORT).show();
+                        getSupportActionBar().setTitle("Current translation = KJV");
                         translation = 1;
                         show_download();
                         break;
@@ -188,12 +197,6 @@ public class TranslationActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_main, menu);
-
-        // to find a menuitem it has to be set here
-        MenuItem new_text = menu.findItem(R.id.new_text);
-        MenuItem test_function = menu.findItem(R.id.test_function);
-        test_function.setVisible(false);
-        new_text.setVisible(false);
         return true;
     }
 
@@ -387,6 +390,7 @@ public class TranslationActivity extends AppCompatActivity {
         Intent intent = new Intent(this, FavoriteActivity.class);
         // starts the new activity
         startActivity(intent);
+        finish();
     }
 }
 

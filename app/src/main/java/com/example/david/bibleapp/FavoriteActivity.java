@@ -1,16 +1,14 @@
 package com.example.david.bibleapp;
 
 import android.content.DialogInterface;
-import android.content.Intent;
-import android.os.Build;
-import android.support.annotation.RequiresApi;
+
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 
-import android.util.Log;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 
 import android.view.ViewGroup;
@@ -29,12 +27,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
-import org.json.JSONException;
-
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-
 
 public class FavoriteActivity extends AppCompatActivity {
     ArrayList<String> ListText = new ArrayList<>();
@@ -45,7 +38,6 @@ public class FavoriteActivity extends AppCompatActivity {
     DatabaseReference mDatabase;
     FirebaseAuth authTest;
     Integer subject_length, clicked_subject;
-    Integer layer = 0;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -81,8 +73,6 @@ public class FavoriteActivity extends AppCompatActivity {
         }
     }
 
-
-
     /*
     to use a custom menu this is needed
      */
@@ -91,6 +81,12 @@ public class FavoriteActivity extends AppCompatActivity {
 
         // needed for showing the custom actionbar
         getMenuInflater().inflate(R.menu.menu_main, menu);
+
+        // to find a menuitem it has to be set here
+        MenuItem translation = menu.findItem(R.id.switch_translation);
+        MenuItem favorites = menu.findItem(R.id.favorites);
+        translation.setVisible(false);
+        favorites.setVisible(false);
         return true;
     }
 

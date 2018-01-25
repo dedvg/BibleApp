@@ -24,12 +24,9 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
         userT = findViewById(R.id.usernameED);
         passwordT = findViewById(R.id.passwordED);
-
         mAuth = FirebaseAuth.getInstance();
-
         // set a listener that checks if the user is already logged in
         setListener();
 
@@ -115,11 +112,5 @@ public class MainActivity extends AppCompatActivity {
         };
     }
 
-    public void test_function(View view) {
 
-        Intent intent = new Intent(MainActivity.this,
-                UserActivity.class);
-        startActivity(intent);
-        finish();
-    }
 }

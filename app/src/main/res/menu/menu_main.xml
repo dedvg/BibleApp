@@ -3,14 +3,9 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
 
-<button
 
-    />
-    <item android:id="@+id/new_text"
-        android:orderInCategory="100"
-        android:icon="@drawable/downbutton"
-        app:showAsAction="always"
-        android:title="" />
+
+
 
 
     <item android:id="@+id/favorites"
@@ -19,13 +14,9 @@
         app:showAsAction="never"
         />
 
-    <item android:id="@+id/test_function"
-        android:title="test_function"
-        android:orderInCategory="100"
-        app:showAsAction="never"
-        />
+
     <item android:id="@+id/switch_translation"
-        android:title="switch_translation"
+        android:title="switch translation"
         android:orderInCategory="100"
         app:showAsAction="never"
         />

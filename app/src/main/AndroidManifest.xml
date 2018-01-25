@@ -19,13 +19,23 @@
         <activity
             android:name=".RegisterActivity"
             android:label="@string/title_activity_register"
-            android:theme="@style/AppTheme" />
+            android:theme="@style/AppTheme"
+            android:screenOrientation="portrait"
+            />
         <activity
             android:name=".UserActivity"
             android:label="@string/title_activity_user"
-            android:theme="@style/AppTheme" />
-        <activity android:name=".FavoriteActivity" />
-        <activity android:name=".TranslationActivity"></activity>
+            android:theme="@style/AppTheme"
+            android:screenOrientation="portrait"
+            />
+        <activity
+            android:name=".FavoriteActivity"
+            android:screenOrientation="portrait"
+            />
+        <activity
+            android:name=".TranslationActivity"
+            android:screenOrientation="portrait"
+            />
     </application>
 
 </manifest>

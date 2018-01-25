@@ -45,20 +45,16 @@ import javax.security.auth.Subject;
 public class UserActivity extends AppCompatActivity {
 
     Toolbar toolbar;
-    TextView testT;
     ListView listView ,row_list ;
     List<String> ListText = new ArrayList<String>();
-    Integer layer = 0, chapters = 0, translation = 0, clicked_pos, selected_chapter, add_factor, selected_book_int, upper_bound;
-    Boolean old = true;
-    Button download_btn;
+    Integer layer = 0, translation = 0, clicked_pos;
     JSONArray BOOKSjson;
-    String selected_book;
     TranslationDatabase theDatabase;
     AlertDialog dialog_verses;
     FirebaseAuth authTest;
     UserClass to_change;
     DatabaseReference mDatabase;
-
+    NavigationClass navigatorClass = new NavigationClass();
 
 
     @Override
@@ -66,14 +62,11 @@ public class UserActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_user);
         // create references
-        download_btn = findViewById(R.id.downloadBTN);
         toolbar = findViewById(R.id.toolbar);
-        testT = findViewById(R.id.testTXT);
         listView = findViewById(R.id.listView);
         theDatabase = TranslationDatabase.getInstance(this.getApplicationContext());
         authTest = FirebaseAuth.getInstance();
         mDatabase = FirebaseDatabase.getInstance().getReference();
-
 
         // set up the action bar
         setSupportActionBar(toolbar);
@@ -81,7 +74,6 @@ public class UserActivity extends AppCompatActivity {
         toolbar.setSubtitle("made by David");
 
         // initialize some varioables
-        download_btn.setVisibility(View.INVISIBLE);
 
         // add backbutton to the toolbar
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -139,26 +131,13 @@ public class UserActivity extends AppCompatActivity {
             case R.id.favorites:
                 GoToFavorites();
                 break;
-            case R.id.test_function:
-                break;
             case R.id.switch_translation:
                 switch_translation();
               break;
-            case R.id.new_text:
-                click_listener(true);
-                layer = 0;
-                select_layer();
-                break;
         }
         return super.onOptionsItemSelected(item);
     }
-    /*
-    will bring the user to translationActivity to download the new book the user does not have
-     */
-    public void download_book(View view) {
 
-        go_to_translation(selected_book, selected_book_int);
-    }
     /*
     will create a clicklistener on the listview
     it keeps track of the layer and changes variables to make navigation possible
@@ -174,61 +153,62 @@ public class UserActivity extends AppCompatActivity {
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             clicked_pos = position;
+            switch (layer){
+                case 0:
+                    if (clicked_pos == 0)
+                    {
+                        navigatorClass.setOld(true);
+                    }
+                    else{
+                        navigatorClass.setOld(false);
+                    }
+                    break;
+                case 1:
+                    navigatorClass.setSelected_book_int(clicked_pos);
+                    try {
+                        navigatorClass.selected_book = BOOKSjson.getJSONObject(navigatorClass.selected_book_int).getString("key");
+                        navigatorClass.chapters = BOOKSjson.getJSONObject(navigatorClass.selected_book_int).getInt("val");
 
-            // to remember wheteher old or new is clicked
-            if (layer == 0 && clicked_pos == 0)
-            {
-                old = true;
-                add_factor = 0;
-                upper_bound = 39;
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                    break;
+                case 2:
+                    navigatorClass.setSelected_chapter(clicked_pos);
+                    break;
             }
-            else if(layer == 0){
-                add_factor = 39;
-                upper_bound = 27;
-                old = false;
-            }
-            else if (layer == 1){
-                selected_book_int = clicked_pos + add_factor;
-                try {
-                    selected_book = BOOKSjson.getJSONObject(selected_book_int).getString("key");
-                    chapters = BOOKSjson.getJSONObject(selected_book_int).getInt("val");
-
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
-            else if (layer == 2){
-                selected_chapter = clicked_pos + 1;
-            }
-
             // something is clicked so the layer will become 1 higher and select layer will handle the layout
             layer += 1;
-
             select_layer();
         }
     }
     /*
     this function will enable adding the clicked text to the favorites of the user
-    TODO enable adding to favorites
     */
     private class LongClickListener implements AdapterView.OnItemLongClickListener {
         @Override
         public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
             Integer verse = position + 1;
-            Add_To_Favorites_Verses(verse);
-            Toast.makeText(UserActivity.this, "add " + selected_book + " " + selected_chapter.toString() + ":  " + verse.toString() , Toast.LENGTH_SHORT).show();
+            addToFavoritesVerses(verse);
+            Toast.makeText(UserActivity.this, "add " + navigatorClass.selected_book + " " + navigatorClass.selected_chapter.toString() + ":  " + verse.toString() , Toast.LENGTH_SHORT).show();
             return false;
         }
     }
     /*
     test dialog made with use of https://stackoverflow.com/questions/10903754/input-text-dialog-android
      */
-    public void Add_To_Favortes(final Integer begin_verse, final Integer end_verse){
+    public void DialogAddFavorites1(final Integer begin_verse, final Integer end_verse){
         final String[] m_Text = {""};
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setMessage("Under which name do you want to add this to firebase?");
-        builder.setTitle("Selected " + selected_book + " " + selected_chapter + " verse :" + begin_verse + " - " + end_verse);
+        if (begin_verse == end_verse){
+            builder.setTitle("Selected " + navigatorClass.selected_book + " " + navigatorClass.selected_chapter + " verse : " + begin_verse );
+
+        }
+        else{
+            builder.setTitle("Selected " + navigatorClass.selected_book + " " + navigatorClass.selected_chapter + " verse : " + begin_verse + " - " + end_verse);
+        }
 
         // Set up the input
         final EditText input = new EditText(this);
@@ -242,17 +222,13 @@ public class UserActivity extends AppCompatActivity {
             public void onClick(DialogInterface dialog, int which) {
                 ArrayList<String> VersesList = new ArrayList<String>();
                 m_Text[0] = input.getText().toString();
-                Toast.makeText(UserActivity.this, m_Text[0], Toast.LENGTH_SHORT).show();
                 Integer row = translation + 3;
-//                TODO verse by verse is added, but the verses are stored seperatly in the SQL need to fix this
-                Cursor theCursor = theDatabase.get_verses(selected_book, selected_chapter, begin_verse, end_verse, translation);
-                String verse;
+                Cursor theCursor = theDatabase.get_verses(navigatorClass.selected_book, navigatorClass.selected_chapter, begin_verse, end_verse, translation);
                 while (theCursor.moveToNext()){
-                    verse = theCursor.getString(row);
-                    System.out.println(verse);
+                    String verse = theCursor.getString(row);
                     VersesList.add(verse);
                 }
-                add_text_to_firebase2(m_Text[0],selected_book,selected_chapter,begin_verse, end_verse,VersesList);
+                add_text_to_firebase2(m_Text[0],navigatorClass.selected_book,navigatorClass.selected_chapter,begin_verse, end_verse,VersesList);
             }
         });
         builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -269,16 +245,14 @@ public class UserActivity extends AppCompatActivity {
     https://www.youtube.com/watch?v=0gTXUHDz6BM
      */
 
-    public void Add_To_Favorites_Verses(final Integer verse ){
+    public void addToFavoritesVerses(final Integer verse ){
         Integer max_verse = 0;
         List<String> verses = new ArrayList<>();
-        System.out.println("BOOK " +  selected_book + " " + selected_chapter + " vers " + verse);
-        Cursor theCursor = theDatabase.get_max_verse(selected_book, selected_chapter, verse, translation);
+        Cursor theCursor = theDatabase.get_max_verse(navigatorClass.selected_book, navigatorClass.selected_chapter, verse, translation);
         while (theCursor.moveToNext()){
             max_verse = theCursor.getInt(0);
             System.out.println(max_verse.toString());
         }
-
         for (int i = verse; i <= max_verse ; i ++)
         {
             verses.add(String.valueOf(i));
@@ -290,10 +264,9 @@ public class UserActivity extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 ViewGroup vg = (ViewGroup)view;
-                TextView txt = vg.findViewById(R.id.list_item_text);
                 Integer option_clicked = verse + position;
                 Toast.makeText(UserActivity.this, "clicked " + option_clicked.toString(), Toast.LENGTH_SHORT).show();
-                Add_To_Favortes(verse, option_clicked);
+                DialogAddFavorites1(verse, option_clicked);
                 dialog_verses.cancel();
             }
         });
@@ -454,14 +427,14 @@ public class UserActivity extends AppCompatActivity {
      */
     public void show_books() {
         ListText.clear();
-        for (int i = 0; i < upper_bound; i++) {
-            String verse = null;
+        for (int i = 0; i < navigatorClass.upper_bound; i++) {
+            String book_name = null;
             try {
-                verse = BOOKSjson.getJSONObject(i + add_factor).getString("key");
+                book_name = BOOKSjson.getJSONObject(i + navigatorClass.add_factor).getString("key");
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-            ListText.add(verse);
+            ListText.add(book_name);
         }
         fill_list();
     }
@@ -470,9 +443,9 @@ public class UserActivity extends AppCompatActivity {
     will show all chapters depending on the selected book
 
      */
-    public void show_chapters(Integer chapters){
+    public void show_chapters(){
         ListText.clear();
-        for (int i = 0; i < chapters; i ++){
+        for (int i = 0; i < navigatorClass.chapters; i ++){
 
             // +1 because the chapters in the bible do not start with 0
             ListText.add(String.valueOf(i + 1));
@@ -489,7 +462,6 @@ public class UserActivity extends AppCompatActivity {
     layer 3 = reading and adding to favorites of the selected chapter
     */
     public void select_layer()  {
-        download_btn.setVisibility(View.INVISIBLE);
         click_listener(true);
         switch (layer) {
             case 0:
@@ -503,27 +475,25 @@ public class UserActivity extends AppCompatActivity {
                 break;
             case 2:
                 if (book_present()){
-                    show_chapters(chapters);
-                    getSupportActionBar().setTitle(selected_book);
+                    show_chapters();
+                    getSupportActionBar().setTitle(navigatorClass.selected_book);
                 }
                 else {
-                    go_to_translation(selected_book, selected_book_int);
+                    go_to_translation(navigatorClass.selected_book, navigatorClass.selected_book_int);
                     layer = 1;
                 }
                 break;
             case 3:
-                getSupportActionBar().setTitle(selected_book + " " + selected_chapter.toString());
+                getSupportActionBar().setTitle(navigatorClass.selected_book + " " + navigatorClass.selected_chapter.toString());
                 click_listener(false);
-
-                // test if the book is already downloaded
-
-                    read_chapter(selected_book, selected_chapter);
+                toolbar.setSubtitle("add item to favorites by long tapping");
+                read_chapter(navigatorClass.selected_book, navigatorClass.selected_chapter);
                 break;
         }
     }
 
     public boolean book_present (){
-        Cursor theCursor = theDatabase.getchapter(selected_book, 1, translation);
+        Cursor theCursor = theDatabase.getchapter(navigatorClass.selected_book, 1, translation);
         Integer rows = theCursor.getCount();
         if (rows >= 1) {
             return true;
