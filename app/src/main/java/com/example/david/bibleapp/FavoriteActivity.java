@@ -59,7 +59,9 @@ public class FavoriteActivity extends AppCompatActivity {
              go_back();
             }
         });
-        get_user();
+        getUserFirebase();
+        listView.setOnItemLongClickListener(new LongClickListener());
+
     }
 
     private void go_back() {
@@ -69,7 +71,7 @@ public class FavoriteActivity extends AppCompatActivity {
         }
         else {
             clicked_subject = null;
-            get_user();
+            getUserFirebase();
         }
     }
 
@@ -93,7 +95,7 @@ public class FavoriteActivity extends AppCompatActivity {
     /*
     gets the current user from firebase
      */
-    public void get_user () {
+    public void getUserFirebase () {
         ValueEventListener postListener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -128,7 +130,6 @@ public class FavoriteActivity extends AppCompatActivity {
     public void refresh_verses(){
         subject_length = current_user.subjects.get(clicked_subject).verses.size();
         listView.setOnItemClickListener(null);
-        listView.setOnItemLongClickListener(new LongClickListener());
         VerseAdaper verseAdaper = new VerseAdaper();
         listView.setAdapter(verseAdaper);
     }
@@ -140,6 +141,23 @@ public class FavoriteActivity extends AppCompatActivity {
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             clicked_subject = position;
            refresh_verses();
+        }
+    }
+
+    /*
+   long click listener to delete item from firebase
+    */
+    private class LongClickListener implements AdapterView.OnItemLongClickListener {
+        @Override
+        public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+            if (clicked_subject == null)
+            {
+                delteSubjectMsg(position);
+            }
+            else {
+                delteVerseMsg(position);
+            }
+            return true;
         }
     }
     /*
@@ -196,20 +214,33 @@ public class FavoriteActivity extends AppCompatActivity {
 
     }
 
+
     /*
-    long click listener to delete item from firebase
+    deletes subject from firebase
      */
-    private class LongClickListener implements AdapterView.OnItemLongClickListener {
-        @Override
-        public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-            ask_delete_verse(position);
-            return false;
-        }
+    private void delteSubjectMsg(final int position) {
+        DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int choice) {
+                switch (choice) {
+                    case DialogInterface.BUTTON_POSITIVE:
+                        deleteSubject(position);
+                        break;
+                    case DialogInterface.BUTTON_NEGATIVE:
+                        break;
+                }
+            }
+        };
+        AlertDialog.Builder builder = new AlertDialog.Builder(FavoriteActivity.this);
+        builder.setMessage("Do you really want to delete this from your Favorites?"  )
+                .setPositiveButton("Yes", dialogClickListener)
+                .setNegativeButton("No", dialogClickListener).show();
     }
+
     /*
     asks the user if the user really wants to delete the verses from his favorits
      */
-    public void ask_delete_verse(final int position){
+    public void delteVerseMsg(final int position){
         DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int choice) {
@@ -246,6 +277,13 @@ public class FavoriteActivity extends AppCompatActivity {
         add_to_firebase(to_change);
     }
 
+    public void deleteSubject(int position){
+
+        UserClass to_change = current_user;
+        to_change.subjects.remove(position);
+        add_to_firebase(to_change);
+    }
+
     /*
     will add the custom userclass to firebase
      */
@@ -255,6 +293,7 @@ public class FavoriteActivity extends AppCompatActivity {
             public void onDataChange(DataSnapshot dataSnapshot) {
                 FirebaseUser user = authTest.getCurrentUser();
                 mDatabase.child("users").child(user.getUid()).setValue(to_change);
+                getUserFirebase();
             }
             @Override
             public void onCancelled(DatabaseError databaseError) {
@@ -265,6 +304,6 @@ public class FavoriteActivity extends AppCompatActivity {
             }
         };
         mDatabase.addListenerForSingleValueEvent(postListener);
-        get_user();
+
     }
 }

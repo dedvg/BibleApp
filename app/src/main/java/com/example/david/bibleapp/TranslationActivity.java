@@ -155,7 +155,6 @@ public class TranslationActivity extends AppCompatActivity {
     }
 
     /*
-
     will switch translation depending on the selected part
      */
     public void switch_translation(){
@@ -164,29 +163,36 @@ public class TranslationActivity extends AppCompatActivity {
             public void onClick(DialogInterface dialog, int choice) {
                 switch (choice) {
                     case DialogInterface.BUTTON_POSITIVE:
-                        Toast.makeText(TranslationActivity.this, "WEB selected", Toast.LENGTH_SHORT).show();
-                        getSupportActionBar().setTitle("Current translation = WEB");
+                        String translation_txt;
+                        if( translation == 0){
+                            translation = 1;
+                            translation_txt = "KJV";
+                        }
+                        else {
+                            translation = 0;
+                            translation_txt = "WEB";
+                        }
+                        getSupportActionBar().setTitle("Current translation = " + translation_txt);
+                        show_download();
+                        break;
 
-                        translation = 0;
-                        show_download();
-                        break;
-                    case DialogInterface.BUTTON_NEGATIVE:
-                        Toast.makeText(TranslationActivity.this, "KJV selected", Toast.LENGTH_SHORT).show();
-                        getSupportActionBar().setTitle("Current translation = KJV");
-                        translation = 1;
-                        show_download();
-                        break;
                     case DialogInterface.BUTTON_NEUTRAL:
                         break;
                 }
             }
         };
 
+        String translation_txt;
+        if (translation == 0){
+            translation_txt ="KJV";
+        }
+        else {
+            translation_txt = "WEB";
+        }
         AlertDialog.Builder builder = new AlertDialog.Builder(TranslationActivity.this);
-        builder.setMessage("Which translation do you want to use?")
-                .setNeutralButton("current translation", dialogClickListener)
-                .setPositiveButton("WEB", dialogClickListener)
-                .setNegativeButton("KJV", dialogClickListener).show();
+        builder.setMessage("do you want to switch to " + translation_txt)
+                .setNeutralButton("no", dialogClickListener)
+                .setPositiveButton("yes", dialogClickListener).show();
     }
 
 
@@ -388,6 +394,8 @@ public class TranslationActivity extends AppCompatActivity {
    */
     private void GoToFavorites() {
         Intent intent = new Intent(this, FavoriteActivity.class);
+        intent.putExtra("translation", translation);
+
         // starts the new activity
         startActivity(intent);
         finish();

@@ -18,8 +18,6 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
-import android.widget.TextView;
-import android.widget.Button;
 
 import android.widget.Toast;
 import com.google.firebase.auth.FirebaseAuth;
@@ -61,6 +59,10 @@ public class UserActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_user);
+        Intent intent = getIntent();
+        translation = intent.getIntExtra("translation", 0);
+
+
         // create references
         toolbar = findViewById(R.id.toolbar);
         listView = findViewById(R.id.listView);
@@ -93,17 +95,17 @@ public class UserActivity extends AppCompatActivity {
             public void onClick(View v) {
                 if (layer > 0){
                     layer -= 1;
-                    select_layer();
-                    click_listener(true);
+                    setLayerLayout();
+                    clickListener(true);
                 }
             }
         });
-        click_listener(true);
+        clickListener(true);
 
-        select_layer();
+        setLayerLayout();
         // will make all info available from the local JSON
         try {
-            load_booksJSON();
+            getBookJson();
         } catch (JSONException e) {
             e.printStackTrace();
         } catch (IOException e) {
@@ -126,13 +128,13 @@ public class UserActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.logout:
-                before_logout();
+                logoutMsg();
                 break;
             case R.id.favorites:
                 GoToFavorites();
                 break;
             case R.id.switch_translation:
-                switch_translation();
+                switchTranslation();
               break;
         }
         return super.onOptionsItemSelected(item);
@@ -149,7 +151,7 @@ public class UserActivity extends AppCompatActivity {
 
      */
 
-    private class clicklistener implements AdapterView.OnItemClickListener {
+    private class ClickListener implements AdapterView.OnItemClickListener {
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             clicked_pos = position;
@@ -179,7 +181,7 @@ public class UserActivity extends AppCompatActivity {
             }
             // something is clicked so the layer will become 1 higher and select layer will handle the layout
             layer += 1;
-            select_layer();
+            setLayerLayout();
         }
     }
     /*
@@ -189,7 +191,7 @@ public class UserActivity extends AppCompatActivity {
         @Override
         public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
             Integer verse = position + 1;
-            addToFavoritesVerses(verse);
+            dialogFavorites(verse);
             Toast.makeText(UserActivity.this, "add " + navigatorClass.selected_book + " " + navigatorClass.selected_chapter.toString() + ":  " + verse.toString() , Toast.LENGTH_SHORT).show();
             return false;
         }
@@ -197,7 +199,7 @@ public class UserActivity extends AppCompatActivity {
     /*
     test dialog made with use of https://stackoverflow.com/questions/10903754/input-text-dialog-android
      */
-    public void DialogAddFavorites1(final Integer begin_verse, final Integer end_verse){
+    public void dialogAddFavorites1(final Integer begin_verse, final Integer end_verse){
         final String[] m_Text = {""};
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -228,7 +230,7 @@ public class UserActivity extends AppCompatActivity {
                     String verse = theCursor.getString(row);
                     VersesList.add(verse);
                 }
-                add_text_to_firebase2(m_Text[0],navigatorClass.selected_book,navigatorClass.selected_chapter,begin_verse, end_verse,VersesList);
+                verseInFirebase(m_Text[0],begin_verse, end_verse,VersesList);
             }
         });
         builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -245,7 +247,7 @@ public class UserActivity extends AppCompatActivity {
     https://www.youtube.com/watch?v=0gTXUHDz6BM
      */
 
-    public void addToFavoritesVerses(final Integer verse ){
+    public void dialogFavorites(final Integer verse ){
         Integer max_verse = 0;
         List<String> verses = new ArrayList<>();
         Cursor theCursor = theDatabase.get_max_verse(navigatorClass.selected_book, navigatorClass.selected_chapter, verse, translation);
@@ -266,16 +268,16 @@ public class UserActivity extends AppCompatActivity {
                 ViewGroup vg = (ViewGroup)view;
                 Integer option_clicked = verse + position;
                 Toast.makeText(UserActivity.this, "clicked " + option_clicked.toString(), Toast.LENGTH_SHORT).show();
-                DialogAddFavorites1(verse, option_clicked);
+                dialogAddFavorites1(verse, option_clicked);
                 dialog_verses.cancel();
             }
         });
-        show_dialog_listview();
+        dialogFavorites2();
     }
     /*
     actually showing the dialog
      */
-    public void show_dialog_listview(){
+    public void dialogFavorites2(){
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setCancelable(true);
         builder.setTitle("Add to Favorties");
@@ -287,15 +289,13 @@ public class UserActivity extends AppCompatActivity {
         builder.setView(row_list);
         dialog_verses = builder.create();
         dialog_verses.show();
-
-
     }
     /*
     function to set an on click listener to the list or a longclicklistener
     */
-    public void click_listener(Boolean set){
+    public void clickListener(Boolean set){
         if (set == true){
-            listView.setOnItemClickListener(new clicklistener());
+            listView.setOnItemClickListener(new ClickListener());
             listView.setOnItemLongClickListener(null);
         }
         else{
@@ -305,75 +305,56 @@ public class UserActivity extends AppCompatActivity {
     }
 
 
-    /*
-    gets the selected chapter from the database and presents it at the list
-    if the database does not contain the information a download button will appear
-    */
-    public void read_chapter(String book, Integer chapter){
-        // clear the listview
-        ListText.clear();
 
-        // afther column 3 the translations are present
-        Integer verse_column = 3 + translation;
-        Cursor theCursor = theDatabase.getchapter(book, chapter, translation);
-        Integer rows = theCursor.getCount();
-
-        // if there are multiple rows make the text readable else show a download button
-        // the results depend on the selected translation
-
-        while (theCursor.moveToNext()){
-            String number = theCursor.getString(2);
-            String verse = theCursor.getString(verse_column);
-            ListText.add(number + ":  "+ verse);
-        }
-        // will create an empty listview or full with verses
-        fill_list();
-    }
 
     /*
     popup which allows the user to select a different translation
     allows the user to read from a different translation
      */
-    public void switch_translation(){
+    public void switchTranslation(){
         DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int choice) {
                 switch (choice) {
                     case DialogInterface.BUTTON_POSITIVE:
-                        Toast.makeText(UserActivity.this, "WEB selected", Toast.LENGTH_SHORT).show();
-                        toolbar.setSubtitle("WEB");
-                        translation = 0;
-                        if (!book_present()) {
+                        String translation_txt;
+                        if( translation == 0){
+                            translation = 1;
+                            translation_txt = "KJV";
+                        }
+                        else {
+                            translation = 0;
+                            translation_txt = "WEB";
+                        }
+                        Toast.makeText(UserActivity.this, translation_txt + " selected", Toast.LENGTH_SHORT).show();
+                        toolbar.setSubtitle(translation_txt);
+                        if (!checkBookExistence()) {
                             layer = 1;
                         }
-                        select_layer();
-                        break;
-                    case DialogInterface.BUTTON_NEGATIVE:
-                        Toast.makeText(UserActivity.this, "KJV selected", Toast.LENGTH_SHORT).show();
-                        toolbar.setSubtitle("KJV");
-                        translation = 1;
-                        if (!book_present()) {
-                            layer = 1;
-                        }
-                        select_layer();
+                        setLayerLayout();
                         break;
                     case DialogInterface.BUTTON_NEUTRAL:
                         break;
                 }
             }
         };
-
+        String translation_txt;
+        if (translation == 0){
+            translation_txt ="KJV";
+        }
+        else {
+            translation_txt = "WEB";
+        }
         AlertDialog.Builder builder = new AlertDialog.Builder(UserActivity.this);
-        builder.setMessage("Which translation do you want to use?")
-                .setNeutralButton("current translation", dialogClickListener)
-                .setPositiveButton("WEB", dialogClickListener)
-                .setNegativeButton("KJV", dialogClickListener).show();
+        builder.setMessage("do you want to switch to " + translation_txt)
+                .setNeutralButton("no", dialogClickListener)
+                .setPositiveButton("yes", dialogClickListener).show();
     }
 
     /*
     creates a popup which asks the user if the user really wants to logout
     */
-    public void before_logout(){
+    public void logoutMsg(){
         DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int choice) {
@@ -396,7 +377,7 @@ public class UserActivity extends AppCompatActivity {
     will fill the list with what is currently in ListText
      */
 
-    public void fill_list() {
+    public void fillList() {
         ArrayAdapter theAdapter = new ArrayAdapter(this, android.R.layout.simple_list_item_1, ListText);
         listView.setAdapter(theAdapter);
         listView.setVisibility(View.VISIBLE);
@@ -404,7 +385,7 @@ public class UserActivity extends AppCompatActivity {
     /*
     will load all books and chapters in a ordered jsonarray
      */
-    public void load_booksJSON() throws JSONException, IOException {
+    public void getBookJson() throws JSONException, IOException {
         // done with use of https://www.youtube.com/watch?v=h71Ia9iFWfI
         JSONObject jsonObject = null;
         InputStream is = getAssets().open("books.json");
@@ -416,16 +397,54 @@ public class UserActivity extends AppCompatActivity {
         jsonObject = new JSONObject(json);
         BOOKSjson = jsonObject.getJSONObject("sections").getJSONArray("whole_bible");
     }
+
+
+
+
     /*
-    will fill the listview with books from the old or new testament
+    will handle the listview layout and which functions need to be run
 
-    add factor and upper bound determine which books will be shown
-
-    0-39 old testament books
-
-    40-66 new testament books
+    layer 0 = choice between old and new testament
+    layer 1 = choice between books of the old or new testament
+    layer 2 = choice between the chapters of the selected book
+    layer 3 = reading and adding to favorites of the selected chapter
+    */
+    public void setLayerLayout()  {
+        clickListener(true);
+        switch (layer) {
+            case 0:
+                layer0Layout();
+                break;
+            case 1:
+                layer1Layout();
+                break;
+            case 2:
+                layer2Layout();
+                break;
+            case 3:
+                layer3Layout();
+                break;
+        }
+    }
+    /*
+    will create a listview with old and new
      */
-    public void show_books() {
+    public void layer0Layout (){
+        ListText.clear();
+        ListText.add("Old");
+        ListText.add("New");
+        fillList();
+    }
+    /*
+   will fill the listview with books from the old or new testament
+
+   add factor and upper bound determine which books will be shown
+
+   0-39 old testament books
+
+   40-66 new testament books
+    */
+    public void layer1Layout() {
         ListText.clear();
         for (int i = 0; i < navigatorClass.upper_bound; i++) {
             String book_name = null;
@@ -436,63 +455,56 @@ public class UserActivity extends AppCompatActivity {
             }
             ListText.add(book_name);
         }
-        fill_list();
+        fillList();
     }
 
     /*
     will show all chapters depending on the selected book
-
      */
-    public void show_chapters(){
-        ListText.clear();
-        for (int i = 0; i < navigatorClass.chapters; i ++){
+    public void layer2Layout(){
+        if (checkBookExistence()){
+            ListText.clear();
+            getSupportActionBar().setTitle(navigatorClass.selected_book);
+            for (int i = 0; i < navigatorClass.chapters; i ++){
 
-            // +1 because the chapters in the bible do not start with 0
-            ListText.add(String.valueOf(i + 1));
+                // +1 because the chapters in the bible do not start with 0
+                ListText.add(String.valueOf(i + 1));
+            }
+            fillList();
         }
-        fill_list();
+        else {
+            go_to_translation(navigatorClass.selected_book, navigatorClass.selected_book_int);
+            layer = 1;
+        }
     }
-
     /*
-    will handle the listview layout and which functions need to be run
-
-    layer 0 = choice between old and new testament
-    layer 1 = choice between books of the old or new testament
-    layer 2 = choice between the chapters of the selected book
-    layer 3 = reading and adding to favorites of the selected chapter
+    gets the selected chapter from the database and presents it at the list
+    if the database does not contain the information a download button will appear
     */
-    public void select_layer()  {
-        click_listener(true);
-        switch (layer) {
-            case 0:
-                ListText.clear();
-                ListText.add("Old");
-                ListText.add("New");
-                fill_list();
-                break;
-            case 1:
-                show_books();
-                break;
-            case 2:
-                if (book_present()){
-                    show_chapters();
-                    getSupportActionBar().setTitle(navigatorClass.selected_book);
-                }
-                else {
-                    go_to_translation(navigatorClass.selected_book, navigatorClass.selected_book_int);
-                    layer = 1;
-                }
-                break;
-            case 3:
-                getSupportActionBar().setTitle(navigatorClass.selected_book + " " + navigatorClass.selected_chapter.toString());
-                click_listener(false);
-                toolbar.setSubtitle("add item to favorites by long tapping");
-                read_chapter(navigatorClass.selected_book, navigatorClass.selected_chapter);
-                break;
-        }
-    }
+    public void layer3Layout(){
+        getSupportActionBar().setTitle(navigatorClass.selected_book + " " + navigatorClass.selected_chapter.toString());
+        clickListener(false);
+        toolbar.setSubtitle("add item to favorites by long tapping");
+        // clear the listview
+        ListText.clear();
 
-    public boolean book_present (){
+        // afther column 3 the translations are present
+        Integer verse_column = 3 + translation;
+        Cursor theCursor = theDatabase.getchapter(navigatorClass.selected_book, navigatorClass.selected_chapter, translation);
+        Integer rows = theCursor.getCount();
+
+        // if there are multiple rows make the text readable else show a download button
+        // the results depend on the selected translation
+        while (theCursor.moveToNext()){
+            String number = theCursor.getString(2);
+            String verse = theCursor.getString(verse_column);
+            ListText.add(number + ":  "+ verse);
+        }
+
+        // will create an empty listview or full with verses
+        fillList();
+    }
+    public boolean checkBookExistence (){
         Cursor theCursor = theDatabase.getchapter(navigatorClass.selected_book, 1, translation);
         Integer rows = theCursor.getCount();
         if (rows >= 1) {
@@ -504,12 +516,12 @@ public class UserActivity extends AppCompatActivity {
     will add the selected verses to firebase
      */
 
-    public void add_text_to_firebase2(final String subject, final String book, final int chapter, final int begin_verse, final int end_verse, final ArrayList verses_list) {
+    public void verseInFirebase(final String subject, final int begin_verse, final int end_verse, final ArrayList verses_list) {
         ValueEventListener postListener = new ValueEventListener() {
             @RequiresApi(api = Build.VERSION_CODES.KITKAT)
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                VerseClass VerseText = new VerseClass(book, chapter,begin_verse, end_verse, verses_list);
+                VerseClass VerseText = new VerseClass(navigatorClass.selected_book, navigatorClass.selected_chapter ,begin_verse, end_verse, verses_list);
                 if (translation == 0){VerseText.translation = "(WEB)";}
                 else {VerseText.translation = "(KJV)";}
 
@@ -517,26 +529,20 @@ public class UserActivity extends AppCompatActivity {
                 // get the userclass from firebase (from the current user)
                 FirebaseUser user = authTest.getCurrentUser();
                 to_change = dataSnapshot.child("users").child(user.getUid()).getValue(UserClass.class);
-                SubjectClass Subject_to_change;
-                ArrayList<SubjectClass> SubjectList = to_change.subjects;
+                ArrayList<SubjectClass> SubjectList;
                 ArrayList<VerseClass> verses_to_change = new ArrayList<VerseClass>();
-                if(SubjectList == null)
-                {
-                    SubjectList = new ArrayList<SubjectClass>();
-                }
-                else {
-                    for (int i = 0; i < SubjectList.size(); i++) {
-                        if (Objects.equals(SubjectList.get(i).name, subject)) {
-                            Toast.makeText(UserActivity.this, "found", Toast.LENGTH_SHORT).show();
-                            verses_to_change = SubjectList.get(i).verses;
-                            verses_to_change.add(VerseText);
-                            SubjectList.get(i).verses = verses_to_change;
-                            found = true;
-                        }
+                // prevent it from being null
+                if(to_change.subjects == null) {SubjectList = new ArrayList<SubjectClass>();}
+                else{SubjectList = to_change.subjects;}
+                for (int i = 0; i < SubjectList.size(); i++) {
+                    if (Objects.equals(SubjectList.get(i).name, subject)) {
+                        verses_to_change = SubjectList.get(i).verses;
+                        SubjectList.get(i).verses = verses_to_change;
+                        found = true;
                     }
                 }
+                verses_to_change.add(VerseText);
                 if (!found){
-                    verses_to_change.add(VerseText);
                     SubjectClass new_subject = new SubjectClass(subject,verses_to_change);
                     SubjectList.add(new_subject);
                 }
