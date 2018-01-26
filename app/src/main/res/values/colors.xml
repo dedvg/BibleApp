@@ -3,6 +3,8 @@
 
     <color name="colorPrimaryDark">#322803</color>
     <color name="colorPrimary">#607D8B</color>
+    <color name="black">#000000</color>
+
     <!--todo use these colours again-->
     <!--<color name="colorPrimary">#94916438</color>-->
     <!--<color name="colorPrimaryDark">#9b513204</color>-->

@@ -93,7 +93,6 @@ public class TranslationDatabase extends SQLiteOpenHelper {
 
         if (check_chapter1_existence_KJV(book) && check_chapter1_existence_WEB(book))
         {
-            System.out.println("ALEADY PRESEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEENT");
             query = "UPDATE " + TABLE_NAME + " SET " + variable_column + " = '" + text + "' WHERE " + COL1 + " = '" + book+ "' AND " + COL2 + " = " + chapter + " AND " + COL3 + " = " + verse +  ";";
         }
         else{
@@ -140,7 +139,6 @@ public class TranslationDatabase extends SQLiteOpenHelper {
 
         SQLiteDatabase db = this.getWritableDatabase();
         String query = "SELECT * FROM " + TABLE_NAME + " WHERE " + COL1 + " = '" +  book + "' AND " + COL2 + " = " + chapter + " AND " + variable_column + " IS NOT NULL;";
-        System.out.println(query);
         Cursor entries = db.rawQuery(query, null);
         return entries;
     }

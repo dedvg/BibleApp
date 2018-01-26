@@ -16,9 +16,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.BaseAdapter;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 
+import android.widget.TextView;
 import android.widget.Toast;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -53,7 +56,7 @@ public class UserActivity extends AppCompatActivity {
     UserClass to_change;
     DatabaseReference mDatabase;
     NavigationClass navigatorClass = new NavigationClass();
-
+    Button leftbtn, rightbtn;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,7 +72,8 @@ public class UserActivity extends AppCompatActivity {
         theDatabase = TranslationDatabase.getInstance(this.getApplicationContext());
         authTest = FirebaseAuth.getInstance();
         mDatabase = FirebaseDatabase.getInstance().getReference();
-
+        leftbtn = findViewById(R.id.leftBTN);
+        rightbtn = findViewById(R.id.rightBTN);
         // set up the action bar
         setSupportActionBar(toolbar);
         getSupportActionBar().setTitle("Bible App");
@@ -141,10 +145,27 @@ public class UserActivity extends AppCompatActivity {
     }
 
     /*
+    will handle the leftbutton on click events
+    sets the previous chapter as readable
+     */
+    public void previousChapter(View view) {
+        navigatorClass.selected_chapter = navigatorClass.selected_chapter - 1;
+        setLayerLayout();
+    }
+    /*
+    will handle the rightbutton on click events
+    set the next chapter as readable
+    */
+    public void nextChapter(View view) {
+        navigatorClass.selected_chapter = navigatorClass.selected_chapter +1 ;
+        setLayerLayout();
+    }
+
+    /* factor and upper bound determine which books need to be sho
     will create a clicklistener on the listview
     it keeps track of the layer and changes variables to make navigation possible
 
-    add factor and upper bound determine which books need to be shown
+    addwn
 
     old testament = 0 -39
     new testament = 40 - 66
@@ -371,14 +392,52 @@ public class UserActivity extends AppCompatActivity {
                 .setPositiveButton("Yes", dialogClickListener)
                 .setNegativeButton("No", dialogClickListener).show();
     }
+
+    /*
+    Custom adapter for seeing Listview items
+     */
+    class CustomAdapter extends BaseAdapter {
+
+        @Override
+        public int getCount() {
+            return ListText.size();
+        }
+
+        @Override
+        public Object getItem(int position) {
+            return null;
+        }
+
+        @Override
+        public long getItemId(int position) {
+            return 0;
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            convertView = getLayoutInflater().inflate(R.layout.row_user, null);
+
+            TextView description_txt = convertView.findViewById(R.id.list_item);
+            description_txt.setText(ListText.get(position));
+            return convertView;
+        }
+    }
+
     /*
     will fill the list with what is currently in ListText
      */
 
     public void fillList() {
-        ArrayAdapter theAdapter = new ArrayAdapter(this, android.R.layout.simple_list_item_1, ListText);
+//        ArrayAdapter theAdapter = new ArrayAdapter(this, android.R.layout.simple_list_item_1, ListText);
+//        listView.setAdapter(theAdapter);
+
+
+        // Initialize a new ArrayAdapter object from list
+        CustomAdapter theAdapter = new CustomAdapter();
+
+        // Populate the second ListView with second ArrayAdapter
         listView.setAdapter(theAdapter);
-        listView.setVisibility(View.VISIBLE);
+
     }
     /*
     will load all books and chapters in a ordered jsonarray
@@ -408,6 +467,7 @@ public class UserActivity extends AppCompatActivity {
     layer 3 = reading and adding to favorites of the selected chapter
     */
     public void setLayerLayout()  {
+        buttonLayout();
         clickListener(true);
         switch (layer) {
             case 0:
@@ -423,6 +483,30 @@ public class UserActivity extends AppCompatActivity {
                 layer3Layout();
                 break;
         }
+    }
+    /*
+    will handle the visibility of the left and right button
+     */
+    public void buttonLayout(){
+        if (layer == 3){
+            if (navigatorClass.selected_chapter == navigatorClass.chapters){
+                rightbtn.setVisibility(View.INVISIBLE);
+                leftbtn.setVisibility(View.VISIBLE);
+            }
+            else if(navigatorClass.selected_chapter == 1){
+                leftbtn.setVisibility(View.INVISIBLE);
+                rightbtn.setVisibility(View.VISIBLE);
+            }
+            else{
+                leftbtn.setVisibility(View.VISIBLE);
+                rightbtn.setVisibility(View.VISIBLE);
+            }
+        }
+       else {
+            leftbtn.setVisibility(View.INVISIBLE);
+            rightbtn.setVisibility(View.INVISIBLE);
+        }
+
     }
     /*
     will create a listview with old and new
@@ -516,7 +600,6 @@ public class UserActivity extends AppCompatActivity {
 
     public void verseInFirebase(final String subject, final int begin_verse, final int end_verse, final ArrayList verses_list) {
         ValueEventListener postListener = new ValueEventListener() {
-            @RequiresApi(api = Build.VERSION_CODES.KITKAT)
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 VerseClass VerseText = new VerseClass(navigatorClass.selected_book, navigatorClass.selected_chapter ,begin_verse, end_verse, verses_list);
