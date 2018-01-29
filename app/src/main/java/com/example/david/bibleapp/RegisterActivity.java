@@ -17,12 +17,13 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
-
+// todo create a better back button
 public class RegisterActivity extends AppCompatActivity {
-    private FirebaseAuth mAuth;
     String email, password;
-    DatabaseReference mDatabase;
     EditText userT, passwordT;
+
+    DatabaseReference mDatabase;
+    private FirebaseAuth mAuth;
 
     public RegisterActivity() {
         // Required empty public constructor

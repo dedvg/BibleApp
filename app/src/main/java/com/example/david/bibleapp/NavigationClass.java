@@ -4,8 +4,7 @@ package com.example.david.bibleapp;
  *
  */
 
-import java.util.ArrayList;
-import java.util.List;
+
 
 public class NavigationClass {
     // book name
@@ -51,10 +50,12 @@ public class NavigationClass {
         this.old = old;
     }
 
+    // determine the position of the book with a correction factor if needed
     public void setSelected_book_int(Integer clicked_pos) {
         this.selected_book_int = clicked_pos + this.add_factor;
     }
 
+    // set the selected chapter
     public void setSelected_chapter(Integer clicked_pos) {
         Integer temp = clicked_pos + 1;
         this.selected_chapter = temp;

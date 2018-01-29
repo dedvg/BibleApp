@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 /**
  * Created by dedvg on 29-1-2018.
- * will enable saving a whole book
+ * with this all chapters of a book can be added as a list of ChapterClasses
  */
 
 public class ChapterClass {

@@ -15,6 +15,8 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
 public class MainActivity extends AppCompatActivity {
+
+    // creating references
     EditText userT, passwordT;
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
@@ -24,24 +26,31 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        // initializing the references
         userT = findViewById(R.id.usernameED);
         passwordT = findViewById(R.id.passwordED);
         mAuth = FirebaseAuth.getInstance();
+
         // set a listener that checks if the user is already logged in
         setListener();
 
     }
 
+    /*
+    will go to RegisterActivity to enable the user to register
+     */
     public void register(View view) {
         Intent intent = new Intent(this, RegisterActivity.class);
-        Toast.makeText(MainActivity.this, "redirect succesfull",
-                Toast.LENGTH_SHORT).show();
-
-        // starts the new activity
         startActivity(intent);
+        finish();
     }
 
-    public void LoginUser(View view) {
+    /*
+    will handle the login
+    if succesfull go to UserActivity
+     */
+    public void loginUser(View view) {
         String password = passwordT.getText().toString();
         String username = userT.getText().toString();
 
@@ -51,29 +60,30 @@ public class MainActivity extends AppCompatActivity {
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
 
-                            // Sign in success
-                            SignedIn();
+                            // sign in success
+                            signedIn();
                         }
                         else {
 
-                            // If sign in fails, display a message to the user.
+                            // if sign in fails, display a message to the user.
                             Toast.makeText(MainActivity.this, "Authentication failed",
                                     Toast.LENGTH_SHORT).show();
                         }
                     }
                 });
     }
-
-    private void SignedIn() {
+    /*
+    go to UserActivity
+     */
+    private void signedIn() {
         Intent intent = new Intent(this, UserActivity.class);
-        Toast.makeText(MainActivity.this, "redirect succesfull",
-                Toast.LENGTH_SHORT).show();
-
-        // starts the new activity
         startActivity(intent);
+        finish();
     }
 
-
+    /*
+    on opening the app will set a listener to check if the user is previously logged in
+     */
     @Override
     public void onStart() {
         super.onStart();
@@ -81,7 +91,9 @@ public class MainActivity extends AppCompatActivity {
         mAuth.addAuthStateListener(mAuthListener);
     }
 
-
+    /*
+    will remove the listener onStop
+     */
     @Override
     public void onStop() {
         super.onStop();
@@ -90,24 +102,19 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    /*
+    the function that sets a listener to check if the user is already logged in previously
+    if so go to UserActivity
+     */
     private void setListener() {
         mAuthListener = new FirebaseAuth.AuthStateListener() {
             @Override
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
                 FirebaseUser user = firebaseAuth.getCurrentUser();
                 if (user != null) {
-
-                    // if the user is singed in
-                    Intent intent = new Intent(MainActivity.this,
-                            UserActivity.class);
-
-                    // starts the new activity
-                    startActivity(intent);
-                    finish();
+                    signedIn();
                 }
             }
         };
     }
-
-
 }

@@ -40,8 +40,8 @@ public class TranslationActivity extends AppCompatActivity {
     Toolbar toolbar;
     TranslationDatabase theDatabase;
     JSONArray BOOKSjson;
-    Integer chapters, translation, given_book_int, clicked_book, load_chapter = 0;
-    String add_factor, given_book ,book;
+    Integer chapters, translation, given_book_int, load_chapter = 0;
+    String add_factor, given_book;
     ProgressBar spinner;
     ProgressDialog progress_dialog;
     ArrayList <ChapterClass> bible_book = new ArrayList<ChapterClass>();
@@ -109,21 +109,9 @@ public class TranslationActivity extends AppCompatActivity {
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        check_downloadreference(given_book_int, given_book);
     }
 
-    /*
-    checks if the intent gave a book to download, if so enable the user to download the selected book
-     */
-    private void check_downloadreference(Integer given_book_int, String given_book) {
-        if (!Objects.equals(given_book, "")) {
-            book = given_book;
-            clicked_book = given_book_int;
-            show_download();
-        } else {
-            go_back();
-        }
-    }
+
     /*
     will handle the onclick of the download button
      */
@@ -214,20 +202,20 @@ public class TranslationActivity extends AppCompatActivity {
     private void set_text() {
         title_txt.setText("KJV = King James Version and WEB = World English Bible");
         if (translation == 0 ){
-            if (theDatabase.check_chapter1_existence_WEB(book)) {
-                translation_txt.setText(" WEB version of " + book + " is already downloaded");
+            if (theDatabase.check_chapter1_existence_WEB(given_book)) {
+                translation_txt.setText(" WEB version of " + given_book + " is already downloaded");
             }
             else{
-                translation_txt.setText(book + "(WEB)");
+                translation_txt.setText(given_book + "(WEB)");
             }
         }
         else if (translation == 1)
         {
-            if (theDatabase.check_chapter1_existence_KJV(book)) {
-                translation_txt.setText(" KJV version of " + book + " is already downloaded");
+            if (theDatabase.check_chapter1_existence_KJV(given_book)) {
+                translation_txt.setText(" KJV version of " + given_book + " is already downloaded");
             }
             else{
-                translation_txt.setText(book + "(KJV)");
+                translation_txt.setText(given_book + "(KJV)");
             }
         }
         translation_txt.setVisibility(View.VISIBLE);
@@ -315,19 +303,19 @@ public class TranslationActivity extends AppCompatActivity {
 
 //        progress_dialog.show();
 
-        chapters = BOOKSjson.getJSONObject(clicked_book).getInt("val");
+        chapters = BOOKSjson.getJSONObject(given_book_int).getInt("val");
         progress_dialog.setMax(chapters);
         progress_dialog.show();
-        volley_translation_1_chapters(book);
+        volley_translation_1_chapters();
     }
     /*
     function that will volley all chapters of the book one by one
      */
-    public void volley_translation_1_chapters(String book) throws JSONException {
+    public void volley_translation_1_chapters( ) throws JSONException {
 
         for (int i = 0; i < chapters; i++) {
             int chapter = i + 1;
-            volley_translation_2_chapter(book, chapter);
+            volley_translation_2_chapter(chapter);
         }
     }
 
@@ -337,11 +325,12 @@ public class TranslationActivity extends AppCompatActivity {
     TODO can crash while downloading and only having half of the book
     will volley the chapter given by volley_translatio_1_chapters
      */
-    public void volley_translation_2_chapter(final String book, final int chapter) {
+    public void volley_translation_2_chapter( final int chapter) {
 
         // Initialize a new RequestQueue instance
         RequestQueue requestQueue = Volley.newRequestQueue(getApplicationContext());
-        String mJSONURLString = "https://bible-api.com/" + book + "%20" + chapter + add_factor;
+        String mJSONURLString = "https://bible-api.com/" + given_book + "%20" + chapter + add_factor;
+
 
         // Initialize a new JsonObjectRequest instance
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(
@@ -356,7 +345,7 @@ public class TranslationActivity extends AppCompatActivity {
 
                             System.out.println(load_chapter.toString());
                             JSONArray jsonArray = response.getJSONArray("verses");
-                            volley_translation_3_db(book, chapter, jsonArray);
+                            volley_translation_3_db(jsonArray);
                         } catch (JSONException e) {
                             // if this shows something changed in the JSON
                             Toast.makeText(TranslationActivity.this,
@@ -383,7 +372,7 @@ public class TranslationActivity extends AppCompatActivity {
     /*
     will set the textresult in the database verse by verse
      */
-    public void volley_translation_3_db(String Book, int chapter, JSONArray jsonArray)throws JSONException{
+    public void volley_translation_3_db(JSONArray jsonArray)throws JSONException{
 
         ArrayList<String> verses = new ArrayList<>();
 
