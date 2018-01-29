@@ -115,6 +115,9 @@ __progress__
 * layout of the list in UserActivity is changed
 
 # day 11 (29 -1-2018)
+problems with custom adapters
+
+
 __decicions__
 * made a new class to enable downloading a book
 * will make  a progressbar to see how far the download is (especially needed for psalms)
