@@ -103,7 +103,7 @@ __progress__
 * navigation class is made
 * translation is passed on in each activity
 
-# day 9 (26 -1-2018)
+# day 10 (26 -1-2018)
 __decicions__
 * __BUGGS__
       * downloading a book can happen half
@@ -114,4 +114,15 @@ __progress__
 * left and right buttons are made for navigating chapters
 * layout of the list in UserActivity is changed
 
+# day 11 (29 -1-2018)
+__decicions__
+* made a new class to enable downloading a book
+* will make  a progressbar to see how far the download is (especially needed for psalms)
+* __BUGGS__
+      * loading can take forever
+      * 
+      
+
+__progress__
+* the data will be added at once enabling preventing the data from being added if the book is downloaded half (second part not yet implemented)
 
