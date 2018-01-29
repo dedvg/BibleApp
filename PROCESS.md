@@ -102,3 +102,30 @@ __progress__
 * If the book is not present the user does not have to select a chapter and click download first to go to TranslateActivity. This will go automatically
 * navigation class is made
 * translation is passed on in each activity
+
+# day 10 (26 -1-2018)
+__decicions__
+* __BUGGS__
+      * downloading a book can happen half
+      * favorites should not be possible when no connection
+      
+
+__progress__
+* left and right buttons are made for navigating chapters
+* layout of the list in UserActivity is changed
+
+# day 11 (29 -1-2018)
+problems with custom adapters
+
+
+__decicions__
+* made a new class to enable downloading a book
+* will make  a progressbar to see how far the download is (especially needed for psalms)
+* __BUGGS__
+      * loading can take forever
+      * 
+      
+
+__progress__
+* the data will be added at once enabling preventing the data from being added if the book is downloaded half (second part not yet implemented)
+
