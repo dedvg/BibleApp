@@ -1,5 +1,6 @@
 package com.example.david.bibleapp;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -28,6 +29,8 @@ import com.google.firebase.auth.FirebaseAuth;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.util.ArrayList;
 import java.util.Objects;
 
 public class TranslationActivity extends AppCompatActivity {
@@ -40,6 +43,8 @@ public class TranslationActivity extends AppCompatActivity {
     Integer chapters, translation, given_book_int, clicked_book, load_chapter = 0;
     String add_factor, given_book ,book;
     ProgressBar spinner;
+    ProgressDialog progress_dialog;
+    ArrayList <ChapterClass> bible_book = new ArrayList<ChapterClass>();
 
 
     @Override
@@ -300,8 +305,19 @@ public class TranslationActivity extends AppCompatActivity {
     preperation of the volley which will get the biblebook
      */
     public void volley_translation_0_books() throws JSONException {
-        spinner.setVisibility(View.VISIBLE);
+//        spinner.setVisibility(View.VISIBLE);
+
+        progress_dialog = new ProgressDialog(this);
+        progress_dialog.setMessage("loading");
+        progress_dialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+        progress_dialog.setIndeterminate(false);
+
+
+//        progress_dialog.show();
+
         chapters = BOOKSjson.getJSONObject(clicked_book).getInt("val");
+        progress_dialog.setMax(chapters);
+        progress_dialog.show();
         volley_translation_1_chapters(book);
     }
     /*
@@ -318,6 +334,7 @@ public class TranslationActivity extends AppCompatActivity {
 
 
     /*
+    TODO can crash while downloading and only having half of the book
     will volley the chapter given by volley_translatio_1_chapters
      */
     public void volley_translation_2_chapter(final String book, final int chapter) {
@@ -334,6 +351,10 @@ public class TranslationActivity extends AppCompatActivity {
                     public void onResponse(JSONObject response) {
 
                         try {
+                            load_chapter += 1;
+                            progress_dialog.setProgress(load_chapter);
+
+                            System.out.println(load_chapter.toString());
                             JSONArray jsonArray = response.getJSONArray("verses");
                             volley_translation_3_db(book, chapter, jsonArray);
                         } catch (JSONException e) {
@@ -351,6 +372,7 @@ public class TranslationActivity extends AppCompatActivity {
                         Toast.makeText(TranslationActivity.this,
                                 "No connection please restart the app with internet acces",
                                 Toast.LENGTH_SHORT).show();
+                        go_back();
                     }
                 }
         );
@@ -362,16 +384,34 @@ public class TranslationActivity extends AppCompatActivity {
     will set the textresult in the database verse by verse
      */
     public void volley_translation_3_db(String Book, int chapter, JSONArray jsonArray)throws JSONException{
-        load_chapter += 1;
-        if (load_chapter == chapters){
-            spinner.setVisibility(View.GONE);
-            Toast.makeText(TranslationActivity.this, "Finished downloading", Toast.LENGTH_SHORT).show();
+
+        ArrayList<String> verses = new ArrayList<>();
+
+        String text;
+        for (int i = 0; i < jsonArray.length(); i++) {
+            text =  jsonArray.getJSONObject(i).getString("text");
+            verses.add(text);
         }
-            String text;
-            for (int i = 0; i < jsonArray.length(); i++) {
-                text =  jsonArray.getJSONObject(i).getString("text");
-                    theDatabase.addItem(Book, chapter,i + 1,text, translation);
+        ChapterClass chapter_text = new ChapterClass(load_chapter, verses);
+        bible_book.add(chapter_text);
+        if (load_chapter == chapters){
+            setInDatabase(bible_book);
+        }
+    }
+
+    /*
+    will set the whole class in the SQL database
+     */
+    private void setInDatabase(ArrayList<ChapterClass> book) {
+        Integer size_book = book.size() + 1;
+        Toast.makeText(TranslationActivity.this, "Finished downloading" + size_book.toString(), Toast.LENGTH_SHORT).show();
+        for (int i = 0 ; i < book.size(); i ++) {
+            for (int j = 0 ; j < book.get(i).verses.size(); j ++) {
+                theDatabase.addItem(given_book, book.get(i).chapter,j + 1, book.get(i).verses.get(j), translation );
             }
+        }
+        progress_dialog.dismiss();
+        go_back();
     }
 
 

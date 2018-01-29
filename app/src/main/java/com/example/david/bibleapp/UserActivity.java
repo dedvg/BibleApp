@@ -14,6 +14,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
@@ -57,6 +59,7 @@ public class UserActivity extends AppCompatActivity {
     DatabaseReference mDatabase;
     NavigationClass navigatorClass = new NavigationClass();
     Button leftbtn, rightbtn;
+    private Animation animation_click;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,7 +67,8 @@ public class UserActivity extends AppCompatActivity {
         setContentView(R.layout.activity_user);
         Intent intent = getIntent();
         translation = intent.getIntExtra("translation", 0);
-
+        // set animation
+        animation_click = AnimationUtils.loadAnimation(this, R.anim.button_animation);
 
         // create references
         toolbar = findViewById(R.id.toolbar);
@@ -151,6 +155,7 @@ public class UserActivity extends AppCompatActivity {
     public void previousChapter(View view) {
         navigatorClass.selected_chapter = navigatorClass.selected_chapter - 1;
         setLayerLayout();
+        view.startAnimation(animation_click);
     }
     /*
     will handle the rightbutton on click events
@@ -159,6 +164,7 @@ public class UserActivity extends AppCompatActivity {
     public void nextChapter(View view) {
         navigatorClass.selected_chapter = navigatorClass.selected_chapter +1 ;
         setLayerLayout();
+        view.startAnimation(animation_click);
     }
 
     /* factor and upper bound determine which books need to be sho
@@ -467,6 +473,7 @@ public class UserActivity extends AppCompatActivity {
     layer 3 = reading and adding to favorites of the selected chapter
     */
     public void setLayerLayout()  {
+        listView.setDividerHeight(1);
         buttonLayout();
         clickListener(true);
         switch (layer) {
@@ -489,11 +496,11 @@ public class UserActivity extends AppCompatActivity {
      */
     public void buttonLayout(){
         if (layer == 3){
-            if (navigatorClass.selected_chapter == navigatorClass.chapters){
+            if (navigatorClass.selected_chapter >= navigatorClass.chapters){
                 rightbtn.setVisibility(View.INVISIBLE);
                 leftbtn.setVisibility(View.VISIBLE);
             }
-            else if(navigatorClass.selected_chapter == 1){
+            else if(navigatorClass.selected_chapter <= 1){
                 leftbtn.setVisibility(View.INVISIBLE);
                 rightbtn.setVisibility(View.VISIBLE);
             }
@@ -582,7 +589,7 @@ public class UserActivity extends AppCompatActivity {
             String verse = theCursor.getString(verse_column);
             ListText.add(number + ":  "+ verse);
         }
-
+        listView.setDividerHeight(0);
         // will create an empty listview or full with verses
         fillList();
     }

@@ -135,7 +135,7 @@ public class FavoriteActivity extends AppCompatActivity {
     public void refresh_verses(){
         subject_length = current_user.subjects.get(clicked_subject).verses.size();
         listView.setOnItemClickListener(null);
-        VerseAdaper verseAdaper = new VerseAdaper();
+        VerseAdapter verseAdaper = new VerseAdapter();
         listView.setAdapter(verseAdaper);
     }
     /*
@@ -159,10 +159,11 @@ public class FavoriteActivity extends AppCompatActivity {
             return true;
         }
     }
+
     /*
-    Custom adapter for seeing Listview items
-     */
-    class VerseAdaper extends BaseAdapter{
+  Custom adapter for seeing Listview items
+   */
+    class VerseAdapter extends BaseAdapter{
 
         @Override
         public int getCount() {
@@ -202,12 +203,42 @@ public class FavoriteActivity extends AppCompatActivity {
             return convertView;
         }
     }
+    /*
+    Custom adapter for seeing Listview items
+     */
+    class SubjectAdapter extends BaseAdapter{
+
+        @Override
+        public int getCount() {
+            return current_user.subjects.size();
+        }
+
+        @Override
+        public Object getItem(int position) {
+            return null;
+        }
+
+        @Override
+        public long getItemId(int position) {
+            return 0;
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            convertView = getLayoutInflater().inflate(R.layout.row_user, null);
+
+            TextView verse_txt = convertView.findViewById(R.id.list_item);
+           String text = current_user.subjects.get(position).name;
+            verse_txt.setText(text);
+            return convertView;
+        }
+    }
 
     /*
     will fill the list with what is currently in ListText
      */
     public void fill_list() {
-        ArrayAdapter theAdapter = new ArrayAdapter(this, android.R.layout.simple_list_item_1, ListText);
+        SubjectAdapter theAdapter = new SubjectAdapter();
         listView.setAdapter(theAdapter);
         listView.setVisibility(View.VISIBLE);
 
@@ -291,6 +322,7 @@ public class FavoriteActivity extends AppCompatActivity {
 
     /*
     will add the custom userclass to firebase
+    TODO controleren of het zonder ondatachange kan
      */
     private void add_to_firebase(final UserClass to_change) {
         ValueEventListener postListener = new ValueEventListener() {

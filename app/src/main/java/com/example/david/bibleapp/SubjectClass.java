@@ -21,11 +21,5 @@ public class SubjectClass {
 
     }
 
-    @Override
-    public String toString() {
-        return "SubjectClass{" +
-                "verses=" + verses +
-                ", name='" + name + '\'' +
-                '}';
-    }
+
 }

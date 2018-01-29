@@ -9,9 +9,10 @@
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
-        android:text="TextView"
         android:textAlignment="center"
-        android:textColor="@color/common_google_signin_btn_text_dark_focused" />
+        android:textColor="@color/black"
+        android:textSize="20dp"
+        android:textStyle="bold" />
 
     <TextView
         android:id="@+id/textTXT"
@@ -22,5 +23,7 @@
         android:layout_below="@+id/chapterTXT"
         android:paddingLeft="@dimen/fab_margin"
         android:paddingRight="@dimen/fab_margin"
+        android:textSize="20dp"
+        android:textColor="@color/gray"
          />
 </RelativeLayout>
