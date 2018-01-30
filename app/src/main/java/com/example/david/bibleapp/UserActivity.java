@@ -579,7 +579,7 @@ public class UserActivity extends AppCompatActivity {
 
         // afther column 3 the translations are present
         Integer verse_column = 3 + translation;
-        Cursor theCursor = theDatabase.getchapter(navigatorClass.selected_book, navigatorClass.selected_chapter, translation);
+        Cursor theCursor = theDatabase.getChapter(navigatorClass.selected_book, navigatorClass.selected_chapter, translation);
         Integer rows = theCursor.getCount();
 
         // if there are multiple rows make the text readable else show a download button
@@ -594,7 +594,7 @@ public class UserActivity extends AppCompatActivity {
         fillList();
     }
     public boolean checkBookExistence (){
-        Cursor theCursor = theDatabase.getchapter(navigatorClass.selected_book, 1, translation);
+        Cursor theCursor = theDatabase.getChapter(navigatorClass.selected_book, 1, translation);
         Integer rows = theCursor.getCount();
         if (rows >= 1) {
             return true;

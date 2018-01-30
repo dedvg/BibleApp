@@ -48,42 +48,13 @@ public class TranslationDatabase extends SQLiteOpenHelper {
 
     }
 
-    public boolean check_chapter1_existence_WEB(String book){
-        SQLiteDatabase db = this.getWritableDatabase();
-
-        Cursor cursor = null;
-        String Query = "SELECT * FROM " + TABLE_NAME + " WHERE " + COL1 + " = '" + book+ "' AND " + COL2 + "=  1" +  " AND " + COL4 + " IS NOT NULL;";
-        cursor= db.rawQuery(Query,null);
-
-        if(cursor.getCount() <= 0){
-            cursor.close();
-            return false;
-        }
-        cursor.close();
-        return true;
-    }
-    public boolean check_chapter1_existence_KJV(String book){
-        SQLiteDatabase db = this.getWritableDatabase();
-
-        Cursor cursor = null;
-        String Query = "SELECT * FROM " + TABLE_NAME + " WHERE " + COL1 + " = '" + book+ "' AND " + COL2 + "=  1 AND " + COL5 + " IS NOT NULL;";
-        cursor= db.rawQuery(Query,null);
-
-        if(cursor.getCount() == 0){
-            cursor.close();
-            return false;
-        }
-        cursor.close();
-        return true;
-    }
-
 
 
     // update the table
+    // todo check working part
     public void addItem( String book, int chapter, int verse, String text, int translation) {
         SQLiteDatabase db = this.getWritableDatabase();
         String query;
-        boolean existence = false;
 
         String variable_column = COL4;
 
@@ -91,7 +62,7 @@ public class TranslationDatabase extends SQLiteOpenHelper {
             variable_column = COL5;
         }
 
-        if (check_chapter1_existence_KJV(book) && check_chapter1_existence_WEB(book))
+        if (getChapter(book, chapter, translation).getCount() >= 1)
         {
             query = "UPDATE " + TABLE_NAME + " SET " + variable_column + " = '" + text + "' WHERE " + COL1 + " = '" + book+ "' AND " + COL2 + " = " + chapter + " AND " + COL3 + " = " + verse +  ";";
         }
@@ -129,7 +100,7 @@ public class TranslationDatabase extends SQLiteOpenHelper {
         return entries;
     }
 
-    public Cursor getchapter(String book, Integer chapter, Integer translation) {
+    public Cursor getChapter(String book, Integer chapter, Integer translation) {
 
         String variable_column = COL4;
 

@@ -30,6 +30,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Objects;
 
@@ -198,28 +200,33 @@ public class TranslationActivity extends AppCompatActivity {
     /*
     will set the layout depending on which translations are present
 
+    if the translation is already downloaded do not show a download button
+    else show the download button and adapt the text accordingly
+    todo test this function
      */
     private void set_text() {
-        title_txt.setText("KJV = King James Version and WEB = World English Bible");
-        if (translation == 0 ){
-            if (theDatabase.check_chapter1_existence_WEB(given_book)) {
+
+        if (theDatabase.getChapter(given_book, 1, translation).getCount() >= 1) {
+            translation_btn.setVisibility(View.INVISIBLE);
+            if (translation == 0){
                 translation_txt.setText(" WEB version of " + given_book + " is already downloaded");
             }
-            else{
-                translation_txt.setText(given_book + "(WEB)");
-            }
-        }
-        else if (translation == 1)
-        {
-            if (theDatabase.check_chapter1_existence_KJV(given_book)) {
+            else {
                 translation_txt.setText(" KJV version of " + given_book + " is already downloaded");
             }
-            else{
+        }
+        else{
+            translation_btn.setVisibility(View.VISIBLE);
+            if (translation == 0){
+                translation_txt.setText(given_book + "(WEB)");
+            }
+            else {
                 translation_txt.setText(given_book + "(KJV)");
             }
         }
+        title_txt.setText("KJV = King James Version and WEB = World English Bible");
+
         translation_txt.setVisibility(View.VISIBLE);
-        translation_btn.setVisibility(View.VISIBLE);
 
     }
 
@@ -326,11 +333,18 @@ public class TranslationActivity extends AppCompatActivity {
     will volley the chapter given by volley_translatio_1_chapters
      */
     public void volley_translation_2_chapter( final int chapter) {
+        String book_url = null;
+        try {
+            book_url = URLEncoder.encode(given_book, "utf-8");
 
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
         // Initialize a new RequestQueue instance
         RequestQueue requestQueue = Volley.newRequestQueue(getApplicationContext());
-        String mJSONURLString = "https://bible-api.com/" + given_book + "%20" + chapter + add_factor;
+        String mJSONURLString = "https://bible-api.com/" + book_url + "%20" + chapter + add_factor;
 
+        System.out.println(mJSONURLString);
 
         // Initialize a new JsonObjectRequest instance
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(
