@@ -204,37 +204,41 @@ public class UserActivity extends AppCompatActivity {
     private class LongClickListener implements AdapterView.OnItemLongClickListener {
         @Override
         public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-            Integer verse = position + 1;
-            dialogFavorites(verse);
-            Toast.makeText(UserActivity.this, "add " + navigatorClass.selected_book + " " + navigatorClass.selected_chapter.toString() + ":  " + verse.toString(), Toast.LENGTH_SHORT).show();
+            verse_text = new VerseClass(navigatorClass.selected_book, navigatorClass.selected_chapter);
+            verse_text.begin_verse = position + 1;
+            dialogFavorites();
+            Toast.makeText(UserActivity.this, "add " + navigatorClass.selected_book + " " + navigatorClass.selected_chapter.toString() + ":  " + verse_text.begin_verse.toString(), Toast.LENGTH_SHORT).show();
             return false;
         }
     }
+    /*
+    dialogclicklistener which will set the subject and add it to firebase
+    (will add the subject with the selected verses)
+     */
+    DialogInterface.OnClickListener setSubjectListener = new DialogInterface.OnClickListener() {
+        @Override
+        public void onClick(DialogInterface dialog, int choice) {
+            switch (choice) {
+                case DialogInterface.BUTTON_POSITIVE:
+                    ArrayList<String> verses_list = new ArrayList<String>();
+                    subject = input.getText().toString();
+                    Integer row = translation + 3;
+                    Cursor theCursor = theDatabase.getVerses(verse_text);
+                    while (theCursor.moveToNext()) {
+                        verses_list.add(theCursor.getString(row));
+                    }
+                    verseInFirebase(verses_list);
+                    break;
+                case DialogInterface.BUTTON_NEGATIVE:
+                    break;
+            }
+        }
+    };
 
     /*
     test dialog made with use of https://stackoverflow.com/questions/10903754/input-text-dialog-android
      */
     public void dialogAddFavorites1() {
-
-        DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int choice) {
-                switch (choice) {
-                    case DialogInterface.BUTTON_POSITIVE:
-                        ArrayList<String> verses_list = new ArrayList<String>();
-                        subject = input.getText().toString();
-                        Integer row = translation + 3;
-                        Cursor theCursor = theDatabase.getVerses(verse_text);
-                        while (theCursor.moveToNext()) {
-                            verses_list.add(theCursor.getString(row));
-                        }
-                        verseInFirebase(verses_list);
-                        break;
-                    case DialogInterface.BUTTON_NEGATIVE:
-                        break;
-                }
-            }
-        };
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setMessage("Under which name do you want to add this to firebase?");
 
@@ -251,16 +255,30 @@ public class UserActivity extends AppCompatActivity {
         builder.setView(input);
 
         // Set up the buttons and show the dialog
-        builder.setPositiveButton("add", dialogClickListener);
-        builder.setNegativeButton("cancel", dialogClickListener);
+        builder.setPositiveButton("add", setSubjectListener);
+        builder.setNegativeButton("cancel", setSubjectListener);
         builder.show();
     }
+
+     /*
+    dialogclicklistener which will set end verse of the subject wich can be added to firebase
+     */
+
+   AdapterView.OnItemClickListener verseSelected =  new AdapterView.OnItemClickListener() {
+        @Override
+        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            Integer option_clicked = verse_text.begin_verse + position;
+            verse_text.end_verse = option_clicked;
+            dialogAddFavorites1();
+            dialog_verses.cancel();
+        }
+    };
     /*
     helper function for adding to favorites, done with:
     https://www.youtube.com/watch?v=0gTXUHDz6BM
      */
 
-    public void dialogFavorites(final Integer verse) {
+    public void dialogFavorites() {
         Integer max_verse = 0;
         List<String> verses = new ArrayList<>();
         Cursor theCursor = theDatabase.get_max_verse(navigatorClass.selected_book, navigatorClass.selected_chapter);
@@ -268,21 +286,13 @@ public class UserActivity extends AppCompatActivity {
             max_verse = theCursor.getInt(0);
             System.out.println(max_verse.toString());
         }
-        for (int i = verse; i <= max_verse; i++) {
+        for (int i = verse_text.begin_verse; i <= max_verse; i++) {
             verses.add(String.valueOf(i));
         }
         row_list = new ListView(this);
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, R.layout.row_custom_dialog, R.id.list_item_text, verses);
         row_list.setAdapter(adapter);
-        row_list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Integer option_clicked = verse + position;
-                verse_text = new VerseClass(navigatorClass.selected_book, navigatorClass.selected_chapter, verse, option_clicked);
-                dialogAddFavorites1();
-                dialog_verses.cancel();
-            }
-        });
+        row_list.setOnItemClickListener(verseSelected);
         dialogFavorites2();
     }
 
