@@ -43,7 +43,7 @@ public class TranslationActivity extends AppCompatActivity {
     TranslationDatabase theDatabase;
     JSONArray BOOKSjson;
     Integer chapters, translation, given_book_int, load_chapter = 0;
-    String add_factor, given_book;
+    String add_factor, given_book, book_url;
     ProgressBar spinner;
     ProgressDialog progress_dialog;
     ArrayList <ChapterClass> bible_book = new ArrayList<ChapterClass>();
@@ -82,7 +82,7 @@ public class TranslationActivity extends AppCompatActivity {
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                    go_back();
+                go_back();
 
             }
         });
@@ -91,17 +91,24 @@ public class TranslationActivity extends AppCompatActivity {
         // get the variables needed from the intent
         Intent intent = getIntent();
         given_book = intent.getStringExtra("book");
+
+        // convert given book to an url
+        try {
+            book_url = URLEncoder.encode(given_book, "utf-8");
+
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
         given_book_int = intent.getIntExtra("book_int", 0);
         translation = intent.getIntExtra("translation", 0);
 
-        if (translation == 1){
+        if (translation == 1) {
             getSupportActionBar().setTitle("Current translation = KJV");
-        }
-        else {
+        } else {
             getSupportActionBar().setTitle("Current translation = WEB");
         }
 
-        show_download();
+        showDownload();
 
         String jsonArray = intent.getStringExtra("jsonArray");
 
@@ -140,23 +147,13 @@ public class TranslationActivity extends AppCompatActivity {
     /*
     will switch translation depending on the selected part
      */
-    public void switch_translation(){
+    public void beforeSwitchTranslation(){
         DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int choice) {
                 switch (choice) {
                     case DialogInterface.BUTTON_POSITIVE:
-                        String translation_txt;
-                        if( translation == 0){
-                            translation = 1;
-                            translation_txt = "KJV";
-                        }
-                        else {
-                            translation = 0;
-                            translation_txt = "WEB";
-                        }
-                        getSupportActionBar().setTitle("Current translation = " + translation_txt);
-                        show_download();
+                        switchTranslation();
                         break;
 
                     case DialogInterface.BUTTON_NEUTRAL:
@@ -177,7 +174,24 @@ public class TranslationActivity extends AppCompatActivity {
                 .setNeutralButton("no", dialogClickListener)
                 .setPositiveButton("yes", dialogClickListener).show();
     }
+    /*
+    actually switches the translation
+     */
+    private void switchTranslation() {
+        String translation_txt;
+        if( translation == 0){
+            translation = 1;
+            translation_txt = "KJV";
+        }
+        else {
+            translation = 0;
+            translation_txt = "WEB";
+        }
+        getSupportActionBar().setTitle("Current translation = " + translation_txt);
 
+        // layout needs to be adapted
+        showDownload();
+    }
 
 
     /*
@@ -192,10 +206,10 @@ public class TranslationActivity extends AppCompatActivity {
     /*
     shows the layout to enabling a download of a book
      */
-    public void show_download(){
+    public void showDownload(){
             translation_txt.setVisibility(View.VISIBLE);
             title_txt.setVisibility(View.VISIBLE);
-            set_text();
+            setText();
     }
     /*
     will set the layout depending on which translations are present
@@ -204,7 +218,7 @@ public class TranslationActivity extends AppCompatActivity {
     else show the download button and adapt the text accordingly
     todo test this function
      */
-    private void set_text() {
+    private void setText() {
 
         if (theDatabase.checkChapter1Existence(given_book, translation)){
             translation_btn.setVisibility(View.INVISIBLE);
@@ -237,14 +251,14 @@ public class TranslationActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.logout:
-                before_logout();
+                beforeLogout();
                 break;
             case R.id.favorites:
                 GoToFavorites();
                 break;
 
             case R.id.switch_translation:
-                switch_translation();
+                beforeSwitchTranslation();
                 break;
         }
         return super.onOptionsItemSelected(item);
@@ -254,7 +268,7 @@ public class TranslationActivity extends AppCompatActivity {
 
     asks the user if the user really wants to logout, if yes logout
      */
-    public void before_logout(){
+    public void beforeLogout(){
         DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int choice) {
@@ -300,16 +314,10 @@ public class TranslationActivity extends AppCompatActivity {
     preperation of the volley which will get the biblebook
      */
     public void volley_translation_0_books() throws JSONException {
-//        spinner.setVisibility(View.VISIBLE);
-
         progress_dialog = new ProgressDialog(this);
         progress_dialog.setMessage("loading");
         progress_dialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
         progress_dialog.setIndeterminate(false);
-
-
-//        progress_dialog.show();
-
         chapters = BOOKSjson.getJSONObject(given_book_int).getInt("val");
         progress_dialog.setMax(chapters);
         progress_dialog.show();
@@ -333,18 +341,9 @@ public class TranslationActivity extends AppCompatActivity {
     will volley the chapter given by volley_translatio_1_chapters
      */
     public void volley_translation_2_chapter( final int chapter) {
-        String book_url = null;
-        try {
-            book_url = URLEncoder.encode(given_book, "utf-8");
-
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
         // Initialize a new RequestQueue instance
         RequestQueue requestQueue = Volley.newRequestQueue(getApplicationContext());
         String mJSONURLString = "https://bible-api.com/" + book_url + "%20" + chapter + add_factor;
-
-        System.out.println(mJSONURLString);
 
         // Initialize a new JsonObjectRequest instance
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(
@@ -357,15 +356,9 @@ public class TranslationActivity extends AppCompatActivity {
                             load_chapter += 1;
                             progress_dialog.setProgress(load_chapter);
 
-                            System.out.println(load_chapter.toString());
                             JSONArray jsonArray = response.getJSONArray("verses");
                             volley_translation_3_db(jsonArray, chapter);
-                        } catch (JSONException e) {
-                            // if this shows something changed in the JSON
-                            Toast.makeText(TranslationActivity.this,
-                                    "problem with accesing the JSON",
-                                    Toast.LENGTH_SHORT).show();
-                        }
+                        } catch (JSONException ignored) {}
                     }
                 },
                 new Response.ErrorListener() {

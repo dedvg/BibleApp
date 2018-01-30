@@ -220,7 +220,7 @@ public class FavoriteActivity extends AppCompatActivity {
             // set the text of all verses in the verse textview
             String text = "";
             for (int i = 0;  i < current_verse.text.size(); i ++){
-                Integer verse_number = i + 1;
+                Integer verse_number = i + current_verse.begin_verse;
                 text +=" " + verse_number.toString() +": " + current_verse.text.get(i);
             }
             verses_txt.setText(text);
@@ -234,6 +234,9 @@ public class FavoriteActivity extends AppCompatActivity {
 
         @Override
         public int getCount() {
+            if (current_user.subjects == null){
+                return 0;
+            }
             return current_user.subjects.size();
         }
 
