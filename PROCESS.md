@@ -140,4 +140,6 @@ __decicions__
 __progress__
 * prevented books with a number in front of it lik 1 corintians from crashing
 * commented some more code
+* chapters where not in the right order, this is fixed now
+* worked on getting better code hub to 6 instead of 5
 
