@@ -1,13 +1,12 @@
 package com.example.david.bibleapp;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /*
-each subject has a name and verses in it
-
-so a SubjectClass has its name and a list of verses
+each subject has a name and the belonging list of verses in it
+this is used for the favorites of the user in firebase
  */
+import java.util.ArrayList;
+
+
 
 public class SubjectClass {
 

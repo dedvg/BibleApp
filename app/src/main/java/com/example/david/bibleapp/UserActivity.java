@@ -1,5 +1,16 @@
 package com.example.david.bibleapp;
 
+/*
+This Activity is the Main Activity the user will use.
+This activity allows the user to logout, switch translation, read the bible (if already downloaded),
+and navigate to favorites.
+The user will first need to select old or new testament, then a biblebook and then the chapter.
+When reading a chapter the user can navigate to the next chapter and previous chapter if available
+with use of the provided buttons beside the listview.
+When long tapping a verse the user can add a selection of verses from that chapter to their
+favorites with a name they can fill in.
+ */
+
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
@@ -8,7 +19,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.text.InputType;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -21,7 +31,6 @@ import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
-
 import android.widget.TextView;
 import android.widget.Toast;
 import com.google.firebase.auth.FirebaseAuth;
@@ -31,11 +40,9 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -517,8 +524,8 @@ public class UserActivity extends AppCompatActivity {
      */
     public void layer0Layout() {
         list_text.clear();
-        list_text.add("Old");
-        list_text.add("New");
+        list_text.add("Old Testament");
+        list_text.add("New Testament");
         fillList();
     }
 

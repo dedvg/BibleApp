@@ -1,7 +1,12 @@
 package com.example.david.bibleapp;
 
+/*
+This Activity allows the user to download a book they do not own yet.
+The user is able to go back to UserActivity with use of the back button provided,
+is able to switch translation and if needed logout.
+*/
+
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.support.v7.app.AlertDialog;
@@ -11,13 +16,10 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-
 import android.widget.Button;
-
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -25,23 +27,20 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.google.firebase.auth.FirebaseAuth;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
-import java.util.Objects;
 
 public class TranslationActivity extends AppCompatActivity {
 
     TextView title_txt, translation_txt;
     Button translation_btn;
     Toolbar toolbar;
-    TranslationDatabase theDatabase;
-    JSONArray BOOKSjson;
+    TranslationDatabase the_database;
+    JSONArray books_json;
     Integer chapters, translation, given_book_int, load_chapter = 0;
     String add_factor, given_book, book_url;
     ProgressBar spinner;
@@ -53,30 +52,6 @@ public class TranslationActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_translation);
-        spinner = findViewById(R.id.progressBar1);
-
-        // creating references
-        translation_btn = findViewById(R.id.transBTN);
-        title_txt = findViewById(R.id.titleTXT);
-        translation_txt = findViewById(R.id.transTXT);
-        toolbar = findViewById(R.id.toolbar);
-
-        // create the toolbar
-        setSupportActionBar(toolbar);
-
-        // add backbutton
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setDisplayShowHomeEnabled(true);
-
-        theDatabase = TranslationDatabase.getInstance(this.getApplicationContext());
-
-
-        // layout function
-        spinner.setVisibility(View.GONE);
-        // when pressing back the user will be brought back to select between all books
-        // or back to UserActivity
-        toolbar.setNavigationOnClickListener(new navigationBackClicked());
-
 
         // get the variables needed from the intent
         Intent intent = getIntent();
@@ -85,10 +60,10 @@ public class TranslationActivity extends AppCompatActivity {
         translation = intent.getIntExtra("translation", 0);
         String jsonArray = intent.getStringExtra("jsonArray");
 
-        //  make BOOKSjson to enable getting the right values again
+        //  make books_json to enable getting the right values again
         // and make the given book to a good url
         try {
-            BOOKSjson = new JSONArray(jsonArray);
+            books_json = new JSONArray(jsonArray);
             book_url = URLEncoder.encode(given_book, "utf-8");
 
         } catch (JSONException e) {
@@ -97,14 +72,66 @@ public class TranslationActivity extends AppCompatActivity {
             e.printStackTrace();
         }
 
+
+
+        // creating references
+        translation_btn = findViewById(R.id.transBTN);
+        title_txt = findViewById(R.id.titleTXT);
+        translation_txt = findViewById(R.id.transTXT);
+        toolbar = findViewById(R.id.toolbar);
+        the_database = TranslationDatabase.getInstance(this.getApplicationContext());
+        spinner = findViewById(R.id.progressBar1);
+
+
+        // create the toolbar
+        setSupportActionBar(toolbar);
+
+        // add backbutton
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
+
+        // initialize the spinner at invisible
+        spinner.setVisibility(View.GONE);
+
+        // set an onclicklistener on the navigationbackbutton
+        toolbar.setNavigationOnClickListener(new navigationBackClicked());
+
+        // sets the layout ready for use
         showDownload();
     }
 
+    /*
+       enables custom menu
+        */
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
+    }
+
+    /*
+     handles which menu item is clicked and what to do
+    */
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.logout:
+                beforeLogout();
+                break;
+            case R.id.favorites:
+                goToFavorites();
+                break;
+            case R.id.switch_translation:
+                switchTranslationDialog();
+                break;
+        }
+        return super.onOptionsItemSelected(item);
+    }
 
     /*
     will handle the onclick of the download button
      */
-    public void download_btn (View view){
+    public void download (View view){
         if (translation == 0){
             add_factor = "";
             try {
@@ -124,25 +151,11 @@ public class TranslationActivity extends AppCompatActivity {
         }
     }
 
-    /*
-    dialogonclicklisteer to switch translation
-     */
-    DialogInterface.OnClickListener translationSwitchListener = new DialogInterface.OnClickListener() {
-        @Override
-        public void onClick(DialogInterface dialog, int choice) {
-            switch (choice) {
-                case DialogInterface.BUTTON_POSITIVE:
-                    switchTranslation();
-                    break;
-                case DialogInterface.BUTTON_NEUTRAL:
-                    break;
-            }
-        }
-    };
+
     /*
     will switch translation depending on the selected part
      */
-    public void beforeSwitchTranslation(){
+    public void switchTranslationDialog(){
         String translation_txt = "WEB";
         if (translation == 0){
             translation_txt ="KJV";
@@ -150,8 +163,8 @@ public class TranslationActivity extends AppCompatActivity {
 
         AlertDialog.Builder builder = new AlertDialog.Builder(TranslationActivity.this);
         builder.setMessage("do you want to switch to " + translation_txt)
-                .setNeutralButton("no", translationSwitchListener)
-                .setPositiveButton("yes", translationSwitchListener).show();
+                .setNeutralButton("no", switchTranslationDialogListener)
+                .setPositiveButton("yes", switchTranslationDialogListener).show();
     }
     /*
     actually switches the translation
@@ -170,14 +183,6 @@ public class TranslationActivity extends AppCompatActivity {
     }
 
 
-    /*
-    enables custom menu
-     */
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
-    }
 
     /*
     shows the layout to enabling a download of a book
@@ -201,7 +206,7 @@ public class TranslationActivity extends AppCompatActivity {
      */
     private void setText() {
 
-        if (theDatabase.checkChapter1Existence(given_book, translation)){
+        if (the_database.checkChapter1Existence(given_book, translation)){
             translation_btn.setVisibility(View.INVISIBLE);
             if (translation == 0){
                 translation_txt.setText(" WEB version of " + given_book + " is already downloaded");
@@ -225,42 +230,8 @@ public class TranslationActivity extends AppCompatActivity {
 
     }
 
-    /*
-    handles which menu item is clicked and what to do
-     */
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.logout:
-                beforeLogout();
-                break;
-            case R.id.favorites:
-                goToFavorites();
-                break;
 
-            case R.id.switch_translation:
-                beforeSwitchTranslation();
-                break;
-        }
-        return super.onOptionsItemSelected(item);
-    }
-    /*
-    the click listener for the beforeLogout function
-    if clicked yes the user will logout
-     */
 
-    DialogInterface.OnClickListener beforeLogoutClickListener = new DialogInterface.OnClickListener() {
-        @Override
-        public void onClick(DialogInterface dialog, int choice) {
-            switch (choice) {
-                case DialogInterface.BUTTON_POSITIVE:
-                    logout();
-                    break;
-                case DialogInterface.BUTTON_NEGATIVE:
-                    break;
-            }
-        }
-    };
     /*
 
     asks the user if the user really wants to logout, if yes logout
@@ -304,7 +275,7 @@ public class TranslationActivity extends AppCompatActivity {
         progress_dialog.setMessage("loading");
         progress_dialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
         progress_dialog.setIndeterminate(false);
-        chapters = BOOKSjson.getJSONObject(given_book_int).getInt("val");
+        chapters = books_json.getJSONObject(given_book_int).getInt("val");
         progress_dialog.setMax(chapters);
         progress_dialog.show();
         volleyTranslation1Chapters();
@@ -390,7 +361,7 @@ public class TranslationActivity extends AppCompatActivity {
         Toast.makeText(TranslationActivity.this, "Finished downloading" + size_book.toString(), Toast.LENGTH_SHORT).show();
         for (int i = 0 ; i < book.size(); i ++) {
             for (int j = 0 ; j < book.get(i).verses.size(); j ++) {
-                theDatabase.addItem(given_book, book.get(i).chapter,j + 1, book.get(i).verses.get(j), translation );
+                the_database.addItem(given_book, book.get(i).chapter,j + 1, book.get(i).verses.get(j), translation );
             }
         }
         progress_dialog.dismiss();
@@ -418,5 +389,38 @@ public class TranslationActivity extends AppCompatActivity {
             goBack();
         }
     }
+
+    /*
+    the click listener for the beforeLogout function
+    if clicked yes the user will logout
+     */
+    DialogInterface.OnClickListener beforeLogoutClickListener = new DialogInterface.OnClickListener() {
+        @Override
+        public void onClick(DialogInterface dialog, int choice) {
+            switch (choice) {
+                case DialogInterface.BUTTON_POSITIVE:
+                    logout();
+                    break;
+                case DialogInterface.BUTTON_NEGATIVE:
+                    break;
+            }
+        }
+    };
+
+    /*
+    dialogonclicklisteer to switch translation
+     */
+    DialogInterface.OnClickListener switchTranslationDialogListener = new DialogInterface.OnClickListener() {
+        @Override
+        public void onClick(DialogInterface dialog, int choice) {
+            switch (choice) {
+                case DialogInterface.BUTTON_POSITIVE:
+                    switchTranslation();
+                    break;
+                case DialogInterface.BUTTON_NEUTRAL:
+                    break;
+            }
+        }
+    };
 }
 

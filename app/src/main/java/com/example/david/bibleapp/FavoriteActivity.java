@@ -1,23 +1,25 @@
 package com.example.david.bibleapp;
 
-import android.content.DialogInterface;
+/*
+This Activity allows the user to read their subjects they have made.
+By clicking on a subject the added verses will be shown and which translation belongs to them.
+The user is able to logout and to go back to UserActivity to continue reading
+*/
 
+import android.content.DialogInterface;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
-
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -25,7 +27,6 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-
 import java.util.ArrayList;
 
 public class FavoriteActivity extends AppCompatActivity {
@@ -35,7 +36,7 @@ public class FavoriteActivity extends AppCompatActivity {
     // the information the current user has in his favorites
     UserClass current_user;
 
-    // iniatializing
+    // iniatializing references
     ListView listview;
     Toolbar toolbar;
     Integer subject_length, clicked_subject, position_to_delete;
@@ -43,6 +44,7 @@ public class FavoriteActivity extends AppCompatActivity {
     // references for firebase use
     DatabaseReference the_database;
     FirebaseAuth the_auth;
+    FirebaseUser user;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -53,20 +55,42 @@ public class FavoriteActivity extends AppCompatActivity {
         listview = findViewById(R.id.ListView);
         the_auth = FirebaseAuth.getInstance();
         the_database = FirebaseDatabase.getInstance().getReference();
+        user = the_auth.getCurrentUser();
+
 
         // add backbutton
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
 
-        // set some layout for the custom toolbar and an onclick listener on the back button
+        // set some layout for the custom toolbar
         toolbar.setTitle("Favories");
         toolbar.setSubtitle("long tap an item te delete it");
-        toolbar.setNavigationOnClickListener(new navigationBackClicked());
 
+        // get the current user
         getUserFirebase();
-        listview.setOnItemLongClickListener(new LongClickListener());
 
+        // set onclicklisteners
+        listview.setOnItemLongClickListener(new LongClickListener());
+        toolbar.setNavigationOnClickListener(new navigationBackClicked());
+    }
+
+    /*
+    to use a custom menu this is needed
+    some items of the custom toolbar are made invisible
+     */
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+
+        // needed for showing the custom actionbar
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+
+        // to find a menuitem it has to be set here
+        MenuItem translation = menu.findItem(R.id.switch_translation);
+        MenuItem favorites = menu.findItem(R.id.favorites);
+        translation.setVisible(false);
+        favorites.setVisible(false);
+        return true;
     }
     /*
     dependent whether a subject has been clicked it will go one step back
@@ -86,36 +110,21 @@ public class FavoriteActivity extends AppCompatActivity {
     }
 
     /*
-    to use a custom menu this is needed
-     */
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-
-        // needed for showing the custom actionbar
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-
-        // to find a menuitem it has to be set here
-        MenuItem translation = menu.findItem(R.id.switch_translation);
-        MenuItem favorites = menu.findItem(R.id.favorites);
-        translation.setVisible(false);
-        favorites.setVisible(false);
-        return true;
-    }
-
-    /*
-    gets the current UserClass from the user from firebase
+    gets the current UserClass from the user from firebase and adapt layout accordingly
      */
     public void getUserFirebase () {
         ValueEventListener postListener = new ValueEventListener() {
             @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                FirebaseUser user = the_auth.getCurrentUser();
-                current_user = dataSnapshot.child("users").child(user.getUid()).getValue(UserClass.class);
+            public void onDataChange(DataSnapshot db) {
+
+                // get the current user
+                current_user = db.child("users").child(user.getUid()).getValue(UserClass.class);
 
                 // check if there are any subjects, if so display them else give a toast
                 if (current_user.subjects != null) {refreshSubjects();}
                 else{
-                    Toast.makeText(FavoriteActivity.this, "Nothing added to favorites", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(FavoriteActivity.this, "Nothing added to favorites",
+                                   Toast.LENGTH_SHORT).show();
                     list_text.clear();
                     fillList();
                 }
@@ -123,8 +132,8 @@ public class FavoriteActivity extends AppCompatActivity {
             @Override
             public void onCancelled(DatabaseError databaseError) {
                 // if not possible toast it
-                Toast.makeText(FavoriteActivity.this, " please restart app with internet connection",
-                        Toast.LENGTH_SHORT).show();
+                Toast.makeText(FavoriteActivity.this, " please restart app with" +
+                               " internet connection", Toast.LENGTH_SHORT).show();
             }
         };
         the_database.addListenerForSingleValueEvent(postListener);
@@ -134,52 +143,99 @@ public class FavoriteActivity extends AppCompatActivity {
     shows the subjects that are present in the UserClass from the current user
      */
     private void refreshSubjects() {
+
+        // clear the text and add the subjects one by one
         list_text.clear();
         for (int i = 0; i < current_user.subjects.size(); i ++){
             list_text.add(current_user.subjects.get(i).name);
         }
+
+        // set an onclicklistener
         listview.setOnItemClickListener(new FavoriteActivity.clicklistener());
+
+        // show the subjects
         fillList();
     }
+
     /*
     will show the verses in the UserClass with use of a custom adapter(verseAdapter)
     and removes the onclick function
+    subject_length is set here (needed for the verseAdapter
      */
     public void refreshVerses(){
         subject_length = current_user.subjects.get(clicked_subject).verses.size();
         listview.setOnItemClickListener(null);
-        VerseAdapter verseAdaper = new VerseAdapter();
-        listview.setAdapter(verseAdaper);
+        VerseAdapter verse_adpater = new VerseAdapter();
+        listview.setAdapter(verse_adpater);
     }
+
     /*
-    handles the onclick events from the list by setting a subjects and showing the verses
+    will fill the list with what is currently in list_text only used for subjects
+    this is done with a custom adapter used to get a better layout
      */
-    private class clicklistener implements AdapterView.OnItemClickListener {
-        @Override
-        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            clicked_subject = position;
-            refreshVerses();
-        }
+    public void fillList() {
+        SubjectAdapter the_adapter = new SubjectAdapter();
+        listview.setAdapter(the_adapter);
     }
 
     /*
-   long click listener to delete item from firebase
-   if long clicked a delete message will be shown to ask whether the user really
-   wants to delete this
-    */
-    private class LongClickListener implements AdapterView.OnItemLongClickListener {
-        @Override
-        public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-            position_to_delete = position;
-            deleteDialog();
-            return true;
+    deletes subject from firebase by asking first if the user wants to with
+     */
+    private void deleteDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(FavoriteActivity.this);
+        builder.setMessage("Do you really want to delete this from your Favorites?"  )
+                .setPositiveButton("Yes", deleteDialogClickListener)
+                .setNegativeButton("No", deleteDialogClickListener).show();
+    }
+
+
+    /*
+    delete verse/subject from firebase by adding the changed UserClass back to Firebase
+     */
+    public void deleteVerses(int position){
+        UserClass to_change = current_user;
+
+        // if there is only one VerseClass delete the whole subject
+        // else delete the clicked VerseClass from the subject and toast it
+        if (to_change.subjects.get(clicked_subject).verses.size() == 1){
+
+            // needed beacause remove does not accept an Integer
+            int temp = clicked_subject;
+            to_change.subjects.remove(temp);
         }
+        else {
+
+            to_change.subjects.get(clicked_subject).verses.remove(position);
+            Toast.makeText(FavoriteActivity.this, "deleted", Toast.LENGTH_SHORT).show();
+        }
+
+        // set the new UserClass in Firebase
+        addToFirebase(to_change);
+    }
+    /*
+    deletes a subject from the UserClass
+     */
+    public void deleteSubject(int position){
+
+        UserClass to_change = current_user;
+        to_change.subjects.remove(position);
+        addToFirebase(to_change);
     }
 
     /*
-  custom adapter for seeing Listview items
-  only used to show the verses in the UserClass in a proper way
-   */
+    will add the custom userclass to firebase
+     */
+    private void addToFirebase(final UserClass to_change) {
+        the_database.child("users").child(user.getUid()).setValue(to_change);
+
+        // get the new user from firebase and update the layout
+        getUserFirebase();
+    }
+
+    /*
+    custom adapter for seeing Listview items
+    only used to show the verses of a clicked subject
+     */
     class VerseAdapter extends BaseAdapter{
 
         @Override
@@ -199,25 +255,35 @@ public class FavoriteActivity extends AppCompatActivity {
 
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
+
+            // set the custom layout for the adapter
             convertView = getLayoutInflater().inflate(R.layout.row_favorites, null);
 
+            // create references
             TextView description_txt = convertView.findViewById(R.id.chapterTXT);
             TextView verses_txt = convertView.findViewById(R.id.textTXT);
 
             // change the description accordingly and set it on the description textview
-            VerseClass current_verse = current_user.subjects.get(clicked_subject).verses.get(position);
-            if (current_verse.end_verse == current_verse.begin_verse){
-                description_txt.setText(current_verse.book + " " + current_verse.chapter + " : " + current_verse.begin_verse + current_verse.translation);
+            VerseClass verse_class = current_user.subjects.get(clicked_subject).verses.get(position);
+            if (verse_class.end_verse == verse_class.begin_verse){
+                description_txt.setText(verse_class.book + " " + verse_class.chapter + " : " +
+                                        verse_class.begin_verse + verse_class.translation);
             }
             else {
-                description_txt.setText(current_verse.book + " " + current_verse.chapter + " : " + current_verse.begin_verse + " - " + current_verse.end_verse + current_verse.translation);
+                description_txt.setText(verse_class.book + " " + verse_class.chapter + " : " +
+                                        verse_class.begin_verse + " - " + verse_class.end_verse
+                                        + verse_class.translation);
             }
 
             // set the text of all verses in the verse textview
             String text = "";
-            for (int i = 0;  i < current_verse.text.size(); i ++){
-                Integer verse_number = i + current_verse.begin_verse;
-                text +=" " + verse_number.toString() +": " + current_verse.text.get(i);
+
+            // add verse by verse to the text
+            for (int i = 0;  i < verse_class.text.size(); i ++){
+
+                // calculate the current verse number
+                Integer verse_number = i + verse_class.begin_verse;
+                text +=" " + verse_number.toString() +": " + verse_class.text.get(i);
             }
             verses_txt.setText(text);
             return convertView;
@@ -230,6 +296,8 @@ public class FavoriteActivity extends AppCompatActivity {
 
         @Override
         public int getCount() {
+
+            // if there are no subjects return 0 to create an empty listview
             if (current_user.subjects == null){
                 return 0;
             }
@@ -248,110 +316,18 @@ public class FavoriteActivity extends AppCompatActivity {
 
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
+
+            // use of a custom row layout
             convertView = getLayoutInflater().inflate(R.layout.row_user, null);
 
+            // create references and set the text accordingly
             TextView verse_txt = convertView.findViewById(R.id.list_item);
-           String text = current_user.subjects.get(position).name;
+            String text = current_user.subjects.get(position).name;
             verse_txt.setText(text);
             return convertView;
         }
     }
 
-    /*
-    will fill the list with what is currently in list_text only used for subjects
-     */
-    public void fillList() {
-        SubjectAdapter theAdapter = new SubjectAdapter();
-        listview.setAdapter(theAdapter);
-        listview.setVisibility(View.VISIBLE);
-
-    }
-    /*
-    the onclick listener for the deleteDialog
-    if the positive button is clicked the subject will get deleted
-     */
-    DialogInterface.OnClickListener deleteClickListener = new DialogInterface.OnClickListener() {
-        @Override
-        public void onClick(DialogInterface dialog, int choice) {
-            switch (choice) {
-                case DialogInterface.BUTTON_POSITIVE:
-                    if (clicked_subject == null)
-                    {
-                        deleteSubject(position_to_delete);
-                    }
-                    else {
-                        delete_verses(position_to_delete);
-                    }
-                    break;
-                case DialogInterface.BUTTON_NEGATIVE:
-                    break;
-            }
-        }
-    };
-    /*
-    deletes subject from firebase by asking first if the user wants to
-     */
-    private void deleteDialog() {
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(FavoriteActivity.this);
-        builder.setMessage("Do you really want to delete this from your Favorites?"  )
-                .setPositiveButton("Yes", deleteClickListener)
-                .setNegativeButton("No", deleteClickListener).show();
-    }
-
-
-    /*
-    delete verse/subject from firebase by adding the changed UserClass back to Firebase
-     */
-    public void delete_verses(int position){
-        UserClass to_change = current_user;
-        if (to_change.subjects.get(clicked_subject).verses.size() == 1){
-            // needed beacause remove does not accept an Integer
-            // if the length is 1 verse delete the subject
-            int temp = clicked_subject;
-            to_change.subjects.remove(temp);
-        }
-        else {
-            to_change.subjects.get(clicked_subject).verses.remove(position);
-            Toast.makeText(FavoriteActivity.this, "deleted", Toast.LENGTH_SHORT).show();
-        }
-
-        // set the new UserClass in Firebase
-        add_to_firebase(to_change);
-    }
-    /*
-    deletes a subject from the UserClass
-     */
-    public void deleteSubject(int position){
-
-        UserClass to_change = current_user;
-        to_change.subjects.remove(position);
-        add_to_firebase(to_change);
-    }
-
-    /*
-    will add the custom userclass to firebase
-    TODO controleren of het zonder ondatachange kan
-     */
-    private void add_to_firebase(final UserClass to_change) {
-        ValueEventListener postListener = new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                FirebaseUser user = the_auth.getCurrentUser();
-                the_database.child("users").child(user.getUid()).setValue(to_change);
-                getUserFirebase();
-            }
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                // if not possible toast it
-                Toast.makeText(FavoriteActivity.this, " please restart app with internet connection",
-                        Toast.LENGTH_SHORT).show();
-                return;
-            }
-        };
-        the_database.addListenerForSingleValueEvent(postListener);
-
-    }
 
     /*
     if the navigation backButton is pressed go one step back
@@ -360,6 +336,57 @@ public class FavoriteActivity extends AppCompatActivity {
         @Override
         public void onClick(View v) {
             goBack();
+        }
+    }
+
+    /*
+   the onclick listener for the deleteDialog
+   if the positive button is clicked the subject will get deleted
+    */
+    DialogInterface.OnClickListener deleteDialogClickListener = new DialogInterface.OnClickListener() {
+        @Override
+        public void onClick(DialogInterface dialog, int choice) {
+            switch (choice) {
+                case DialogInterface.BUTTON_POSITIVE:
+
+                    // if clicked_subject is null a subject is long tapped and will be deleted
+                    if (clicked_subject == null)
+                    {
+                        deleteSubject(position_to_delete);
+                    }
+                    else {
+
+                        // a subject is selected so the long tapped verses will be deleted
+                        deleteVerses(position_to_delete);
+                    }
+                    break;
+                case DialogInterface.BUTTON_NEGATIVE:
+                    break;
+            }
+        }
+    };
+    /*
+  handles the onclick events from the list by setting a subjects and showing the verses
+   */
+    private class clicklistener implements AdapterView.OnItemClickListener {
+        @Override
+        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            clicked_subject = position;
+            refreshVerses();
+        }
+    }
+
+    /*
+   long click listener to delete item from firebase
+   if long clicked a delete message will be shown to ask whether the user really
+   wants to delete this
+    */
+    private class LongClickListener implements AdapterView.OnItemLongClickListener {
+        @Override
+        public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+            position_to_delete = position;
+            deleteDialog();
+            return true;
         }
     }
 }

@@ -1,5 +1,8 @@
 package com.example.david.bibleapp;
 
+/*
+This Activity will allow the user to register a new account or go back to log in.
+ */
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -17,13 +20,13 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
-// todo create a better back button
 public class RegisterActivity extends AppCompatActivity {
-    String email, password;
-    EditText userT, passwordT;
 
-    DatabaseReference mDatabase;
-    private FirebaseAuth mAuth;
+    // initializing references
+    String email, password;
+    EditText user_textview, password_textview;
+    DatabaseReference the_database;
+    private FirebaseAuth the_auth;
 
     public RegisterActivity() {
         // Required empty public constructor
@@ -33,27 +36,35 @@ public class RegisterActivity extends AppCompatActivity {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
-        userT = findViewById(R.id.usernameED);
-        passwordT = findViewById(R.id.passwordED);
-        mDatabase = FirebaseDatabase.getInstance().getReference();
-        mAuth = FirebaseAuth.getInstance();
+
+        // creating the references
+        user_textview = findViewById(R.id.usernameED);
+        password_textview = findViewById(R.id.passwordED);
+        the_database = FirebaseDatabase.getInstance().getReference();
+        the_auth = FirebaseAuth.getInstance();
     }
 
-    // creates user and checks if it is succesfull in the onComplete
+    /*
+    creates the user with use of an onCompleteListener
+     */
     public void create_user(final String email, String password) {
-        mAuth.createUserWithEmailAndPassword(email, password)
+        the_auth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, new registerListener());
     }
 
-
-
-
+    /*
+    will add a userclass to firebase when registering to make sure it is not null
+     */
     public void addUserToFirebase(){
-        FirebaseUser user = mAuth.getCurrentUser();
+        FirebaseUser user = the_auth.getCurrentUser();
         assert user != null;
         String Uid = user.getUid();
-        mDatabase.child("users").child(Uid).setValue(new UserClass(email, null));
+        the_database.child("users").child(Uid).setValue(new UserClass(email, null));
     }
+
+    /*
+    will go to the UserActivity
+     */
     private void loggingIn() {
         Intent intent = new Intent(this, UserActivity.class);
         // starts the new activity
@@ -62,29 +73,35 @@ public class RegisterActivity extends AppCompatActivity {
         finish();
     }
 
-    // checks if both fields are filled in correct, if correct it creates the user
+    /*
+    checks if the password is 7 or longer and the email is valid
+    if both are valid create the user otherwise set hints
+     */
     public void register(View view) {
-        email = userT.getText().toString();
-        password = passwordT.getText().toString();
+        email = user_textview.getText().toString();
+        password = password_textview.getText().toString();
         if (Patterns.EMAIL_ADDRESS.matcher(email).matches()){
             if (password.length() >6 ){
                 create_user(email,password);
             }
             else{
-                passwordT.setHint("needs at least 6 characters");
-                passwordT.setText("");
+                password_textview.setHint("needs at least 6 characters");
+                password_textview.setText("");
             }
         }
         else{
-            userT.setHint("fill in a valid email");
-            userT.setText("");
+            user_textview.setHint("fill in a valid email");
+            user_textview.setText("");
         }
     }
 
+    /*
+    will go back to MainActivity to enable the user to login
+     */
     public void goToLogin(View view) {
         Intent intent = new Intent(this, MainActivity.class);
-        // starts the new activity
 
+        // starts the new activity
         startActivity(intent);
         finish();
     }
@@ -96,14 +113,15 @@ public class RegisterActivity extends AppCompatActivity {
 
                     // toast it, add user to firebase and go to the next activity
                     Toast.makeText(RegisterActivity.this,
-                            "Authentication succes.", Toast.LENGTH_SHORT).show();
+                              "Authentication succes.", Toast.LENGTH_SHORT).show();
                     addUserToFirebase();
                     loggingIn();
                 } else {
 
                     // If sign in fails, display a message to the user.
                     Toast.makeText(RegisterActivity.this,
-                            "Authentication failed, check your connection", Toast.LENGTH_SHORT).show();
+                              "Authentication failed, check your connection",
+                                   Toast.LENGTH_SHORT).show();
                 }
             }
         }

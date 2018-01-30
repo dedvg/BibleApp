@@ -1,10 +1,11 @@
 package com.example.david.bibleapp;
 
-/**
+/*
+This class had a username TODO use the uername to see other favorites
+and a ArrayList of subjects to store the favorites of the user in firebase.
  */
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class UserClass {
 

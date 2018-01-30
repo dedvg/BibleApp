@@ -2,11 +2,10 @@ package com.example.david.bibleapp;
 
 import java.util.ArrayList;
 
-/**
- * Created by dedvg on 23-1-2018.
- */
-
-
+/*
+When a selection of verses is added to the user Favorites this class is used.
+It saves all the needed information to read it in FavoriteActivity.
+*/
 
 public class VerseClass {
     public ArrayList<String> text;

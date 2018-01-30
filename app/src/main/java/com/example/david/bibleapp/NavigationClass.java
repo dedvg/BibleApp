@@ -1,15 +1,15 @@
 package com.example.david.bibleapp;
 
-/**
- *
- */
+/*
+This class will make sure the navigation in UserActivity will be easy.
+It removes a lot of variables which would else be needed in UserActivity.
+*/
 
 
 
 public class NavigationClass {
     // book name
     String selected_book;
-    Integer layer;
 
     // book number from the 66 books
     Integer selected_book_int;
@@ -57,8 +57,7 @@ public class NavigationClass {
 
     // set the selected chapter
     public void setSelected_chapter(Integer clicked_pos) {
-        Integer temp = clicked_pos + 1;
-        this.selected_chapter = temp;
+        this.selected_chapter = clicked_pos + 1;
     }
 
 

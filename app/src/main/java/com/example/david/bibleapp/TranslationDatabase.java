@@ -1,7 +1,8 @@
 package com.example.david.bibleapp;
 
-/**
- * Created by dedvg on 15-1-2018.
+/*
+This will handle the SQL database behind the app.
+All text which is downloaded is stored in this database and read from this database.
  */
 
 
@@ -14,8 +15,6 @@ import android.util.Log;
 public class TranslationDatabase extends SQLiteOpenHelper {
 
     private static TranslationDatabase instance = null;
-    // makes the column names
-    private static final String TAG ="TRANSLATIONS";
     private static final String TABLE_NAME ="Bible_translations";
     private static final String COL1 ="book_name";
     private static final String COL2 ="chapter";
