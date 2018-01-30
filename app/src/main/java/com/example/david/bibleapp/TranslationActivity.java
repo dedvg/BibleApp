@@ -55,69 +55,49 @@ public class TranslationActivity extends AppCompatActivity {
         setContentView(R.layout.activity_translation);
         spinner = findViewById(R.id.progressBar1);
 
-
         // creating references
         translation_btn = findViewById(R.id.transBTN);
-
         title_txt = findViewById(R.id.titleTXT);
         translation_txt = findViewById(R.id.transTXT);
-
-
         toolbar = findViewById(R.id.toolbar);
-
 
         // create the toolbar
         setSupportActionBar(toolbar);
 
-
-        theDatabase = TranslationDatabase.getInstance(this.getApplicationContext());
         // add backbutton
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
+
+        theDatabase = TranslationDatabase.getInstance(this.getApplicationContext());
+
 
         // layout function
         spinner.setVisibility(View.GONE);
         // when pressing back the user will be brought back to select between all books
         // or back to UserActivity
-        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                go_back();
-
-            }
-        });
+        toolbar.setNavigationOnClickListener(new navigationBackClicked());
 
 
         // get the variables needed from the intent
         Intent intent = getIntent();
         given_book = intent.getStringExtra("book");
-
-        // convert given book to an url
-        try {
-            book_url = URLEncoder.encode(given_book, "utf-8");
-
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
         given_book_int = intent.getIntExtra("book_int", 0);
         translation = intent.getIntExtra("translation", 0);
-
-        if (translation == 1) {
-            getSupportActionBar().setTitle("Current translation = KJV");
-        } else {
-            getSupportActionBar().setTitle("Current translation = WEB");
-        }
-
-        showDownload();
-
         String jsonArray = intent.getStringExtra("jsonArray");
 
         //  make BOOKSjson to enable getting the right values again
+        // and make the given book to a good url
         try {
             BOOKSjson = new JSONArray(jsonArray);
+            book_url = URLEncoder.encode(given_book, "utf-8");
+
         } catch (JSONException e) {
             e.printStackTrace();
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
         }
+
+        showDownload();
     }
 
 
@@ -128,7 +108,7 @@ public class TranslationActivity extends AppCompatActivity {
         if (translation == 0){
             add_factor = "";
             try {
-                volley_translation_0_books();
+                volleyTranslation0Books();
             } catch (JSONException e) {
                 e.printStackTrace();
             }
@@ -137,7 +117,7 @@ public class TranslationActivity extends AppCompatActivity {
             add_factor = "?translation=kjv";
             translation = 1;
             try {
-                volley_translation_0_books();
+                volleyTranslation0Books();
             } catch (JSONException e) {
                 e.printStackTrace();
             }
@@ -145,34 +125,33 @@ public class TranslationActivity extends AppCompatActivity {
     }
 
     /*
+    dialogonclicklisteer to switch translation
+     */
+    DialogInterface.OnClickListener translationSwitchListener = new DialogInterface.OnClickListener() {
+        @Override
+        public void onClick(DialogInterface dialog, int choice) {
+            switch (choice) {
+                case DialogInterface.BUTTON_POSITIVE:
+                    switchTranslation();
+                    break;
+                case DialogInterface.BUTTON_NEUTRAL:
+                    break;
+            }
+        }
+    };
+    /*
     will switch translation depending on the selected part
      */
     public void beforeSwitchTranslation(){
-        DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int choice) {
-                switch (choice) {
-                    case DialogInterface.BUTTON_POSITIVE:
-                        switchTranslation();
-                        break;
-
-                    case DialogInterface.BUTTON_NEUTRAL:
-                        break;
-                }
-            }
-        };
-
-        String translation_txt;
+        String translation_txt = "WEB";
         if (translation == 0){
             translation_txt ="KJV";
         }
-        else {
-            translation_txt = "WEB";
-        }
+
         AlertDialog.Builder builder = new AlertDialog.Builder(TranslationActivity.this);
         builder.setMessage("do you want to switch to " + translation_txt)
-                .setNeutralButton("no", dialogClickListener)
-                .setPositiveButton("yes", dialogClickListener).show();
+                .setNeutralButton("no", translationSwitchListener)
+                .setPositiveButton("yes", translationSwitchListener).show();
     }
     /*
     actually switches the translation
@@ -181,13 +160,10 @@ public class TranslationActivity extends AppCompatActivity {
         String translation_txt;
         if( translation == 0){
             translation = 1;
-            translation_txt = "KJV";
         }
         else {
             translation = 0;
-            translation_txt = "WEB";
         }
-        getSupportActionBar().setTitle("Current translation = " + translation_txt);
 
         // layout needs to be adapted
         showDownload();
@@ -207,9 +183,14 @@ public class TranslationActivity extends AppCompatActivity {
     shows the layout to enabling a download of a book
      */
     public void showDownload(){
-            translation_txt.setVisibility(View.VISIBLE);
-            title_txt.setVisibility(View.VISIBLE);
-            setText();
+        if (translation == 1) {
+            getSupportActionBar().setTitle("Current translation = KJV");
+        } else {
+            getSupportActionBar().setTitle("Current translation = WEB");
+        }
+        translation_txt.setVisibility(View.VISIBLE);
+        title_txt.setVisibility(View.VISIBLE);
+        setText();
     }
     /*
     will set the layout depending on which translations are present
@@ -254,7 +235,7 @@ public class TranslationActivity extends AppCompatActivity {
                 beforeLogout();
                 break;
             case R.id.favorites:
-                GoToFavorites();
+                goToFavorites();
                 break;
 
             case R.id.switch_translation:
@@ -303,8 +284,10 @@ public class TranslationActivity extends AppCompatActivity {
     /*
     will go back to userActivity
      */
-    private void go_back() {
+    private void goBack() {
         Intent intent = new Intent(this, UserActivity.class);
+        intent.putExtra("translation", translation);
+
         // starts the new activity
         startActivity(intent);
         finish();
@@ -313,7 +296,7 @@ public class TranslationActivity extends AppCompatActivity {
     /*
     preperation of the volley which will get the biblebook
      */
-    public void volley_translation_0_books() throws JSONException {
+    public void volleyTranslation0Books() throws JSONException {
         progress_dialog = new ProgressDialog(this);
         progress_dialog.setMessage("loading");
         progress_dialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
@@ -321,16 +304,16 @@ public class TranslationActivity extends AppCompatActivity {
         chapters = BOOKSjson.getJSONObject(given_book_int).getInt("val");
         progress_dialog.setMax(chapters);
         progress_dialog.show();
-        volley_translation_1_chapters();
+        volleyTranslation1Chapters();
     }
     /*
     function that will volley all chapters of the book one by one
      */
-    public void volley_translation_1_chapters( ) throws JSONException {
+    public void volleyTranslation1Chapters( ) throws JSONException {
 
         for (int i = 0; i < chapters; i++) {
             int chapter = i + 1;
-            volley_translation_2_chapter(chapter);
+            volleyTranslation2Chapter(chapter);
         }
     }
 
@@ -338,9 +321,9 @@ public class TranslationActivity extends AppCompatActivity {
 
     /*
     TODO can crash while downloading and only having half of the book
-    will volley the chapter given by volley_translatio_1_chapters
+    will volley the chapter given by volleyTranslation1
      */
-    public void volley_translation_2_chapter( final int chapter) {
+    public void volleyTranslation2Chapter( final int chapter) {
         // Initialize a new RequestQueue instance
         RequestQueue requestQueue = Volley.newRequestQueue(getApplicationContext());
         String mJSONURLString = "https://bible-api.com/" + book_url + "%20" + chapter + add_factor;
@@ -357,7 +340,7 @@ public class TranslationActivity extends AppCompatActivity {
                             progress_dialog.setProgress(load_chapter);
 
                             JSONArray jsonArray = response.getJSONArray("verses");
-                            volley_translation_3_db(jsonArray, chapter);
+                            volleyTranslation3Database(jsonArray, chapter);
                         } catch (JSONException ignored) {}
                     }
                 },
@@ -368,7 +351,7 @@ public class TranslationActivity extends AppCompatActivity {
                         Toast.makeText(TranslationActivity.this,
                                 "No connection please restart the app with internet acces",
                                 Toast.LENGTH_SHORT).show();
-                        go_back();
+                        goBack();
                     }
                 }
         );
@@ -380,7 +363,7 @@ public class TranslationActivity extends AppCompatActivity {
     will set the textresult in the database verse by verse
     chapter needs to be passed on because chapter 1 does not need to get here first
      */
-    public void volley_translation_3_db(JSONArray jsonArray, int chapter)throws JSONException{
+    public void volleyTranslation3Database(JSONArray jsonArray, int chapter)throws JSONException{
 
         ArrayList<String> verses = new ArrayList<>();
 
@@ -408,20 +391,29 @@ public class TranslationActivity extends AppCompatActivity {
             }
         }
         progress_dialog.dismiss();
-        go_back();
+        goBack();
     }
 
 
     /*
    will go to the favoritesActivity
    */
-    private void GoToFavorites() {
+    private void goToFavorites() {
         Intent intent = new Intent(this, FavoriteActivity.class);
         intent.putExtra("translation", translation);
 
         // starts the new activity
         startActivity(intent);
         finish();
+    }
+    /*
+    if the navigation backButton is pressed go one step back
+     */
+    private class navigationBackClicked implements View.OnClickListener {
+        @Override
+        public void onClick(View v) {
+            goBack();
+        }
     }
 }
 

@@ -129,7 +129,7 @@ public class UserActivity extends AppCompatActivity {
                 GoToFavorites();
                 break;
             case R.id.switch_translation:
-                switchTranslation();
+                switchTranslationDialog();
                 break;
         }
         return super.onOptionsItemSelected(item);
@@ -214,8 +214,7 @@ public class UserActivity extends AppCompatActivity {
     /*
     test dialog made with use of https://stackoverflow.com/questions/10903754/input-text-dialog-android
      */
-    public void dialogAddFavorites1(final Integer begin_verse, final Integer end_verse) {
-        verse_text = new VerseClass(navigatorClass.selected_book, navigatorClass.selected_chapter, begin_verse, end_verse);
+    public void dialogAddFavorites1() {
 
         DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
             @Override
@@ -240,9 +239,9 @@ public class UserActivity extends AppCompatActivity {
         builder.setMessage("Under which name do you want to add this to firebase?");
 
         // set a message accordingly to which verses are selected
-        String builder_title = "Selected " + navigatorClass.selected_book + " " + navigatorClass.selected_chapter + " verse : " + begin_verse;
-        if (begin_verse != end_verse) {
-            builder_title += " - " + end_verse;
+        String builder_title = "Selected " + navigatorClass.selected_book + " " + navigatorClass.selected_chapter + " verse : " + verse_text.begin_verse;
+        if (verse_text.begin_verse != verse_text.end_verse) {
+            builder_title += " - " + verse_text.end_verse;
         }
         builder.setTitle(builder_title);
 
@@ -279,7 +278,8 @@ public class UserActivity extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Integer option_clicked = verse + position;
-                dialogAddFavorites1(verse, option_clicked);
+                verse_text = new VerseClass(navigatorClass.selected_book, navigatorClass.selected_chapter, verse, option_clicked);
+                dialogAddFavorites1();
                 dialog_verses.cancel();
             }
         });
@@ -316,37 +316,28 @@ public class UserActivity extends AppCompatActivity {
         }
     }
 
+    /*
+    implements an onclicklistener to check of the translation needs to be changed
+     */
+    DialogInterface.OnClickListener translationSwitchListener = new DialogInterface.OnClickListener() {
+        @Override
+        public void onClick(DialogInterface dialog, int choice) {
+            switch (choice) {
+                case DialogInterface.BUTTON_POSITIVE:
+                    switchTranslation();
+                    break;
+                case DialogInterface.BUTTON_NEUTRAL:
+                    break;
+            }
+        }
+    };
 
     /*
     popup which allows the user to select a different translation
     allows the user to read from a different translation
      */
-    public void switchTranslation() {
-        DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int choice) {
-                switch (choice) {
-                    case DialogInterface.BUTTON_POSITIVE:
-                        String translation_txt;
-                        if (translation == 0) {
-                            translation = 1;
-                            translation_txt = "KJV";
-                        } else {
-                            translation = 0;
-                            translation_txt = "WEB";
-                        }
-                        Toast.makeText(UserActivity.this, translation_txt + " selected", Toast.LENGTH_SHORT).show();
-                        toolbar.setSubtitle(translation_txt);
-                        if (!checkBookExistence()) {
-                            layer = 1;
-                        }
-                        setLayerLayout();
-                        break;
-                    case DialogInterface.BUTTON_NEUTRAL:
-                        break;
-                }
-            }
-        };
+    public void switchTranslationDialog() {
+
         String translation_txt;
         if (translation == 0) {
             translation_txt = "KJV";
@@ -355,8 +346,28 @@ public class UserActivity extends AppCompatActivity {
         }
         AlertDialog.Builder builder = new AlertDialog.Builder(UserActivity.this);
         builder.setMessage("do you want to switch to " + translation_txt)
-                .setNeutralButton("no", dialogClickListener)
-                .setPositiveButton("yes", dialogClickListener).show();
+                .setNeutralButton("no", translationSwitchListener)
+                .setPositiveButton("yes", translationSwitchListener).show();
+    }
+
+    /*
+    switches translation and changes the layout accordingly
+     */
+    private void switchTranslation() {
+        String translation_txt;
+        if (translation == 0) {
+            translation = 1;
+            translation_txt = "KJV";
+        } else {
+            translation = 0;
+            translation_txt = "WEB";
+        }
+        Toast.makeText(UserActivity.this, translation_txt + " selected", Toast.LENGTH_SHORT).show();
+        toolbar.setSubtitle(translation_txt);
+        if (!checkBookExistence()) {
+            layer = 1;
+        }
+        setLayerLayout();
     }
 
     /*
