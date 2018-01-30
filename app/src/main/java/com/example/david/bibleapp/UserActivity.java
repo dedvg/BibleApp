@@ -438,16 +438,11 @@ public class UserActivity extends AppCompatActivity {
      */
 
     public void fillList() {
-//        ArrayAdapter theAdapter = new ArrayAdapter(this, android.R.layout.simple_list_item_1, list_text);
-//        listView.setAdapter(theAdapter);
-
-
         // Initialize a new ArrayAdapter object from list
         CustomAdapter theAdapter = new CustomAdapter();
 
         // Populate the second ListView with second ArrayAdapter
         listView.setAdapter(theAdapter);
-
     }
 
     /*
@@ -645,7 +640,9 @@ public class UserActivity extends AppCompatActivity {
     };
 
 
-
+    /*
+    will set the selected verses in Firebase by setting a singleEventListener
+     */
     public void verseInFirebase(final ArrayList verses_list){
         verse_text.text = verses_list;
         if (translation == 0) {

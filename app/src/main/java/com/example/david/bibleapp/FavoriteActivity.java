@@ -38,7 +38,7 @@ public class FavoriteActivity extends AppCompatActivity {
     // iniatializing
     ListView listview;
     Toolbar toolbar;
-    Integer subject_length, clicked_subject;
+    Integer subject_length, clicked_subject, position_to_delete;
 
     // references for firebase use
     DatabaseReference the_database;
@@ -62,13 +62,8 @@ public class FavoriteActivity extends AppCompatActivity {
         // set some layout for the custom toolbar and an onclick listener on the back button
         toolbar.setTitle("Favories");
         toolbar.setSubtitle("long tap an item te delete it");
-        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // handles the back button press
-                goBack();
-            }
-        });
+        toolbar.setNavigationOnClickListener(new navigationBackClicked());
+
         getUserFirebase();
         listview.setOnItemLongClickListener(new LongClickListener());
 
@@ -175,7 +170,8 @@ public class FavoriteActivity extends AppCompatActivity {
     private class LongClickListener implements AdapterView.OnItemLongClickListener {
         @Override
         public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-            delteMsg(position);
+            position_to_delete = position;
+            deleteDialog();
             return true;
         }
     }
@@ -270,34 +266,37 @@ public class FavoriteActivity extends AppCompatActivity {
         listview.setVisibility(View.VISIBLE);
 
     }
-
-
+    /*
+    the onclick listener for the deleteDialog
+    if the positive button is clicked the subject will get deleted
+     */
+    DialogInterface.OnClickListener deleteClickListener = new DialogInterface.OnClickListener() {
+        @Override
+        public void onClick(DialogInterface dialog, int choice) {
+            switch (choice) {
+                case DialogInterface.BUTTON_POSITIVE:
+                    if (clicked_subject == null)
+                    {
+                        deleteSubject(position_to_delete);
+                    }
+                    else {
+                        delete_verses(position_to_delete);
+                    }
+                    break;
+                case DialogInterface.BUTTON_NEGATIVE:
+                    break;
+            }
+        }
+    };
     /*
     deletes subject from firebase by asking first if the user wants to
      */
-    private void delteMsg(final int position) {
-        DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int choice) {
-                switch (choice) {
-                    case DialogInterface.BUTTON_POSITIVE:
-                        if (clicked_subject == null)
-                        {
-                            deleteSubject(position);
-                        }
-                        else {
-                            delete_verses(position);
-                        }
-                        break;
-                    case DialogInterface.BUTTON_NEGATIVE:
-                        break;
-                }
-            }
-        };
+    private void deleteDialog() {
+
         AlertDialog.Builder builder = new AlertDialog.Builder(FavoriteActivity.this);
         builder.setMessage("Do you really want to delete this from your Favorites?"  )
-                .setPositiveButton("Yes", dialogClickListener)
-                .setNegativeButton("No", dialogClickListener).show();
+                .setPositiveButton("Yes", deleteClickListener)
+                .setNegativeButton("No", deleteClickListener).show();
     }
 
 
@@ -352,5 +351,15 @@ public class FavoriteActivity extends AppCompatActivity {
         };
         the_database.addListenerForSingleValueEvent(postListener);
 
+    }
+
+    /*
+    if the navigation backButton is pressed go one step back
+     */
+    private class navigationBackClicked implements View.OnClickListener {
+        @Override
+        public void onClick(View v) {
+            goBack();
+        }
     }
 }

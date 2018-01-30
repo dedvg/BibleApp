@@ -244,31 +244,34 @@ public class TranslationActivity extends AppCompatActivity {
         }
         return super.onOptionsItemSelected(item);
     }
+    /*
+    the click listener for the beforeLogout function
+    if clicked yes the user will logout
+     */
 
+    DialogInterface.OnClickListener beforeLogoutClickListener = new DialogInterface.OnClickListener() {
+        @Override
+        public void onClick(DialogInterface dialog, int choice) {
+            switch (choice) {
+                case DialogInterface.BUTTON_POSITIVE:
+                    logout();
+                    break;
+                case DialogInterface.BUTTON_NEGATIVE:
+                    break;
+            }
+        }
+    };
     /*
 
     asks the user if the user really wants to logout, if yes logout
      */
     public void beforeLogout(){
-        DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int choice) {
-                switch (choice) {
-                    case DialogInterface.BUTTON_POSITIVE:
 
-                        logout();
-
-                        break;
-                    case DialogInterface.BUTTON_NEGATIVE:
-                        break;
-                }
-            }
-        };
 
         AlertDialog.Builder builder = new AlertDialog.Builder(TranslationActivity.this);
         builder.setMessage("Do you want to log out?")
-                .setPositiveButton("Yes", dialogClickListener)
-                .setNegativeButton("No", dialogClickListener).show();
+                .setPositiveButton("Yes", beforeLogoutClickListener)
+                .setNegativeButton("No", beforeLogoutClickListener).show();
     }
     /*
     handle the actual logout
