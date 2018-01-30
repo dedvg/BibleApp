@@ -9,6 +9,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 public class TranslationDatabase extends SQLiteOpenHelper {
 
@@ -107,17 +108,7 @@ public class TranslationDatabase extends SQLiteOpenHelper {
         return db.rawQuery(query, null);
     }
 
-    /*
-    return a cursor to enable the user to select which translation to read from certain verses
-    used to add verses to favorites
-     */
-    public Cursor get_verses(String book, int chapter, int begin_verse, int end_verse){
-        SQLiteDatabase db = this.getWritableDatabase();
 
-        String query = "SELECT * FROM " + TABLE_NAME + " WHERE " + COL1 + " = '" + book+ "' AND " + COL3 + " BETWEEN " + begin_verse + " AND " + end_verse + " AND " + COL2 + " = " + chapter + ";";
-        Cursor entries = db.rawQuery(query, null);
-        return entries;
-    }
 
 
     public Cursor getChapter(String book, Integer chapter, Integer translation) {
@@ -132,5 +123,18 @@ public class TranslationDatabase extends SQLiteOpenHelper {
         String query = "SELECT * FROM " + TABLE_NAME + " WHERE " + COL1 + " = '" +  book + "' AND " + COL2 + " = " + chapter + " AND " + variable_column + " IS NOT NULL;";
         Cursor entries = db.rawQuery(query, null);
         return entries;
+    }
+
+    /*
+    return a cursor to enable the user to select which translation to read from certain verses
+    used to add verses to favorites
+   */
+    public Cursor getVerses(VerseClass verse_class) {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        String query = "SELECT * FROM " + TABLE_NAME + " WHERE " + COL1 + " = '" + verse_class.book + "' AND " + COL3 + " BETWEEN " + verse_class.begin_verse + " AND " + verse_class.end_verse + " AND " + COL2 + " = " + verse_class.chapter + ";";
+        Log.d("query", query);
+
+        return db.rawQuery(query, null);
     }
 }

@@ -21,8 +21,8 @@ public class VerseClass {
     public VerseClass() {
     }
 
-    public VerseClass (String Book, Integer Chapter, Integer Begin_Verse, Integer End_Verse , ArrayList<String> Text) {
-        this.text = Text;
+    public VerseClass (String Book, Integer Chapter, Integer Begin_Verse, Integer End_Verse ) {
+        this.text = null;
         this.chapter = Chapter;
         this.begin_verse = Begin_Verse;
         this.end_verse = End_Verse;

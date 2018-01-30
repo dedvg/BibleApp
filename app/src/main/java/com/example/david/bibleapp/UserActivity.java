@@ -8,6 +8,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.text.InputType;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -248,9 +249,11 @@ public class UserActivity extends AppCompatActivity {
                 ArrayList<String> VersesList = new ArrayList<String>();
                 m_Text[0] = input.getText().toString();
                 Integer row = translation + 3;
-                Cursor theCursor = theDatabase.get_verses(navigatorClass.selected_book, navigatorClass.selected_chapter, begin_verse, end_verse);
+                VerseClass verse_class = new VerseClass(navigatorClass.selected_book, navigatorClass.selected_chapter, begin_verse, end_verse);
+                Cursor theCursor = theDatabase.getVerses(verse_class);
                 while (theCursor.moveToNext()){
                     String verse = theCursor.getString(row);
+                    Log.d("verse added", verse);
                     VersesList.add(verse);
                 }
                 verseInFirebase(m_Text[0],begin_verse, end_verse,VersesList);
@@ -604,7 +607,8 @@ public class UserActivity extends AppCompatActivity {
         ValueEventListener postListener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                VerseClass VerseText = new VerseClass(navigatorClass.selected_book, navigatorClass.selected_chapter ,begin_verse, end_verse, verses_list);
+                VerseClass VerseText = new VerseClass(navigatorClass.selected_book, navigatorClass.selected_chapter ,begin_verse, end_verse);
+                VerseText.text = verses_list;
                 if (translation == 0){VerseText.translation = "(WEB)";}
                 else {VerseText.translation = "(KJV)";}
 
