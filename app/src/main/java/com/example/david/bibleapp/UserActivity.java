@@ -3,14 +3,11 @@ package com.example.david.bibleapp;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
-import android.os.Build;
-import android.support.annotation.RequiresApi;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.text.InputType;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -43,8 +40,6 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-
-import javax.security.auth.Subject;
 
 public class UserActivity extends AppCompatActivity {
 
@@ -253,7 +248,7 @@ public class UserActivity extends AppCompatActivity {
                 ArrayList<String> VersesList = new ArrayList<String>();
                 m_Text[0] = input.getText().toString();
                 Integer row = translation + 3;
-                Cursor theCursor = theDatabase.get_verses(navigatorClass.selected_book, navigatorClass.selected_chapter, begin_verse, end_verse, translation);
+                Cursor theCursor = theDatabase.get_verses(navigatorClass.selected_book, navigatorClass.selected_chapter, begin_verse, end_verse);
                 while (theCursor.moveToNext()){
                     String verse = theCursor.getString(row);
                     VersesList.add(verse);
@@ -278,7 +273,7 @@ public class UserActivity extends AppCompatActivity {
     public void dialogFavorites(final Integer verse ){
         Integer max_verse = 0;
         List<String> verses = new ArrayList<>();
-        Cursor theCursor = theDatabase.get_max_verse(navigatorClass.selected_book, navigatorClass.selected_chapter, verse, translation);
+        Cursor theCursor = theDatabase.get_max_verse(navigatorClass.selected_book, navigatorClass.selected_chapter);
         while (theCursor.moveToNext()){
             max_verse = theCursor.getInt(0);
             System.out.println(max_verse.toString());

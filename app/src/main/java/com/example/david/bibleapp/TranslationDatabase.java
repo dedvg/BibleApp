@@ -49,15 +49,17 @@ public class TranslationDatabase extends SQLiteOpenHelper {
     }
 
 
+    /*
+    will check if chapter one is present of the translation
+     */
     public boolean checkChapter1Existence(String book, Integer translation){
         SQLiteDatabase db = this.getWritableDatabase();
-
         String variable_column = COL4;
-
         if (translation == 1){
             variable_column = COL5;
         }
-        Cursor cursor = null;
+
+        Cursor cursor;
         String Query = "SELECT * FROM " + TABLE_NAME + " WHERE " + COL1 + " = '" + book+ "' AND " + COL2 + "=  1 AND " + variable_column + " IS NOT NULL;";
         cursor= db.rawQuery(Query,null);
 
@@ -71,7 +73,10 @@ public class TranslationDatabase extends SQLiteOpenHelper {
 
 
 
-    // update the table
+    /*
+    add verses to the table depending whether the columns already exist or not
+    if both col4 and col 5 are present the table needs to be updated instead of insert
+     */
     public void addItem( String book, int chapter, int verse, String text, int translation) {
         SQLiteDatabase db = this.getWritableDatabase();
         String query;
@@ -82,43 +87,38 @@ public class TranslationDatabase extends SQLiteOpenHelper {
             variable_column = COL5;
         }
 
-        if (checkChapter1Existence(book, 0) && checkChapter1Existence(book, 1))
+        if (checkChapter1Existence(book, 1) && checkChapter1Existence(book, 0))
         {
             query = "UPDATE " + TABLE_NAME + " SET " + variable_column + " = '" + text + "' WHERE " + COL1 + " = '" + book+ "' AND " + COL2 + " = " + chapter + " AND " + COL3 + " = " + verse +  ";";
         }
         else{
-
             query = "INSERT INTO " + TABLE_NAME + "(" + COL1 + ", " + COL2 + ", " + COL3 + ", " + variable_column + ") VALUES( '" + book + "', " + chapter + ", " + verse + ", '" + text + "');";
-
         }
-        System.out.println(query);
         db.execSQL(query);
     }
-
-    public Cursor get_max_verse(String book, int chapter, int verse, int translation){
+    /*
+    returns the max verse that is possible used to add verses to favorites
+     */
+    public Cursor get_max_verse(String book, int chapter){
         SQLiteDatabase db = this.getWritableDatabase();
         String query;
 
-
         query = "SELECT MAX (" + COL3 + ") FROM " + TABLE_NAME + " WHERE " + COL1 + " = '" + book+ "' AND " + COL2 + "= " + chapter + " ;";
-        Cursor entries = db.rawQuery(query, null);
-        return entries;
+        return db.rawQuery(query, null);
     }
 
-    public Cursor get_verses (String book, int chapter, int begin_verse, int end_verse, int translation){
+    /*
+    return a cursor to enable the user to select which translation to read from certain verses
+    used to add verses to favorites
+     */
+    public Cursor get_verses(String book, int chapter, int begin_verse, int end_verse){
         SQLiteDatabase db = this.getWritableDatabase();
 
         String query = "SELECT * FROM " + TABLE_NAME + " WHERE " + COL1 + " = '" + book+ "' AND " + COL3 + " BETWEEN " + begin_verse + " AND " + end_verse + " AND " + COL2 + " = " + chapter + ";";
         Cursor entries = db.rawQuery(query, null);
         return entries;
     }
-    // get the whole table
-    public Cursor getData() {
-        SQLiteDatabase db = this.getWritableDatabase();
-        String query = "SELECT * FROM " + TABLE_NAME;
-        Cursor entries = db.rawQuery(query, null);
-        return entries;
-    }
+
 
     public Cursor getChapter(String book, Integer chapter, Integer translation) {
 
@@ -133,20 +133,4 @@ public class TranslationDatabase extends SQLiteOpenHelper {
         Cursor entries = db.rawQuery(query, null);
         return entries;
     }
-
-
-
-
-
-    // delete the whole table
-    public void clear()
-    {
-        SQLiteDatabase db = this.getReadableDatabase();
-        String query ="DELETE FROM " + TABLE_NAME +";";
-        db.execSQL(query);
-    }
-
-
-
-
 }
