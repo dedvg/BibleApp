@@ -133,6 +133,7 @@ __progress__
 * removed some not needed functions
 
 # day 12 (30 -1-2018)
+__BUGG__ the first verse can come at the end of the list while reading
 __decicions__
 
       
@@ -142,4 +143,5 @@ __progress__
 * commented some more code
 * chapters where not in the right order, this is fixed now
 * worked on getting better code hub to 6 instead of 5
+* __BUGG FIX__ favorites always started from verse 1 this is fixed
 
