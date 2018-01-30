@@ -11,5 +11,10 @@
   * use of camelcase
 * __Activities__
     * comment on top of each java file of the Activity with use of /* */
+    * the order of functions from bottom to top is like this:
+         1. listeners
+         1. adapters
+         1. other functions
+         1. functions like onstop OnOptionSelected that need an @override above it
 * __variables__ 
     * always lowercase with _ deviding the words
