@@ -206,7 +206,7 @@ public class TranslationActivity extends AppCompatActivity {
      */
     private void set_text() {
 
-        if (theDatabase.getChapter(given_book, 1, translation).getCount() >= 1) {
+        if (theDatabase.checkChapter1Existence(given_book, translation)){
             translation_btn.setVisibility(View.INVISIBLE);
             if (translation == 0){
                 translation_txt.setText(" WEB version of " + given_book + " is already downloaded");
@@ -359,7 +359,7 @@ public class TranslationActivity extends AppCompatActivity {
 
                             System.out.println(load_chapter.toString());
                             JSONArray jsonArray = response.getJSONArray("verses");
-                            volley_translation_3_db(jsonArray);
+                            volley_translation_3_db(jsonArray, chapter);
                         } catch (JSONException e) {
                             // if this shows something changed in the JSON
                             Toast.makeText(TranslationActivity.this,
@@ -385,8 +385,9 @@ public class TranslationActivity extends AppCompatActivity {
     }
     /*
     will set the textresult in the database verse by verse
+    chapter needs to be passed on because chapter 1 does not need to get here first
      */
-    public void volley_translation_3_db(JSONArray jsonArray)throws JSONException{
+    public void volley_translation_3_db(JSONArray jsonArray, int chapter)throws JSONException{
 
         ArrayList<String> verses = new ArrayList<>();
 
@@ -395,7 +396,7 @@ public class TranslationActivity extends AppCompatActivity {
             text =  jsonArray.getJSONObject(i).getString("text");
             verses.add(text);
         }
-        ChapterClass chapter_text = new ChapterClass(load_chapter, verses);
+        ChapterClass chapter_text = new ChapterClass(chapter, verses);
         bible_book.add(chapter_text);
         if (load_chapter == chapters){
             setInDatabase(bible_book);

@@ -49,9 +49,29 @@ public class TranslationDatabase extends SQLiteOpenHelper {
     }
 
 
+    public boolean checkChapter1Existence(String book, Integer translation){
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        String variable_column = COL4;
+
+        if (translation == 1){
+            variable_column = COL5;
+        }
+        Cursor cursor = null;
+        String Query = "SELECT * FROM " + TABLE_NAME + " WHERE " + COL1 + " = '" + book+ "' AND " + COL2 + "=  1 AND " + variable_column + " IS NOT NULL;";
+        cursor= db.rawQuery(Query,null);
+
+        if(cursor.getCount() == 0){
+            cursor.close();
+            return false;
+        }
+        cursor.close();
+        return true;
+    }
+
+
 
     // update the table
-    // todo check working part
     public void addItem( String book, int chapter, int verse, String text, int translation) {
         SQLiteDatabase db = this.getWritableDatabase();
         String query;
@@ -62,7 +82,7 @@ public class TranslationDatabase extends SQLiteOpenHelper {
             variable_column = COL5;
         }
 
-        if (getChapter(book, chapter, translation).getCount() >= 1)
+        if (checkChapter1Existence(book, 0) && checkChapter1Existence(book, 1))
         {
             query = "UPDATE " + TABLE_NAME + " SET " + variable_column + " = '" + text + "' WHERE " + COL1 + " = '" + book+ "' AND " + COL2 + " = " + chapter + " AND " + COL3 + " = " + verse +  ";";
         }
@@ -71,7 +91,7 @@ public class TranslationDatabase extends SQLiteOpenHelper {
             query = "INSERT INTO " + TABLE_NAME + "(" + COL1 + ", " + COL2 + ", " + COL3 + ", " + variable_column + ") VALUES( '" + book + "', " + chapter + ", " + verse + ", '" + text + "');";
 
         }
-
+        System.out.println(query);
         db.execSQL(query);
     }
 

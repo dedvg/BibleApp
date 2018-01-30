@@ -42,32 +42,19 @@ public class RegisterActivity extends AppCompatActivity {
     // creates user and checks if it is succesfull in the onComplete
     public void create_user(final String email, String password) {
         mAuth.createUserWithEmailAndPassword(email, password)
-                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        if (task.isSuccessful()) {
-
-                            // toast it, add user to firebase and go to the next activity
-                            Toast.makeText(RegisterActivity.this,
-                                    "Authentication succes.", Toast.LENGTH_SHORT).show();
-                            add_user_firebase();
-                            logged_in();
-                        } else {
-
-                            // If sign in fails, display a message to the user.
-                            Toast.makeText(RegisterActivity.this,
-                                    "Authentication failed.", Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                });
+                .addOnCompleteListener(this, new registerListener());
     }
 
-    public void add_user_firebase(){
+
+
+
+    public void addUserToFirebase(){
         FirebaseUser user = mAuth.getCurrentUser();
+        assert user != null;
         String Uid = user.getUid();
         mDatabase.child("users").child(Uid).setValue(new UserClass(email, null));
     }
-    private void logged_in() {
+    private void loggingIn() {
         Intent intent = new Intent(this, UserActivity.class);
         // starts the new activity
 
@@ -94,11 +81,30 @@ public class RegisterActivity extends AppCompatActivity {
         }
     }
 
-    public void GoToLogin(View view) {
+    public void goToLogin(View view) {
         Intent intent = new Intent(this, MainActivity.class);
         // starts the new activity
 
         startActivity(intent);
         finish();
     }
-}
+
+    private class registerListener implements OnCompleteListener<AuthResult> {
+            @Override
+            public void onComplete(@NonNull Task<AuthResult> task) {
+                if (task.isSuccessful()) {
+
+                    // toast it, add user to firebase and go to the next activity
+                    Toast.makeText(RegisterActivity.this,
+                            "Authentication succes.", Toast.LENGTH_SHORT).show();
+                    addUserToFirebase();
+                    loggingIn();
+                } else {
+
+                    // If sign in fails, display a message to the user.
+                    Toast.makeText(RegisterActivity.this,
+                            "Authentication failed, check your connection", Toast.LENGTH_SHORT).show();
+                }
+            }
+        }
+    }

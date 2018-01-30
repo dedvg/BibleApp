@@ -10,6 +10,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.text.InputType;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -49,7 +50,7 @@ public class UserActivity extends AppCompatActivity {
 
     Toolbar toolbar;
     ListView listView ,row_list ;
-    List<String> ListText = new ArrayList<String>();
+    List<String> list_text = new ArrayList<String>();
     Integer layer = 0, translation = 0, clicked_pos;
     JSONArray BOOKSjson;
     TranslationDatabase theDatabase;
@@ -406,7 +407,7 @@ public class UserActivity extends AppCompatActivity {
 
         @Override
         public int getCount() {
-            return ListText.size();
+            return list_text.size();
         }
 
         @Override
@@ -424,17 +425,17 @@ public class UserActivity extends AppCompatActivity {
             convertView = getLayoutInflater().inflate(R.layout.row_user, null);
 
             TextView description_txt = convertView.findViewById(R.id.list_item);
-            description_txt.setText(ListText.get(position));
+            description_txt.setText(list_text.get(position));
             return convertView;
         }
     }
 
     /*
-    will fill the list with what is currently in ListText
+    will fill the list with what is currently in list_text
      */
 
     public void fillList() {
-//        ArrayAdapter theAdapter = new ArrayAdapter(this, android.R.layout.simple_list_item_1, ListText);
+//        ArrayAdapter theAdapter = new ArrayAdapter(this, android.R.layout.simple_list_item_1, list_text);
 //        listView.setAdapter(theAdapter);
 
 
@@ -519,9 +520,9 @@ public class UserActivity extends AppCompatActivity {
     will create a listview with old and new
      */
     public void layer0Layout (){
-        ListText.clear();
-        ListText.add("Old");
-        ListText.add("New");
+        list_text.clear();
+        list_text.add("Old");
+        list_text.add("New");
         fillList();
     }
     /*
@@ -534,7 +535,7 @@ public class UserActivity extends AppCompatActivity {
    40-66 new testament books
     */
     public void layer1Layout() {
-        ListText.clear();
+        list_text.clear();
         for (int i = 0; i < navigatorClass.upper_bound; i++) {
             String book_name = null;
             try {
@@ -542,7 +543,7 @@ public class UserActivity extends AppCompatActivity {
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-            ListText.add(book_name);
+            list_text.add(book_name);
         }
         fillList();
     }
@@ -552,12 +553,12 @@ public class UserActivity extends AppCompatActivity {
      */
     public void layer2Layout(){
         if (checkBookExistence()){
-            ListText.clear();
+            list_text.clear();
             getSupportActionBar().setTitle(navigatorClass.selected_book);
             for (int i = 0; i < navigatorClass.chapters; i ++){
 
                 // +1 because the chapters in the bible do not start with 0
-                ListText.add(String.valueOf(i + 1));
+                list_text.add(String.valueOf(i + 1));
             }
             fillList();
         }
@@ -575,21 +576,20 @@ public class UserActivity extends AppCompatActivity {
         clickListener(false);
         toolbar.setSubtitle("long tap to add to favorites");
         // clear the listview
-        ListText.clear();
+        list_text.clear();
 
         // afther column 3 the translations are present
         Integer verse_column = 3 + translation;
         Cursor theCursor = theDatabase.getChapter(navigatorClass.selected_book, navigatorClass.selected_chapter, translation);
-        Integer rows = theCursor.getCount();
 
-        // if there are multiple rows make the text readable else show a download button
-        // the results depend on the selected translation
+        // add al verses and correspondending verse numbers to the list_text
         while (theCursor.moveToNext()){
             String number = theCursor.getString(2);
             String verse = theCursor.getString(verse_column);
-            ListText.add(number + ":  "+ verse);
+
+            list_text.add(number + ":  "+ verse);
         }
-        listView.setDividerHeight(0);
+
         // will create an empty listview or full with verses
         fillList();
     }
