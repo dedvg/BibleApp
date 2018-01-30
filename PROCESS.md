@@ -123,9 +123,21 @@ __decicions__
 * will make  a progressbar to see how far the download is (especially needed for psalms)
 * __BUGGS__
       * loading can take forever
-      * 
+      * if you click fast on the button for the next chapter you can get an empty chapter
       
 
 __progress__
 * the data will be added at once enabling preventing the data from being added if the book is downloaded half (second part not yet implemented)
+* more comments
+* better loading bar (but improvements are needed)
+* removed some not needed functions
+
+# day 12 (30 -1-2018)
+__decicions__
+
+      
+
+__progress__
+* prevented books with a number in front of it lik 1 corintians from crashing
+* commented some more code
 
