@@ -133,6 +133,7 @@ __progress__
 * removed some not needed functions
 
 # day 12 (30 -1-2018)
+__BUGG__ the first verse can come at the end of the list while reading
 __decicions__
 
       
