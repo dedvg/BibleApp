@@ -43,8 +43,7 @@ public class TranslationActivity extends AppCompatActivity {
     Integer chapters, translation, given_book_int, load_chapter = 0;
     String add_factor, given_book, book_url;
     ProgressDialog progress_dialog;
-    ArrayList <ChapterClass> bible_book = new ArrayList<ChapterClass>();
-
+    ArrayList <ChapterClass> bible_book = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,7 +62,6 @@ public class TranslationActivity extends AppCompatActivity {
         try {
             books_json = new JSONArray(json_array);
             book_url = URLEncoder.encode(given_book, "utf-8");
-
         } catch (JSONException e) {
             e.printStackTrace();
         } catch (UnsupportedEncodingException e) {
@@ -91,8 +89,8 @@ public class TranslationActivity extends AppCompatActivity {
     }
 
     /*
-   enables custom menu
-   */
+    enables custom menu
+    */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_main, menu);
@@ -100,7 +98,7 @@ public class TranslationActivity extends AppCompatActivity {
     }
 
     /*
-     handles which menu item is clicked and what to do
+    handles which menu item is clicked and what to do
     */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -119,8 +117,8 @@ public class TranslationActivity extends AppCompatActivity {
     }
 
     /*
-      will go to the favoritesActivity
-      */
+    will go to the favoritesActivity
+    */
     private void goToFavorites() {
         Intent intent = new Intent(this, FavoriteActivity.class);
         intent.putExtra("translation", translation);
@@ -131,7 +129,7 @@ public class TranslationActivity extends AppCompatActivity {
     }
 
     /*
-   handle the actual logout
+    handle the actual logout
     */
     public void logout() {
         FirebaseAuth.getInstance().signOut();
@@ -143,7 +141,7 @@ public class TranslationActivity extends AppCompatActivity {
 
     /*
     will go back to userActivity
-     */
+    */
     private void goBack() {
         Intent intent = new Intent(this, UserActivity.class);
         intent.putExtra("translation", translation);
@@ -152,10 +150,11 @@ public class TranslationActivity extends AppCompatActivity {
         startActivity(intent);
         finish();
     }
+
     /*
     will handle the onclick of the download button
     changes some parameters depending on the translation used
-     */
+    */
     public void download (View view){
         if (translation == 0){
             add_factor = "";
@@ -173,24 +172,23 @@ public class TranslationActivity extends AppCompatActivity {
         }
     }
 
-
     /*
     will create a dialog which enables the user to swithc translation
-     */
+    */
     public void switchTranslationDialog(){
         String translation_txt = "WEB";
         if (translation == 0){
             translation_txt ="KJV";
         }
-
         AlertDialog.Builder builder = new AlertDialog.Builder(TranslationActivity.this);
         builder.setMessage("do you want to switch to " + translation_txt)
                 .setNeutralButton("no", switchTranslationListener)
                 .setPositiveButton("yes", switchTranslationListener).show();
     }
+
     /*
     actually switches the translation
-     */
+    */
     private void switchTranslation() {
         if( translation == 0){
             translation = 1;
@@ -203,11 +201,9 @@ public class TranslationActivity extends AppCompatActivity {
         showDownload();
     }
 
-
-
     /*
     shows the layout to enabling a download of a book
-     */
+    */
     public void showDownload(){
         if (translation == 1) {
             getSupportActionBar().setTitle("Current translation = KJV");
@@ -215,15 +211,14 @@ public class TranslationActivity extends AppCompatActivity {
             getSupportActionBar().setTitle("Current translation = WEB");
         }
         translation_txt.setVisibility(View.VISIBLE);
-
         setLayout();
     }
+
     /*
     will set the layout depending on which translations are present
-
     if the translation is already downloaded do not show a download button
     else show the download button and adapt the text accordingly
-     */
+    */
     private void setLayout() {
 
         if (sql_database.checkChapter1Existence(given_book, translation)){
@@ -249,14 +244,10 @@ public class TranslationActivity extends AppCompatActivity {
 
     }
 
-
-
     /*
     asks the user if the user really wants to logout, if yes logout
-     */
+    */
     public void logoutDialog(){
-
-
         AlertDialog.Builder builder = new AlertDialog.Builder(TranslationActivity.this);
         builder.setMessage("Do you want to log out?")
                 .setPositiveButton("Yes", logoutListener)
@@ -265,7 +256,7 @@ public class TranslationActivity extends AppCompatActivity {
 
     /*
     preperation of the volley which will get the biblebook
-     */
+    */
     public void volleyPreperations() throws JSONException {
         progress_dialog = new ProgressDialog(this);
         progress_dialog.setMessage("loading");
@@ -277,28 +268,25 @@ public class TranslationActivity extends AppCompatActivity {
         progress_dialog.setMax(chapters);
         progress_dialog.show();
 
-
+        // start volleying the whole book
         volleyChapterByChapter();
     }
 
     /*
     function that will volley all chapters of the book one by one
-     */
+    */
     public void volleyChapterByChapter( ) throws JSONException {
-
         for (int i = 0; i < chapters; i++) {
             int chapter = i + 1;
             volleyChapter(chapter);
         }
     }
 
-
-
     /*
     will volley the chapter of the book and save it in json_array
     each volley sets the progressbar one further
     each chapter is stored with use of the function setChapterInDatabase
-     */
+    */
     public void volleyChapter( final int chapter) {
         // Initialize a new RequestQueue instance
         RequestQueue requestQueue = Volley.newRequestQueue(getApplicationContext());
@@ -310,7 +298,6 @@ public class TranslationActivity extends AppCompatActivity {
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
-
                         try {
 
                             // set the current progress
@@ -326,6 +313,7 @@ public class TranslationActivity extends AppCompatActivity {
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
+
                         // prompt the user to start again
                         Toast.makeText(TranslationActivity.this,
                                 "No connection please restart the app with internet acces",
@@ -338,10 +326,11 @@ public class TranslationActivity extends AppCompatActivity {
         // Add JsonObjectRequest to the RequestQueue
         requestQueue.add(jsonObjectRequest);
     }
+
     /*
     will set the textresult in the database verse by verse
     chapter needs to be passed on because chapter 1 does not need to get here first
-     */
+    */
     public void setChapterInDatabase(JSONArray json_array, int chapter)throws JSONException{
 
         // make a list to store all verses
@@ -366,7 +355,7 @@ public class TranslationActivity extends AppCompatActivity {
 
     /*
     will set the whole book at once in the SQL database
-     */
+    */
     private void setBookInDatabase(ArrayList<ChapterClass> book) {
         Toast.makeText(TranslationActivity.this, "Finished downloading",
                        Toast.LENGTH_SHORT).show();
@@ -389,7 +378,7 @@ public class TranslationActivity extends AppCompatActivity {
 
     /*
     if the navigation backButton is pressed go one step back
-     */
+    */
     private class navigationBackClicked implements View.OnClickListener {
         @Override
         public void onClick(View v) {
@@ -400,7 +389,7 @@ public class TranslationActivity extends AppCompatActivity {
     /*
     the click listener for the beforeLogout function
     if clicked yes the user will logout
-     */
+    */
     DialogInterface.OnClickListener logoutListener = new DialogInterface.OnClickListener() {
         @Override
         public void onClick(DialogInterface dialog, int choice) {
@@ -416,7 +405,7 @@ public class TranslationActivity extends AppCompatActivity {
 
     /*
     dialogonclicklisteer to switch translation
-     */
+    */
     DialogInterface.OnClickListener switchTranslationListener = new DialogInterface.OnClickListener() {
         @Override
         public void onClick(DialogInterface dialog, int choice) {

@@ -114,7 +114,6 @@ public class UserActivity extends AppCompatActivity {
         toolbar.setNavigationOnClickListener(new navigationBackClicked());
     }
 
-
     /*
     will enable the use of a custom toolbar
     */
@@ -179,9 +178,6 @@ public class UserActivity extends AppCompatActivity {
 
     }
 
-
-
-
     /*
     helper function for adding to favorites, done with:
      */
@@ -234,6 +230,7 @@ public class UserActivity extends AppCompatActivity {
         dialog_verses = builder.create();
         dialog_verses.show();
     }
+
     /*
     dialog made with use of:
     https://stackoverflow.com/questions/10903754/input-text-dialog-android
@@ -276,7 +273,6 @@ public class UserActivity extends AppCompatActivity {
             listview.setOnItemLongClickListener(new LongClickListener());
         }
     }
-
 
     /*
     popup which allows the user to select a different translation
@@ -342,6 +338,7 @@ public class UserActivity extends AppCompatActivity {
     will load all books and chapters in a ordered jsonarray books_json
      */
     public void getBookJson() throws JSONException, IOException {
+
         // done with use of https://www.youtube.com/watch?v=h71Ia9iFWfI
         JSONObject jsonObject = null;
         InputStream is = getAssets().open("books.json");
@@ -354,10 +351,8 @@ public class UserActivity extends AppCompatActivity {
         books_json = jsonObject.getJSONObject("sections").getJSONArray("whole_bible");
     }
 
-
     /*
     will handle the listview layout and which functions need to be run
-
     layer 0 = choice between old and new testament
     layer 1 = choice between books of the old or new testament
     layer 2 = choice between the chapters of the selected book
@@ -402,7 +397,6 @@ public class UserActivity extends AppCompatActivity {
             leftbtn.setVisibility(View.INVISIBLE);
             rightbtn.setVisibility(View.INVISIBLE);
         }
-
     }
 
     /*
@@ -417,11 +411,8 @@ public class UserActivity extends AppCompatActivity {
 
     /*
    will fill the listview with books from the old or new testament
-
    from navigatorClass add factor and upper bound determine which books will be shown
-
    0-39 old testament books
-
    40-66 new testament books
     */
     public void layer1Layout() {
@@ -498,9 +489,6 @@ public class UserActivity extends AppCompatActivity {
         fillList();
     }
 
-
-
-
     /*
     will set the selected verses in Firebase by setting a singleEventListener
     and set the translation property in the class
@@ -537,7 +525,7 @@ public class UserActivity extends AppCompatActivity {
     }
 
     /*
-       goes to TranslationActivity with selected book and needed information to download it
+    goes to TranslationActivity with selected book and needed information to download it
     */
     private void goToTranslation(String book, Integer selected_book_int) {
         Intent intent = new Intent(this, TranslationActivity.class);
@@ -551,10 +539,8 @@ public class UserActivity extends AppCompatActivity {
         finish();
     }
 
-
-
     /*
-   Custom adapter for seeing Listview items
+    Custom adapter for seeing Listview items
     */
     class CustomAdapter extends BaseAdapter {
 
@@ -583,9 +569,10 @@ public class UserActivity extends AppCompatActivity {
             return convertView;
         }
     }
+
     /*
-        updats the user with the new favorites
-         */
+    updates the user with the new favorites
+    */
     ValueEventListener updateUser = new ValueEventListener() {
         @Override
         public void onDataChange(DataSnapshot dataSnapshot) {
@@ -637,9 +624,10 @@ public class UserActivity extends AppCompatActivity {
                     Toast.LENGTH_SHORT).show();
         }
     };
+
     /*
     will handle the back button presses by lowering the layout each time
-     */
+    */
     private class navigationBackClicked implements View.OnClickListener {
         @Override
         public void onClick(View v) {
@@ -651,10 +639,11 @@ public class UserActivity extends AppCompatActivity {
             }
         }
     }
+
     /*
      click listener for the list,
      depending on which layer is the current layer some variables are set
-       */
+    */
     private class listClickListener implements AdapterView.OnItemClickListener {
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -715,6 +704,7 @@ public class UserActivity extends AppCompatActivity {
             return false;
         }
     }
+
     /*
     dialogclicklistener which will set the subject and add it to firebase
     (will add the subject with the selected verses)
@@ -725,12 +715,18 @@ public class UserActivity extends AppCompatActivity {
             switch (choice) {
                 case DialogInterface.BUTTON_POSITIVE:
                     ArrayList<String> verses_list = new ArrayList<String>();
+
+                    // get the subject the user typed
                     subject = input.getText().toString();
                     Integer row = translation + 3;
+
+                    // get the verses the cursor selected with the right row
                     Cursor theCursor = sql_databse.getVerses(verse_text);
                     while (theCursor.moveToNext()) {
                         verses_list.add(theCursor.getString(row));
                     }
+
+                    // add the verse(s) to firebase
                     verseInFirebase(verses_list);
                     Toast.makeText(UserActivity.this, "ADDED",
                             Toast.LENGTH_SHORT).show();
@@ -742,7 +738,7 @@ public class UserActivity extends AppCompatActivity {
     };
 
     /*
-   dialogclicklistener which will set end verse of the subject wich can be added to firebase
+    dialogclicklistener which will set end verse of the subject wich can be added to firebase
     */
     AdapterView.OnItemClickListener verseSelected =  new AdapterView.OnItemClickListener() {
         @Override
@@ -756,10 +752,11 @@ public class UserActivity extends AppCompatActivity {
             dialog_verses.cancel();
         }
     };
+
     /*
-       implements an onclicklistener to check of the translation needs to be changed
-       if the positive button is clicked, switch translation
-        */
+    implements an onclicklistener to check of the translation needs to be changed
+    if the positive button is clicked, switch translation
+    */
     DialogInterface.OnClickListener switchTranslationListener = new DialogInterface.OnClickListener() {
         @Override
         public void onClick(DialogInterface dialog, int choice) {
@@ -774,8 +771,8 @@ public class UserActivity extends AppCompatActivity {
     };
 
     /*
-   a clicklisetener which will logout the user if clicked yes
-   used for the function logoutDialog
+    a clicklisetener which will logout the user if clicked yes
+    used for the function logoutDialog
     */
     DialogInterface.OnClickListener logoutListener = new DialogInterface.OnClickListener() {
         @Override
@@ -789,8 +786,6 @@ public class UserActivity extends AppCompatActivity {
             }
         }
     };
-
-
 }
 
 

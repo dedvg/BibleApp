@@ -5,9 +5,8 @@ This class will make sure the navigation in UserActivity will be easy.
 It removes a lot of variables which would else be needed in UserActivity.
 */
 
-
-
 public class NavigationClass {
+
     // book name
     String selected_book;
 
@@ -27,14 +26,12 @@ public class NavigationClass {
     // checks if old or new testament is clicked
     Boolean old;
 
-
     // set default constructor needed for firebase
     public NavigationClass() {
     }
 
     /*
     add factor and upper bound determine which books need to be shown
-
     old testament = 0 -39 (39 books so upper bound is 39 and start 0)
     new testament = 40 - 66 (27 books so upper bound is 27 and start 39)
      */
@@ -59,6 +56,4 @@ public class NavigationClass {
     public void setSelected_chapter(Integer clicked_pos) {
         this.selected_chapter = clicked_pos + 1;
     }
-
-
 }

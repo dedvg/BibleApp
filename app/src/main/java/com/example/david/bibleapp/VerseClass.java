@@ -14,8 +14,7 @@ public class VerseClass {
     public Integer end_verse;
     public Integer chapter;
     public String translation;
-
-
+    
     // set default constructor needed for Firebase
     public VerseClass() {
     }

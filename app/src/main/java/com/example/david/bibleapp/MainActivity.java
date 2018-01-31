@@ -1,4 +1,5 @@
 package com.example.david.bibleapp;
+
 /*
 This Activity allows the user to login.
 If the user already logged in previously, the user will be redirected to UserActivity.
@@ -6,6 +7,7 @@ If the user has no account the user can click on the text:
 "click here if you have no account"
 And if clicked the user will be redirected to RegisterActivity to register.
 */
+
 import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
@@ -24,8 +26,7 @@ public class MainActivity extends AppCompatActivity {
     // creating references
     EditText user_textview, password_textview;
     private FirebaseAuth the_auth;
-    private FirebaseAuth.AuthStateListener the_authListener;
-
+    private FirebaseAuth.AuthStateListener the_authlistener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,33 +40,33 @@ public class MainActivity extends AppCompatActivity {
 
         // set a listener that checks if the user is already logged in
         setListener();
-
     }
 
     /*
     on opening the app will set a listener to check if the user is previously logged in
-     */
+    */
     @Override
     public void onStart() {
         super.onStart();
+
         // Check if user is signed in
-        the_auth.addAuthStateListener(the_authListener);
+        the_auth.addAuthStateListener(the_authlistener);
     }
 
     /*
     will remove the listener onStop
-     */
+    */
     @Override
     public void onStop() {
         super.onStop();
-        if (the_authListener != null) {
-            the_auth.removeAuthStateListener(the_authListener);
+        if (the_authlistener != null) {
+            the_auth.removeAuthStateListener(the_authlistener);
         }
     }
 
     /*
     will go to RegisterActivity to enable the user to register
-     */
+    */
     public void register(View view) {
         Intent intent = new Intent(this, RegisterActivity.class);
         startActivity(intent);
@@ -75,48 +76,29 @@ public class MainActivity extends AppCompatActivity {
     /*
     will handle the login
     if succesfull go to UserActivity
-    TODO anonomous listener
-     */
+    */
     public void loginUser(View view) {
         String password = password_textview.getText().toString();
         String username = user_textview.getText().toString();
-
-
         the_auth.signInWithEmailAndPassword(username, password)
-                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        if (task.isSuccessful()) {
-
-                            // sign in success
-                            signedIn();
-                        }
-                        else {
-
-                            // if sign in fails, display a message to the user.
-                            Toast.makeText(MainActivity.this, "Authentication failed",
-                                    Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                });
+                .addOnCompleteListener(this, loginUserListener );
     }
 
     /*
     go to UserActivity
-     */
+    */
     private void signedIn() {
         Intent intent = new Intent(this, UserActivity.class);
         startActivity(intent);
         finish();
     }
 
-
     /*
     the function that sets a listener to check if the user is already logged in previously
     if so go to UserActivity
-     */
+    */
     private void setListener() {
-        the_authListener = new FirebaseAuth.AuthStateListener() {
+        the_authlistener = new FirebaseAuth.AuthStateListener() {
             @Override
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
                 FirebaseUser user = firebaseAuth.getCurrentUser();
@@ -126,4 +108,25 @@ public class MainActivity extends AppCompatActivity {
             }
         };
     }
+
+    /*
+    listener for logging in firebase
+    if successful go to UserActivity
+     */
+    OnCompleteListener loginUserListener = new OnCompleteListener<AuthResult>() {
+        @Override
+        public void onComplete(@NonNull Task<AuthResult> task) {
+            if (task.isSuccessful()) {
+
+                // sign in success
+                signedIn();
+            }
+            else {
+
+                // if sign in fails, display a message to the user.
+                Toast.makeText(MainActivity.this, "Authentication failed",
+                        Toast.LENGTH_SHORT).show();
+            }
+        }
+    };
 }

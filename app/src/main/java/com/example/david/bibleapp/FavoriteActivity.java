@@ -30,6 +30,7 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 
 public class FavoriteActivity extends AppCompatActivity {
+
     //the displayed text in the list
     ArrayList<String> list_text = new ArrayList<>();
 
@@ -57,7 +58,6 @@ public class FavoriteActivity extends AppCompatActivity {
         the_database = FirebaseDatabase.getInstance().getReference();
         user = the_auth.getCurrentUser();
 
-
         // add backbutton
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -67,7 +67,7 @@ public class FavoriteActivity extends AppCompatActivity {
         toolbar.setTitle("Favories");
         toolbar.setSubtitle("long tap an item te delete it");
 
-        // get the current user
+        // get the current user from Firebase
         getUserFirebase();
 
         // set onclicklisteners
@@ -78,7 +78,7 @@ public class FavoriteActivity extends AppCompatActivity {
     /*
     to use a custom menu this is needed
     some items of the custom toolbar are made invisible
-     */
+    */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
 
@@ -92,9 +92,10 @@ public class FavoriteActivity extends AppCompatActivity {
         favorites.setVisible(false);
         return true;
     }
+
     /*
     dependent whether a subject has been clicked it will go one step back
-     */
+    */
     private void goBack() {
         if (clicked_subject == null)
         {
@@ -111,7 +112,7 @@ public class FavoriteActivity extends AppCompatActivity {
 
     /*
     gets the current UserClass from the user from firebase and adapt layout accordingly
-     */
+    */
     public void getUserFirebase () {
         ValueEventListener postListener = new ValueEventListener() {
             @Override
@@ -141,7 +142,7 @@ public class FavoriteActivity extends AppCompatActivity {
 
     /*
     shows the subjects that are present in the UserClass from the current user
-     */
+    */
     private void refreshSubjects() {
 
         // clear the text and add the subjects one by one
@@ -158,21 +159,21 @@ public class FavoriteActivity extends AppCompatActivity {
     }
 
     /*
-    will show the verses in the UserClass with use of a custom adapter(verseAdapter)
+    will show the verses in the UserClass with use of a custom adapter(VerseAdapter)
     and removes the onclick function
     subject_length is set here (needed for the verseAdapter
-     */
+    */
     public void refreshVerses(){
         subject_length = current_user.subjects.get(clicked_subject).verses.size();
         listview.setOnItemClickListener(null);
-        VerseAdapter verse_adpater = new VerseAdapter();
-        listview.setAdapter(verse_adpater);
+        VerseAdapter verse_adapter = new VerseAdapter();
+        listview.setAdapter(verse_adapter);
     }
 
     /*
     will fill the list with what is currently in list_text only used for subjects
     this is done with a custom adapter used to get a better layout
-     */
+    */
     public void fillList() {
         SubjectAdapter the_adapter = new SubjectAdapter();
         listview.setAdapter(the_adapter);
@@ -180,7 +181,7 @@ public class FavoriteActivity extends AppCompatActivity {
 
     /*
     deletes subject from firebase by asking first if the user wants to with
-     */
+    */
     private void deleteDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(FavoriteActivity.this);
         builder.setMessage("Do you really want to delete this from your Favorites?"  )
@@ -188,10 +189,9 @@ public class FavoriteActivity extends AppCompatActivity {
                 .setNegativeButton("No", deleteDialogListener).show();
     }
 
-
     /*
     delete verse/subject from firebase by adding the changed UserClass back to Firebase
-     */
+    */
     public void deleteVerses(int position){
         UserClass to_change = current_user;
 
@@ -204,7 +204,6 @@ public class FavoriteActivity extends AppCompatActivity {
             to_change.subjects.remove(temp);
         }
         else {
-
             to_change.subjects.get(clicked_subject).verses.remove(position);
             Toast.makeText(FavoriteActivity.this, "deleted", Toast.LENGTH_SHORT).show();
         }
@@ -212,11 +211,11 @@ public class FavoriteActivity extends AppCompatActivity {
         // set the new UserClass in Firebase
         addToFirebase(to_change);
     }
+
     /*
     deletes a subject from the UserClass
-     */
+    */
     public void deleteSubject(int position){
-
         UserClass to_change = current_user;
         to_change.subjects.remove(position);
         addToFirebase(to_change);
@@ -224,7 +223,7 @@ public class FavoriteActivity extends AppCompatActivity {
 
     /*
     will add the custom userclass to firebase
-     */
+    */
     private void addToFirebase(final UserClass to_change) {
         the_database.child("users").child(user.getUid()).setValue(to_change);
 
@@ -235,7 +234,7 @@ public class FavoriteActivity extends AppCompatActivity {
     /*
     custom adapter for seeing Listview items
     only used to show the verses of a clicked subject
-     */
+    */
     class VerseAdapter extends BaseAdapter{
 
         @Override
@@ -289,9 +288,10 @@ public class FavoriteActivity extends AppCompatActivity {
             return convertView;
         }
     }
+
     /*
     custom adapter used for the subjects to give it a proper size
-     */
+    */
     class SubjectAdapter extends BaseAdapter{
 
         @Override
@@ -328,10 +328,9 @@ public class FavoriteActivity extends AppCompatActivity {
         }
     }
 
-
     /*
     if the navigation backButton is pressed go one step back
-     */
+    */
     private class navigationBackClicked implements View.OnClickListener {
         @Override
         public void onClick(View v) {
@@ -340,8 +339,8 @@ public class FavoriteActivity extends AppCompatActivity {
     }
 
     /*
-   the onclick listener for the deleteDialog
-   if the positive button is clicked the subject will get deleted
+    the onclick listener for the deleteDialog
+    if the positive button is clicked the subject will get deleted
     */
     DialogInterface.OnClickListener deleteDialogListener = new DialogInterface.OnClickListener() {
         @Override
@@ -365,9 +364,10 @@ public class FavoriteActivity extends AppCompatActivity {
             }
         }
     };
+
     /*
-  handles the onclick events from the list by setting a subjects and showing the verses
-   */
+    handles the onclick events from the list by setting a subjects and showing the verses
+    */
     private class clicklistener implements AdapterView.OnItemClickListener {
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -377,9 +377,9 @@ public class FavoriteActivity extends AppCompatActivity {
     }
 
     /*
-   long click listener to delete item from firebase
-   if long clicked a delete message will be shown to ask whether the user really
-   wants to delete this
+    long click listener to delete item from firebase
+    if long clicked a delete message will be shown to ask whether the user really
+    wants to delete this
     */
     private class LongClickListener implements AdapterView.OnItemLongClickListener {
         @Override

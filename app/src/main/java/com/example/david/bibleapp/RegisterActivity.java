@@ -3,6 +3,7 @@ package com.example.david.bibleapp;
 /*
 This Activity will allow the user to register a new account or go back to log in.
  */
+
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -46,7 +47,7 @@ public class RegisterActivity extends AppCompatActivity {
 
     /*
     creates the user with use of an onCompleteListener
-     */
+    */
     public void create_user(final String email, String password) {
         the_auth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, new registerListener());
@@ -54,7 +55,7 @@ public class RegisterActivity extends AppCompatActivity {
 
     /*
     will add a userclass to firebase when registering to make sure it is not null
-     */
+    */
     public void addUserToFirebase(){
         FirebaseUser user = the_auth.getCurrentUser();
         assert user != null;
@@ -64,8 +65,8 @@ public class RegisterActivity extends AppCompatActivity {
 
     /*
     will go to the UserActivity
-     */
-    private void loggingIn() {
+    */
+    private void login() {
         Intent intent = new Intent(this, UserActivity.class);
         // starts the new activity
 
@@ -76,7 +77,7 @@ public class RegisterActivity extends AppCompatActivity {
     /*
     checks if the password is 7 or longer and the email is valid
     if both are valid create the user otherwise set hints
-     */
+    */
     public void register(View view) {
         email = user_textview.getText().toString();
         password = password_textview.getText().toString();
@@ -97,7 +98,7 @@ public class RegisterActivity extends AppCompatActivity {
 
     /*
     will go back to MainActivity to enable the user to login
-     */
+    */
     public void goToLogin(View view) {
         Intent intent = new Intent(this, MainActivity.class);
 
@@ -106,6 +107,9 @@ public class RegisterActivity extends AppCompatActivity {
         finish();
     }
 
+    /*
+    will check if the user is registered if so loggin
+    */
     private class registerListener implements OnCompleteListener<AuthResult> {
             @Override
             public void onComplete(@NonNull Task<AuthResult> task) {
@@ -115,7 +119,7 @@ public class RegisterActivity extends AppCompatActivity {
                     Toast.makeText(RegisterActivity.this,
                               "Authentication succes.", Toast.LENGTH_SHORT).show();
                     addUserToFirebase();
-                    loggingIn();
+                    login();
                 } else {
 
                     // If sign in fails, display a message to the user.
