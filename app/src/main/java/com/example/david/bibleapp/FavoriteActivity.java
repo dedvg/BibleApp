@@ -75,6 +75,7 @@ public class FavoriteActivity extends AppCompatActivity {
         toolbar.setNavigationOnClickListener(new navigationBackClicked());
     }
 
+
     /*
     to use a custom menu this is needed
     some items of the custom toolbar are made invisible
@@ -88,6 +89,9 @@ public class FavoriteActivity extends AppCompatActivity {
         // to find a menuitem it has to be set here
         MenuItem translation = menu.findItem(R.id.switch_translation);
         MenuItem favorites = menu.findItem(R.id.favorites);
+        MenuItem logout = menu.findItem(R.id.logout);
+
+        logout.setVisible(false);
         translation.setVisible(false);
         favorites.setVisible(false);
         return true;
