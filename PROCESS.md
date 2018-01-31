@@ -145,3 +145,12 @@ __progress__
 * worked on getting better code hub to 6 instead of 5
 * __BUGG FIX__ favorites always started from verse 1 this is fixed
 
+# day 13 (31 -1-2018)
+__decicions__
+
+      
+
+__progress__
+* when fast clicking the next chapter button it will not go past the available chapters anymore
+* excess code removed
+* all code is now commented and ordered
