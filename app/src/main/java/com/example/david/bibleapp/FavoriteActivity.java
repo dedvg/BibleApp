@@ -1,9 +1,9 @@
 package com.example.david.bibleapp;
 
 /*
-This Activity allows the user to read their subjects they have made.
-By clicking on a subject the added verses will be shown and which translation belongs to them.
-The user is able to logout and to go back to UserActivity to continue reading
+This Activity allows the user to read their subjects they have added.
+By clicking on a subject the belonging verses will be shown and from where the verses are (book, chapter, begin verse, end verse).
+The user is able go back to UserActivity to continue reading
 */
 
 import android.content.DialogInterface;
