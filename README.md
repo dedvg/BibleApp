@@ -1,40 +1,54 @@
 # BibleApp
 David van Grinsven
 
-### Problem statement
-When using a bible app, you can ofthen mark a few verses or favorite them.
-However when two verses are talking about the same subject it is hard to link them.
+### Usage of the app
+This app is used for reading the bible. It can be done in two translations, the King James Version (KJV) and the World English Bible (WEB). The Bible contains 66 books which can be devided in Old testament books and New testament books. Each book may contain multiple chapters and each chapter contains multiple verses.
 
-Currently there are bible apps for example: Bijbel - Statenvertaling.
-But they lack this.
-Bible is another app, it has the functions but not orderly and usefull for study purposes.
-However this app has multiple translations
+By selecting a book of the old and new testament the user will be asked to download the book at first but if it is downloaded the user is able to read it in the selected translation. While reading the user is able to long tap a verse. A popup will emerge asking the user till which verse the user wants to add to his Favorites. Afther the end verse is selected the user can select a name to which it will be stored in his Favorites.
 
-__Solution:__
+With use of logging in the user will never lose it's Favorites and is able to read it on any phone with internet acces. Any added subject or selection of verses can be easily deleted by long tapping the item. On the top right the user can navigate to his Favorites, logout or switch translation. With the provided back button on the top left the user can go back.
 
-Instead of adding a verse to a universal favorites it can be added to a subject. This way verses will be ordered.
-Allowing the user to switch translation and save multiple translations in the same subject.
+### screenshots
+  __loging in and registering__
+  
+  ![screenshot](/doc/screenshot%20(10).png)
+  ![screenshot](/doc/screenshot%20(11).png)
+ 
+  __switch translation or logout__
 
-__Hardest parts:__
-* Making the Bible readable in the phone. (The API returns a verse but you want to read the whole chapter)
-* Get which text is clicked to add to the correspondending subject.
-* Getting Firebase and the APIs working.
-* Getting a local database to enable reading the text.
+  ![screenshot](/doc/screenshot%20(1).png)
+  ![screenshot](/doc/screenshot%20(2).png)
+  
+  __reading the bible__
+  
+  ![screenshot](/doc/screenshot%20(12).png)
+  ![screenshot](/doc/screenshot%20(3).png)
+  
+  ![screenshot](/doc/screenshot%20(6).png)
+  ![screenshot](/doc/screenshot%20(7).png)
+  
+  __reading the users favorites__
+  
+  ![screenshot](/doc/screenshot%20(8).png)
+  ![screenshot](/doc/screenshot%20(9).png)
+   
+  __if the book is not downloaded yet__
+  
+  ![screenshot](/doc/screenshot%20(4).png)
+  ![screenshot](/doc/screenshot%20(5).png)
+  
+ 
+  
+ 
 
 
-### Prerequisites
+### external sources
 * two different bible API sources
   * https://bible-api.com/
-  * http://www.online-bijbel.nl/ontwikkelaars/
 * the ability to login/register a user and keep track of their favorites (firebase)
   * https://firebase.google.com/
   
 
-__MVP__
-* Be able to read the bible
-* Add a text to favorites (with a chosen subject) with use of Firebase
-* Allow the user to make a new subject and delete one
-* another bible translation
 
-  ![draft](/doc/draft.jpg)
+
 [![BCH compliance](https://bettercodehub.com/edge/badge/dedvg/BibleApp?branch=master)](https://bettercodehub.com/)
