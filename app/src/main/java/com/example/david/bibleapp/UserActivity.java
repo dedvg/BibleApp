@@ -360,6 +360,7 @@ public class UserActivity extends AppCompatActivity {
     */
     public void setLayerLayout() {
         buttonLayout();
+        toolbar.setSubtitle("made by David");
         clickListener(true);
         switch (layer) {
             case 0:
