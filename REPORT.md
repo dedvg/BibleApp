@@ -48,14 +48,14 @@ Related classes and notable features:
 
 _FavoriteActivity_
 
-This Activity allows the user to read their subjects they have made.
-By clicking on a subject the added verses will be shown and which translation belongs to them.
-The user is able to logout and to go back to UserActivity to continue reading
+This Activity allows the user to read their subjects they have added.
+By clicking on a subject the belonging verses will be shown and from where the verses are (book, chapter, begin verse, end verse).
+The user is able go back to UserActivity to continue reading.
 
 Related classes and notable features:
 
  * use of a custom adapter to set the list layout
- * use of firebase 
+ * use of a database from Firebase
 
 _UserActivity_
 
@@ -63,7 +63,7 @@ This Activity is the Main Activity the user will use.
 This activity allows the user to logout, switch translation, read the bible (if already downloaded),
 and navigate to favorites.
 The user will first need to select old or new testament, then a biblebook and then the chapter.
-When reading a chapter the user can navigate to the next chapter and previous chapter if available
+When reading a chapter the user can navigate to the next chapter and previous chapter if available,
 with use of the provided buttons beside the list in the middle of the Activity.
 When long tapping a verse the user can add a selection of verses from that chapter to their
 favorites with a name they can fill in.
@@ -72,7 +72,7 @@ Related classes and notable features:
 
 * all book names and the amount of chapers each bible book has are stored in a local json
 * use of a custom adapter to set the list layout
-* use of a NavigationClass make reading a book easier.
+* use of a NavigationClass make navigating from book to book easier
 * when adding something to favorites the UserClass is taken from Firebase, changed and set back. With use of multiple classes:
     * UserClass: a class with a username and a list of SubjectClasses used to store all the user favorites
     * SubjectClass : has an name and a list of VerseClasses, used to store the selected verses beneath one name.
@@ -80,3 +80,39 @@ Related classes and notable features:
 * use of a local SQL database is used to
     * check if a book is already present in the selected translation
     * read the chapter
+    * get the highest verse a chapter has
+
+
+___changes and challenges___
+
+_changes_
+
+* the layout had minor changes due to extra icons not being needed anymore
+* http://www.online-bijbel.nl/ontwikkelaars/ has not been used due to a time shortage and https://bible-api.com/ already containing multiple english tranlations of the bible.
+* dialogs are used for multiple functions (like: logging out, adding to favorites ect.)
+* another activity is made to download a book (TranslationActivity)
+* animations are used for clicking the arrow buttons while reading a chapter
+* Instead of only using an api to read a chapter use of a SQL database is made so the user can read a book offline.
+
+Due to the API only sending a chapter it was not possible to volley the complete bible. Also the api had no list with bible books that are present. So to know which books are able to be read a solution was needed. When saving multiple verses just a SubjectClass was not enough to store them so another Class was needed. The standard listview layout was not a nice way of reading the bible. This gave the following changes:
+
+* instead of just downloading a chapter a whole book is dowloaded, because downloading each chapter seperatly will take a long time for the user. 
+* use of a local json is used to get all book names and amount of chapters they have
+* extra classes are made to safe Favorites in Firebase and to navigate better
+* Custom Adapters are made to change the layout for the listviews that are used
+
+_trade-offs of these choices_
+
+* the user can not download the whole bible at once
+* the user is not able to select more than 2 translations
+* the user can not read the bible in dutch
+
+Given more time was available the volley would be devided in multiple parts enabling the user to download the hole bible at once or another API could have been used. Adding more translations would not be hard with more time. With the current API the database would need one colum and each statement with translation in it would have to be changed a bit. Given more time multiple API sources could have been added.
+
+_Challenges_
+
+* get the layout right for reading the bible, each part (selecting old or new testament, selecting a book, selecting a chapter) needed another layout and separate functions
+* use of a local SQL database and firebase together created some issues
+* switching translation
+* downloading the bible and saving it in SQL
+* use of a local json
