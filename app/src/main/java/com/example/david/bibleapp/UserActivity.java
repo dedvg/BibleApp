@@ -141,7 +141,7 @@ public class UserActivity extends AppCompatActivity {
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
     }
-    
+
     /*
     will handle the leftbutton on click events
     sets the previous chapter as readable
