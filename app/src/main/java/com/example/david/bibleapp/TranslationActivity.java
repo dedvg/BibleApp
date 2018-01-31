@@ -397,8 +397,6 @@ public class TranslationActivity extends AppCompatActivity {
                 case DialogInterface.BUTTON_POSITIVE:
                     logout();
                     break;
-                case DialogInterface.BUTTON_NEGATIVE:
-                    break;
             }
         }
     };
