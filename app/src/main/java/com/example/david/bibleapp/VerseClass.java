@@ -16,7 +16,7 @@ public class VerseClass {
     public String translation;
 
 
-    // set default constructor needed for firebase
+    // set default constructor needed for Firebase
     public VerseClass() {
     }
 

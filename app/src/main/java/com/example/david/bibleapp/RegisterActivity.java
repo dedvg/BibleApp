@@ -25,7 +25,7 @@ public class RegisterActivity extends AppCompatActivity {
     // initializing references
     String email, password;
     EditText user_textview, password_textview;
-    DatabaseReference the_database;
+    DatabaseReference sql_database;
     private FirebaseAuth the_auth;
 
     public RegisterActivity() {
@@ -40,7 +40,7 @@ public class RegisterActivity extends AppCompatActivity {
         // creating the references
         user_textview = findViewById(R.id.usernameED);
         password_textview = findViewById(R.id.passwordED);
-        the_database = FirebaseDatabase.getInstance().getReference();
+        sql_database = FirebaseDatabase.getInstance().getReference();
         the_auth = FirebaseAuth.getInstance();
     }
 
@@ -59,7 +59,7 @@ public class RegisterActivity extends AppCompatActivity {
         FirebaseUser user = the_auth.getCurrentUser();
         assert user != null;
         String Uid = user.getUid();
-        the_database.child("users").child(Uid).setValue(new UserClass(email, null));
+        sql_database.child("users").child(Uid).setValue(new UserClass(email, null));
     }
 
     /*

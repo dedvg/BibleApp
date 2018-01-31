@@ -14,6 +14,9 @@ import android.util.Log;
 
 public class TranslationDatabase extends SQLiteOpenHelper {
 
+
+    // set all colums
+    // translation1 is World English Bible and translation2 is the King James Version
     private static TranslationDatabase instance = null;
     private static final String TABLE_NAME ="Bible_translations";
     private static final String COL1 ="book_name";
@@ -33,14 +36,21 @@ public class TranslationDatabase extends SQLiteOpenHelper {
         }
         return instance;
     }
-    // create the table on create
+
+    /*
+    will create the table
+     */
+
     @Override
     public void onCreate(SQLiteDatabase db) {
         String createTable = "CREATE TABLE " + TABLE_NAME + " (" + COL1 + " TEXT, " + COL2 + " INT, " + COL3 + " INT," + COL4 + " TEXT," + COL5 + " TEXT);" ;
         db.execSQL(createTable);
 
     }
-    // make the on upgrade
+
+    /*
+    neccesary onUpgrade function
+     */
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME);
@@ -54,15 +64,18 @@ public class TranslationDatabase extends SQLiteOpenHelper {
      */
     public boolean checkChapter1Existence(String book, Integer translation){
         SQLiteDatabase db = this.getWritableDatabase();
+
+        // determine which column will be checked
         String variable_column = COL4;
         if (translation == 1){
             variable_column = COL5;
         }
 
-        Cursor cursor;
+        // make the query
         String Query = "SELECT * FROM " + TABLE_NAME + " WHERE " + COL1 + " = '" + book+ "' AND " + COL2 + "=  1 AND " + variable_column + " IS NOT NULL;";
-        cursor= db.rawQuery(Query,null);
 
+        // execute it and check if there are any rows if so return true else false
+        Cursor cursor= db.rawQuery(Query,null);
         if(cursor.getCount() == 0){
             cursor.close();
             return false;
@@ -81,12 +94,14 @@ public class TranslationDatabase extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
         String query;
 
+        // determine which column will be checked
         String variable_column = COL4;
-
         if (translation == 1){
             variable_column = COL5;
         }
 
+        //  if both col4 and col 5 are present the table needs to be updated instead of insert
+        // this way each translation only takes one cell
         if (checkChapter1Existence(book, 1) && checkChapter1Existence(book, 0))
         {
             query = "UPDATE " + TABLE_NAME + " SET " + variable_column + " = '" + text + "' WHERE " + COL1 + " = '" + book+ "' AND " + COL2 + " = " + chapter + " AND " + COL3 + " = " + verse +  ";";
@@ -94,12 +109,15 @@ public class TranslationDatabase extends SQLiteOpenHelper {
         else{
             query = "INSERT INTO " + TABLE_NAME + "(" + COL1 + ", " + COL2 + ", " + COL3 + ", " + variable_column + ") VALUES( '" + book + "', " + chapter + ", " + verse + ", '" + text + "');";
         }
+
+        // execute the query
         db.execSQL(query);
     }
+
     /*
-    returns the max verse that is possible used to add verses to favorites
+    returns a cursor which only contains the max verse
      */
-    public Cursor get_max_verse(String book, int chapter){
+    public Cursor getMaxVerse(String book, int chapter){
         SQLiteDatabase db = this.getWritableDatabase();
         String query;
 
@@ -107,9 +125,9 @@ public class TranslationDatabase extends SQLiteOpenHelper {
         return db.rawQuery(query, null);
     }
 
-
-
-
+    /*
+    will return a cursor of the chapter
+     */
     public Cursor getChapter(String book, Integer chapter, Integer translation) {
 
         String variable_column = COL4;

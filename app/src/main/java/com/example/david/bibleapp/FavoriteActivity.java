@@ -184,8 +184,8 @@ public class FavoriteActivity extends AppCompatActivity {
     private void deleteDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(FavoriteActivity.this);
         builder.setMessage("Do you really want to delete this from your Favorites?"  )
-                .setPositiveButton("Yes", deleteDialogClickListener)
-                .setNegativeButton("No", deleteDialogClickListener).show();
+                .setPositiveButton("Yes", deleteDialogListener)
+                .setNegativeButton("No", deleteDialogListener).show();
     }
 
 
@@ -343,7 +343,7 @@ public class FavoriteActivity extends AppCompatActivity {
    the onclick listener for the deleteDialog
    if the positive button is clicked the subject will get deleted
     */
-    DialogInterface.OnClickListener deleteDialogClickListener = new DialogInterface.OnClickListener() {
+    DialogInterface.OnClickListener deleteDialogListener = new DialogInterface.OnClickListener() {
         @Override
         public void onClick(DialogInterface dialog, int choice) {
             switch (choice) {

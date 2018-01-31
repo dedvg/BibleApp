@@ -1,7 +1,7 @@
 package com.example.david.bibleapp;
 
 /*
-This class had a username TODO use the uername to see other favorites
+This class had a username
 and a ArrayList of subjects to store the favorites of the user in firebase.
  */
 

@@ -1,4 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
+
+<!--
+this will set an animation for buttons
+-->
 <set xmlns:android="http://schemas.android.com/apk/res/android">
 
     <alpha

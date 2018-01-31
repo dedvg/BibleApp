@@ -52,57 +52,56 @@ import java.util.Objects;
 public class UserActivity extends AppCompatActivity {
 
     Toolbar toolbar;
-    ListView listView, row_list;
+    ListView listview, row_list;
     List<String> list_text = new ArrayList<String>();
     Integer layer = 0, translation = 0, clicked_pos;
-    JSONArray BOOKSjson;
-    TranslationDatabase theDatabase;
+    JSONArray books_json;
+    TranslationDatabase sql_databse;
     AlertDialog dialog_verses;
     FirebaseAuth the_auth;
-    UserClass to_change;
     String subject;
-    DatabaseReference the_databse;
-    NavigationClass navigatorClass = new NavigationClass();
+    DatabaseReference the_database;
     Button leftbtn, rightbtn;
     private Animation animation_click;
     EditText input;
+    NavigationClass navigatorClass = new NavigationClass();
     VerseClass verse_text;
+    UserClass to_change;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_user);
         Intent intent = getIntent();
+
+        // get the translation from the intent else set it to 0 (WEB)
         translation = intent.getIntExtra("translation", 0);
-        // set animation
+
+        // set animation for the buttons
         animation_click = AnimationUtils.loadAnimation(this, R.anim.button_animation);
 
-        // create references
+        // initializing references
         toolbar = findViewById(R.id.toolbar);
-        listView = findViewById(R.id.listView);
-        theDatabase = TranslationDatabase.getInstance(this.getApplicationContext());
+        listview = findViewById(R.id.listView);
+        sql_databse = TranslationDatabase.getInstance(this.getApplicationContext());
         the_auth = FirebaseAuth.getInstance();
-        the_databse = FirebaseDatabase.getInstance().getReference();
+        the_database = FirebaseDatabase.getInstance().getReference();
         leftbtn = findViewById(R.id.leftBTN);
         rightbtn = findViewById(R.id.rightBTN);
-        // set up the action bar
-        setSupportActionBar(toolbar);
-        getSupportActionBar().setTitle("Bible App");
-        toolbar.setSubtitle("made by David");
 
         // add backbutton to the toolbar
+        setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
 
-        /*
-        Determines what happens when the back button is clicked.
-        If the back button is pressed when the layer is 1 it will ask the user to logout.
-         */
-        toolbar.setNavigationOnClickListener(new navigationBackClicked());
+        // add some layout for the custom toolbar
+        getSupportActionBar().setTitle("Bible App");
+        toolbar.setSubtitle("made by David");
 
+        // sets the layout ready for use
         setLayerLayout();
-        // will make all info available from the local JSON
 
+        // gets the information needed to navigate from a local JSON
         try {
             getBookJson();
         } catch (JSONException e) {
@@ -111,6 +110,8 @@ public class UserActivity extends AppCompatActivity {
             e.printStackTrace();
         }
 
+        // set on click listener for the navigationBackButton
+        toolbar.setNavigationOnClickListener(new navigationBackClicked());
     }
 
 
@@ -130,10 +131,10 @@ public class UserActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.logout:
-                logoutMsg();
+                logoutDialog();
                 break;
             case R.id.favorites:
-                GoToFavorites();
+                goToFavorites();
                 break;
             case R.id.switch_translation:
                 switchTranslationDialog();
@@ -147,9 +148,16 @@ public class UserActivity extends AppCompatActivity {
     sets the previous chapter as readable
      */
     public void previousChapter(View view) {
-        navigatorClass.selected_chapter = navigatorClass.selected_chapter - 1;
-        setLayerLayout();
-        view.startAnimation(animation_click);
+        // prevent the user from reading a chapter that does not exist
+        if (0 < navigatorClass.selected_chapter){
+
+            // set the new chapter and adapt the layout to it
+            navigatorClass.selected_chapter = navigatorClass.selected_chapter - 1;
+            setLayerLayout();
+
+            // show an animation
+            view.startAnimation(animation_click);
+        }
     }
 
     /*
@@ -157,100 +165,89 @@ public class UserActivity extends AppCompatActivity {
     set the next chapter as readable
     */
     public void nextChapter(View view) {
-        navigatorClass.selected_chapter = navigatorClass.selected_chapter + 1;
-        setLayerLayout();
-        view.startAnimation(animation_click);
-    }
 
-    /* factor and upper bound determine which books need to be sho
-    will create a clicklistener on the listview
-    it keeps track of the layer and changes variables to make navigation possible
+        // prevent the user from reading a chapter that does not exist
+        if (navigatorClass.chapters > navigatorClass.selected_chapter){
 
-    addwn
-
-    old testament = 0 -39
-    new testament = 40 - 66
-
-     */
-
-    private class ClickListener implements AdapterView.OnItemClickListener {
-        @Override
-        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            clicked_pos = position;
-            switch (layer) {
-                case 0:
-                    if (clicked_pos == 0) {
-                        navigatorClass.setOld(true);
-                    } else {
-                        navigatorClass.setOld(false);
-                    }
-                    break;
-                case 1:
-                    navigatorClass.setSelected_book_int(clicked_pos);
-                    try {
-                        navigatorClass.selected_book = BOOKSjson.getJSONObject(navigatorClass.selected_book_int).getString("key");
-                        navigatorClass.chapters = BOOKSjson.getJSONObject(navigatorClass.selected_book_int).getInt("val");
-
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                    break;
-                case 2:
-                    navigatorClass.setSelected_chapter(clicked_pos);
-                    break;
-            }
-            // something is clicked so the layer will become 1 higher and select layer will handle the layout
-            layer += 1;
+            // set the new chapter and adapt the layout to it
+            navigatorClass.selected_chapter = navigatorClass.selected_chapter + 1;
             setLayerLayout();
+
+            // show an animation
+            view.startAnimation(animation_click);
         }
+
+    }
+
+
+
+
+    /*
+    helper function for adding to favorites, done with:
+     */
+    public void preperationAddFavorites() {
+
+        // will get the max verse
+        Integer max_verse = 0;
+        List<String> verses = new ArrayList<>();
+        Cursor theCursor = sql_databse.getMaxVerse(navigatorClass.selected_book,
+                                                   navigatorClass.selected_chapter);
+        while (theCursor.moveToNext()) {
+            max_verse = theCursor.getInt(0);
+        }
+
+        // will set a list full with numbers from the selected verse till the max verse
+        for (int i = verse_text.begin_verse; i <= max_verse; i++) {
+            verses.add(String.valueOf(i));
+        }
+
+        // make a list with a clicklistener and custom adapter
+        row_list = new ListView(this);
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
+                                                                R.layout.row_custom_dialog,
+                                                                R.id.list_item_text, verses);
+        row_list.setAdapter(adapter);
+        row_list.setOnItemClickListener(verseSelected);
+
+        // maka a dialog with this list used in it
+        addFavoritesDialog1();
     }
 
     /*
-    this function will enable adding the clicked text to the favorites of the user
-    */
-    private class LongClickListener implements AdapterView.OnItemLongClickListener {
-        @Override
-        public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-            verse_text = new VerseClass(navigatorClass.selected_book, navigatorClass.selected_chapter);
-            verse_text.begin_verse = position + 1;
-            dialogFavorites();
-            Toast.makeText(UserActivity.this, "add " + navigatorClass.selected_book + " " + navigatorClass.selected_chapter.toString() + ":  " + verse_text.begin_verse.toString(), Toast.LENGTH_SHORT).show();
-            return false;
-        }
-    }
-    /*
-    dialogclicklistener which will set the subject and add it to firebase
-    (will add the subject with the selected verses)
+    will show a dialog which enables the user to select an end verse with use of
+    the list row_list made in preperationAddFavorites
      */
-    DialogInterface.OnClickListener setSubjectListener = new DialogInterface.OnClickListener() {
-        @Override
-        public void onClick(DialogInterface dialog, int choice) {
-            switch (choice) {
-                case DialogInterface.BUTTON_POSITIVE:
-                    ArrayList<String> verses_list = new ArrayList<String>();
-                    subject = input.getText().toString();
-                    Integer row = translation + 3;
-                    Cursor theCursor = theDatabase.getVerses(verse_text);
-                    while (theCursor.moveToNext()) {
-                        verses_list.add(theCursor.getString(row));
-                    }
-                    verseInFirebase(verses_list);
-                    break;
-                case DialogInterface.BUTTON_NEGATIVE:
-                    break;
-            }
-        }
-    };
-
-    /*
-    test dialog made with use of https://stackoverflow.com/questions/10903754/input-text-dialog-android
-     */
-    public void dialogAddFavorites1() {
+    public void addFavoritesDialog1() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setMessage("Under which name do you want to add this to firebase?");
+        builder.setCancelable(true);
+
+        // set dialog messages
+        builder.setTitle("Add to Favorties");
+        builder.setMessage("till which verse do you want to add? ");
+
+        // Specify the type of input expected
+        final EditText input = new EditText(this);
+        input.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_CLASS_NUMBER);
+
+        // set row list in the dialog
+        builder.setView(row_list);
+        dialog_verses = builder.create();
+        dialog_verses.show();
+    }
+    /*
+    dialog made with use of:
+    https://stackoverflow.com/questions/10903754/input-text-dialog-android
+
+    will add the text with given name in FireBase
+     */
+    public void addFavoritesDialog2() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
         // set a message accordingly to which verses are selected
-        String builder_title = "Selected " + navigatorClass.selected_book + " " + navigatorClass.selected_chapter + " verse : " + verse_text.begin_verse;
+        builder.setMessage("Under which name do you want to add this to your Favorites?");
+        String builder_title = "Selected " + navigatorClass.selected_book + " " +
+                navigatorClass.selected_chapter + " verse : " +
+                verse_text.begin_verse;
         if (verse_text.begin_verse != verse_text.end_verse) {
             builder_title += " - " + verse_text.end_verse;
         }
@@ -267,94 +264,26 @@ public class UserActivity extends AppCompatActivity {
         builder.show();
     }
 
-     /*
-    dialogclicklistener which will set end verse of the subject wich can be added to firebase
-     */
-
-   AdapterView.OnItemClickListener verseSelected =  new AdapterView.OnItemClickListener() {
-        @Override
-        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            Integer option_clicked = verse_text.begin_verse + position;
-            verse_text.end_verse = option_clicked;
-            dialogAddFavorites1();
-            dialog_verses.cancel();
-        }
-    };
-    /*
-    helper function for adding to favorites, done with:
-    https://www.youtube.com/watch?v=0gTXUHDz6BM
-     */
-
-    public void dialogFavorites() {
-        Integer max_verse = 0;
-        List<String> verses = new ArrayList<>();
-        Cursor theCursor = theDatabase.get_max_verse(navigatorClass.selected_book, navigatorClass.selected_chapter);
-        while (theCursor.moveToNext()) {
-            max_verse = theCursor.getInt(0);
-            System.out.println(max_verse.toString());
-        }
-        for (int i = verse_text.begin_verse; i <= max_verse; i++) {
-            verses.add(String.valueOf(i));
-        }
-        row_list = new ListView(this);
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, R.layout.row_custom_dialog, R.id.list_item_text, verses);
-        row_list.setAdapter(adapter);
-        row_list.setOnItemClickListener(verseSelected);
-        dialogFavorites2();
-    }
-
-    /*
-    actually showing the dialog
-     */
-    public void dialogFavorites2() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setCancelable(true);
-        builder.setTitle("Add to Favorties");
-        builder.setMessage("till which verse do you want to add? ");
-
-        final EditText input = new EditText(this);
-        // Specify the type of input expected; this, for example, sets the input as a password, and will mask the text
-        input.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_CLASS_NUMBER);
-        builder.setView(row_list);
-        dialog_verses = builder.create();
-        dialog_verses.show();
-    }
-
     /*
     function to set an on click listener to the list or a longclicklistener
     */
     public void clickListener(Boolean set) {
-        if (set == true) {
-            listView.setOnItemClickListener(new ClickListener());
-            listView.setOnItemLongClickListener(null);
+        if (set) {
+            listview.setOnItemClickListener(new listClickListener());
+            listview.setOnItemLongClickListener(null);
         } else {
-            listView.setOnItemClickListener(null);
-            listView.setOnItemLongClickListener(new LongClickListener());
+            listview.setOnItemClickListener(null);
+            listview.setOnItemLongClickListener(new LongClickListener());
         }
     }
 
-    /*
-    implements an onclicklistener to check of the translation needs to be changed
-     */
-    DialogInterface.OnClickListener translationSwitchListener = new DialogInterface.OnClickListener() {
-        @Override
-        public void onClick(DialogInterface dialog, int choice) {
-            switch (choice) {
-                case DialogInterface.BUTTON_POSITIVE:
-                    switchTranslation();
-                    break;
-                case DialogInterface.BUTTON_NEUTRAL:
-                    break;
-            }
-        }
-    };
 
     /*
     popup which allows the user to select a different translation
     allows the user to read from a different translation
      */
     public void switchTranslationDialog() {
-
+        // set the text for the dialog and onclicklistener
         String translation_txt;
         if (translation == 0) {
             translation_txt = "KJV";
@@ -363,8 +292,8 @@ public class UserActivity extends AppCompatActivity {
         }
         AlertDialog.Builder builder = new AlertDialog.Builder(UserActivity.this);
         builder.setMessage("do you want to switch to " + translation_txt)
-                .setNeutralButton("no", translationSwitchListener)
-                .setPositiveButton("yes", translationSwitchListener).show();
+                .setNeutralButton("no", switchTranslationListener)
+                .setPositiveButton("yes", switchTranslationListener).show();
     }
 
     /*
@@ -379,9 +308,9 @@ public class UserActivity extends AppCompatActivity {
             translation = 0;
             translation_txt = "WEB";
         }
-        Toast.makeText(UserActivity.this, translation_txt + " selected", Toast.LENGTH_SHORT).show();
-        toolbar.setSubtitle(translation_txt);
-        if (!checkBookExistence()) {
+        Toast.makeText(UserActivity.this, "switched translation to " + translation_txt,
+                       Toast.LENGTH_SHORT).show();
+        if (!sql_databse.checkChapter1Existence(navigatorClass.selected_book, translation)) {
             layer = 1;
         }
         setLayerLayout();
@@ -390,70 +319,27 @@ public class UserActivity extends AppCompatActivity {
     /*
     creates a popup which asks the user if the user really wants to logout
     */
-    public void logoutMsg() {
-        DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int choice) {
-                switch (choice) {
-                    case DialogInterface.BUTTON_POSITIVE:
-                        logout();
-                        break;
-                    case DialogInterface.BUTTON_NEGATIVE:
-                        break;
-                }
-            }
-        };
-
+    public void logoutDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(UserActivity.this);
         builder.setMessage("Do you want to log out?")
-                .setPositiveButton("Yes", dialogClickListener)
-                .setNegativeButton("No", dialogClickListener).show();
+                .setPositiveButton("Yes", logoutListener)
+                .setNegativeButton("No", logoutListener).show();
     }
 
-    /*
-    Custom adapter for seeing Listview items
-     */
-    class CustomAdapter extends BaseAdapter {
-
-        @Override
-        public int getCount() {
-            return list_text.size();
-        }
-
-        @Override
-        public Object getItem(int position) {
-            return null;
-        }
-
-        @Override
-        public long getItemId(int position) {
-            return 0;
-        }
-
-        @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-            convertView = getLayoutInflater().inflate(R.layout.row_user, null);
-
-            TextView description_txt = convertView.findViewById(R.id.list_item);
-            description_txt.setText(list_text.get(position));
-            return convertView;
-        }
-    }
 
     /*
     will fill the list with what is currently in list_text
      */
-
     public void fillList() {
         // Initialize a new ArrayAdapter object from list
         CustomAdapter theAdapter = new CustomAdapter();
 
         // Populate the second ListView with second ArrayAdapter
-        listView.setAdapter(theAdapter);
+        listview.setAdapter(theAdapter);
     }
 
     /*
-    will load all books and chapters in a ordered jsonarray
+    will load all books and chapters in a ordered jsonarray books_json
      */
     public void getBookJson() throws JSONException, IOException {
         // done with use of https://www.youtube.com/watch?v=h71Ia9iFWfI
@@ -465,7 +351,7 @@ public class UserActivity extends AppCompatActivity {
         is.close();
         String json = new String(buffer, "UTF-8");
         jsonObject = new JSONObject(json);
-        BOOKSjson = jsonObject.getJSONObject("sections").getJSONArray("whole_bible");
+        books_json = jsonObject.getJSONObject("sections").getJSONArray("whole_bible");
     }
 
 
@@ -478,7 +364,6 @@ public class UserActivity extends AppCompatActivity {
     layer 3 = reading and adding to favorites of the selected chapter
     */
     public void setLayerLayout() {
-        listView.setDividerHeight(1);
         buttonLayout();
         clickListener(true);
         switch (layer) {
@@ -499,6 +384,7 @@ public class UserActivity extends AppCompatActivity {
 
     /*
     will handle the visibility of the left and right button
+    only for layer 3 the buttons need to be visible
      */
     public void buttonLayout() {
         if (layer == 3) {
@@ -520,7 +406,7 @@ public class UserActivity extends AppCompatActivity {
     }
 
     /*
-    will create a listview with old and new
+    will create a listview with old and new testament in it ready to select
      */
     public void layer0Layout() {
         list_text.clear();
@@ -532,7 +418,7 @@ public class UserActivity extends AppCompatActivity {
     /*
    will fill the listview with books from the old or new testament
 
-   add factor and upper bound determine which books will be shown
+   from navigatorClass add factor and upper bound determine which books will be shown
 
    0-39 old testament books
 
@@ -543,7 +429,7 @@ public class UserActivity extends AppCompatActivity {
         for (int i = 0; i < navigatorClass.upper_bound; i++) {
             String book_name = null;
             try {
-                book_name = BOOKSjson.getJSONObject(i + navigatorClass.add_factor).getString("key");
+                book_name = books_json.getJSONObject(i + navigatorClass.add_factor).getString("key");
             } catch (JSONException e) {
                 e.printStackTrace();
             }
@@ -554,9 +440,14 @@ public class UserActivity extends AppCompatActivity {
 
     /*
     will show all chapters depending on the selected book
+    but first it will check if the book is already in the database
+    if not go to TranslateActivity to download the book
      */
     public void layer2Layout() {
-        if (checkBookExistence()) {
+        if (sql_databse.checkChapter1Existence(navigatorClass.selected_book, translation)) {
+
+            // if it exist show all available chapters in the list and set the title to the
+            // selected book
             list_text.clear();
             getSupportActionBar().setTitle(navigatorClass.selected_book);
             for (int i = 0; i < navigatorClass.chapters; i++) {
@@ -566,7 +457,10 @@ public class UserActivity extends AppCompatActivity {
             }
             fillList();
         } else {
-            go_to_translation(navigatorClass.selected_book, navigatorClass.selected_book_int);
+
+            // the layer will be set to 1 to make sure the user can select the book again afther
+            // downloading in translationActivity
+            goToTranslation(navigatorClass.selected_book, navigatorClass.selected_book_int);
             layer = 1;
         }
     }
@@ -576,21 +470,27 @@ public class UserActivity extends AppCompatActivity {
     if the database does not contain the information a download button will appear
     */
     public void layer3Layout() {
-        getSupportActionBar().setTitle(navigatorClass.selected_book + " " + navigatorClass.selected_chapter.toString());
-        clickListener(false);
-        toolbar.setSubtitle("long tap to add to favorites");
-        // clear the listview
         list_text.clear();
 
-        // afther column 3 the translations are present
+        // set the title to the selcted book and chapter
+        getSupportActionBar().setTitle(navigatorClass.selected_book + " " +
+                                       navigatorClass.selected_chapter.toString());
+
+        // remove the click listener and set a longclicklistener
+        clickListener(false);
+
+        // set hint to add to favorites
+        toolbar.setSubtitle("long tap to add to favorites");
+
+        // afther column 3 the translations are present so the row is calculaed this way
         Integer verse_column = 3 + translation;
-        Cursor theCursor = theDatabase.getChapter(navigatorClass.selected_book, navigatorClass.selected_chapter, translation);
+        Cursor theCursor = sql_databse.getChapter(navigatorClass.selected_book,
+                                                  navigatorClass.selected_chapter, translation);
 
         // add al verses and correspondending verse numbers to the list_text
         while (theCursor.moveToNext()) {
             String number = theCursor.getString(2);
             String verse = theCursor.getString(verse_column);
-
             list_text.add(number + ":  " + verse);
         }
 
@@ -598,57 +498,12 @@ public class UserActivity extends AppCompatActivity {
         fillList();
     }
 
-    public boolean checkBookExistence() {
-        Cursor theCursor = theDatabase.getChapter(navigatorClass.selected_book, 1, translation);
-        Integer rows = theCursor.getCount();
-        if (rows >= 1) {
-            return true;
-        }
-        return false;
-    }
 
-    ValueEventListener updateUser = new ValueEventListener() {
-        @Override
-        public void onDataChange(DataSnapshot dataSnapshot) {
-
-            FirebaseUser user = the_auth.getCurrentUser();
-            to_change = dataSnapshot.child("users").child(user.getUid()).getValue(UserClass.class);
-            boolean found = false;
-            // get the userclass from firebase (from the current user)
-            ArrayList<SubjectClass> subject_list = new ArrayList<SubjectClass>();
-            ArrayList<VerseClass> verses_to_change = new ArrayList<VerseClass>();
-            // prevent it from being null
-            if (to_change.subjects == null) {
-                subject_list = new ArrayList<SubjectClass>();
-            } else {
-                subject_list = to_change.subjects;
-            }
-            for (int i = 0; i < subject_list.size(); i++) {
-                if (Objects.equals(subject_list.get(i).name, subject)) {
-                    verses_to_change = subject_list.get(i).verses;
-                    subject_list.get(i).verses = verses_to_change;
-                    found = true;
-                }
-            }
-            verses_to_change.add(verse_text);
-            if (!found) {
-                SubjectClass new_subject = new SubjectClass(subject, verses_to_change);
-                subject_list.add(new_subject);
-            }
-            to_change.subjects = subject_list;
-            the_databse.child("users").child(user.getUid()).setValue(to_change);
-        }
-        @Override
-        public void onCancelled(DatabaseError error) {
-            // if not possible toast it
-            Toast.makeText(UserActivity.this, "please check your connection",
-                    Toast.LENGTH_SHORT).show();
-        }
-    };
 
 
     /*
     will set the selected verses in Firebase by setting a singleEventListener
+    and set the translation property in the class
      */
     public void verseInFirebase(final ArrayList verses_list){
         verse_text.text = verses_list;
@@ -657,7 +512,7 @@ public class UserActivity extends AppCompatActivity {
         } else {
             verse_text.translation = "(KJV)";
         }
-        the_databse.addListenerForSingleValueEvent(updateUser);
+        the_database.addListenerForSingleValueEvent(updateUser);
     }
 
     /*
@@ -674,39 +529,268 @@ public class UserActivity extends AppCompatActivity {
     /*
     will go to the favoritesActivity
     */
-    private void GoToFavorites() {
+    private void goToFavorites() {
         Intent intent = new Intent(this, FavoriteActivity.class);
+
         // starts the new activity
         startActivity(intent);
     }
 
     /*
-       Goes to TranslationActivity with selected book and needed information to download it
+       goes to TranslationActivity with selected book and needed information to download it
     */
-    private void go_to_translation(String book, Integer selected_book_int) {
+    private void goToTranslation(String book, Integer selected_book_int) {
         Intent intent = new Intent(this, TranslationActivity.class);
         intent.putExtra("book", book);
         intent.putExtra("book_int", selected_book_int);
         intent.putExtra("translation", translation);
-        intent.putExtra("jsonArray", BOOKSjson.toString());
+        intent.putExtra("json_array", books_json.toString());
 
-
-        System.out.println("before : " + book + selected_book_int);
         // starts the new activity
         startActivity(intent);
         finish();
     }
 
+
+
+    /*
+   Custom adapter for seeing Listview items
+    */
+    class CustomAdapter extends BaseAdapter {
+
+        @Override
+        public int getCount() {
+            return list_text.size();
+        }
+
+        @Override
+        public Object getItem(int position) {
+            return null;
+        }
+
+        @Override
+        public long getItemId(int position) {
+            return 0;
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            convertView = getLayoutInflater().inflate(R.layout.row_user, null);
+
+            // set the text to what is in list_text
+            TextView description_txt = convertView.findViewById(R.id.list_item);
+            description_txt.setText(list_text.get(position));
+            return convertView;
+        }
+    }
+    /*
+        updats the user with the new favorites
+         */
+    ValueEventListener updateUser = new ValueEventListener() {
+        @Override
+        public void onDataChange(DataSnapshot dataSnapshot) {
+
+            // get user from firebase
+            FirebaseUser user = the_auth.getCurrentUser();
+            to_change = dataSnapshot.child("users").child(user.getUid()).getValue(UserClass.class);
+
+            // this boolean is used to check if the added subject already exist
+            boolean found = false;
+
+            // initialize a subjectclass and the verseslist belonging to it
+            ArrayList<SubjectClass> subject_list = new ArrayList<>();
+            ArrayList<VerseClass> verses_to_change = new ArrayList<>();
+
+            // if there are subjects the subjectlist will become the users subjects
+            if (to_change.subjects != null) {
+                subject_list = to_change.subjects;
+            }
+
+            // check if the subject is already present if so add the verses to that subject
+            for (int i = 0; i < subject_list.size(); i++) {
+                if (Objects.equals(subject_list.get(i).name, subject)) {
+                    verses_to_change = subject_list.get(i).verses;
+
+                    // get which verseslist need to be changed from the subject and set found true
+                    subject_list.get(i).verses = verses_to_change;
+                    found = true;
+                }
+            }
+
+            // add the verses to the verseslist
+            verses_to_change.add(verse_text);
+            if (!found) {
+
+                // if not found make a new subject
+                SubjectClass new_subject = new SubjectClass(subject, verses_to_change);
+                subject_list.add(new_subject);
+            }
+
+            // set the new variables in firebase
+            to_change.subjects = subject_list;
+            the_database.child("users").child(user.getUid()).setValue(to_change);
+        }
+        @Override
+        public void onCancelled(DatabaseError error) {
+            // if not possible toast it
+            Toast.makeText(UserActivity.this, "please check your connection",
+                    Toast.LENGTH_SHORT).show();
+        }
+    };
+    /*
+    will handle the back button presses by lowering the layout each time
+     */
     private class navigationBackClicked implements View.OnClickListener {
         @Override
         public void onClick(View v) {
+
+            // will only lower the layer to 0
             if (layer > 0) {
                 layer -= 1;
                 setLayerLayout();
-                clickListener(true);
             }
         }
     }
+    /*
+     click listener for the list,
+     depending on which layer is the current layer some variables are set
+       */
+    private class listClickListener implements AdapterView.OnItemClickListener {
+        @Override
+        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            clicked_pos = position;
+            switch (layer) {
+                case 0:
+
+                    // set the variables for old or new depending on which is clicked
+                    if (clicked_pos == 0) {
+                        navigatorClass.setOld(true);
+                    } else {
+                        navigatorClass.setOld(false);
+                    }
+                    break;
+                case 1:
+
+                    // set the selected book and the variables belonging to that book
+                    navigatorClass.setSelected_book_int(clicked_pos);
+                    try {
+                        int selectedInt = navigatorClass.selected_book_int;
+                        JSONObject selected_book_json = books_json.getJSONObject(selectedInt);
+                        navigatorClass.selected_book = selected_book_json.getString("key");
+                        navigatorClass.chapters = selected_book_json.getInt("val");
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                    break;
+                case 2:
+
+                    // set the selected chapter
+                    navigatorClass.setSelected_chapter(clicked_pos);
+                    break;
+            }
+
+            // set the layer one higher and set the correct layout for it
+            layer += 1;
+            setLayerLayout();
+        }
+    }
+
+    /*
+    this function will enable adding the clicked text to the favorites of the user
+    */
+    private class LongClickListener implements AdapterView.OnItemLongClickListener {
+        @Override
+        public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+
+            // initialize the new verseclass ready for adding
+            verse_text = new VerseClass(navigatorClass.selected_book,
+                    navigatorClass.selected_chapter);
+
+            // set the begin verse to the clicked verse
+            verse_text.begin_verse = position + 1;
+
+            // dialog till which verse you want to add to favorites
+            preperationAddFavorites();
+            return false;
+        }
+    }
+    /*
+    dialogclicklistener which will set the subject and add it to firebase
+    (will add the subject with the selected verses)
+     */
+    DialogInterface.OnClickListener setSubjectListener = new DialogInterface.OnClickListener() {
+        @Override
+        public void onClick(DialogInterface dialog, int choice) {
+            switch (choice) {
+                case DialogInterface.BUTTON_POSITIVE:
+                    ArrayList<String> verses_list = new ArrayList<String>();
+                    subject = input.getText().toString();
+                    Integer row = translation + 3;
+                    Cursor theCursor = sql_databse.getVerses(verse_text);
+                    while (theCursor.moveToNext()) {
+                        verses_list.add(theCursor.getString(row));
+                    }
+                    verseInFirebase(verses_list);
+                    Toast.makeText(UserActivity.this, "ADDED",
+                            Toast.LENGTH_SHORT).show();
+                    break;
+                case DialogInterface.BUTTON_NEGATIVE:
+                    break;
+            }
+        }
+    };
+
+    /*
+   dialogclicklistener which will set end verse of the subject wich can be added to firebase
+    */
+    AdapterView.OnItemClickListener verseSelected =  new AdapterView.OnItemClickListener() {
+        @Override
+        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            Integer option_clicked = verse_text.begin_verse + position;
+            verse_text.end_verse = option_clicked;
+
+            // second dialog will enable the user to select under which subject it is added
+            // to firebase
+            addFavoritesDialog2();
+            dialog_verses.cancel();
+        }
+    };
+    /*
+       implements an onclicklistener to check of the translation needs to be changed
+       if the positive button is clicked, switch translation
+        */
+    DialogInterface.OnClickListener switchTranslationListener = new DialogInterface.OnClickListener() {
+        @Override
+        public void onClick(DialogInterface dialog, int choice) {
+            switch (choice) {
+                case DialogInterface.BUTTON_POSITIVE:
+                    switchTranslation();
+                    break;
+                case DialogInterface.BUTTON_NEUTRAL:
+                    break;
+            }
+        }
+    };
+
+    /*
+   a clicklisetener which will logout the user if clicked yes
+   used for the function logoutDialog
+    */
+    DialogInterface.OnClickListener logoutListener = new DialogInterface.OnClickListener() {
+        @Override
+        public void onClick(DialogInterface dialog, int choice) {
+            switch (choice) {
+                case DialogInterface.BUTTON_POSITIVE:
+                    logout();
+                    break;
+                case DialogInterface.BUTTON_NEGATIVE:
+                    break;
+            }
+        }
+    };
+
+
 }
 
 

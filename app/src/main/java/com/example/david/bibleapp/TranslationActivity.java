@@ -17,7 +17,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.android.volley.Request;
@@ -27,7 +26,6 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.google.firebase.auth.FirebaseAuth;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -40,7 +38,7 @@ public class TranslationActivity extends AppCompatActivity {
     TextView translation_txt;
     Button translation_btn;
     Toolbar toolbar;
-    TranslationDatabase the_database;
+    TranslationDatabase sql_database;
     JSONArray books_json;
     Integer chapters, translation, given_book_int, load_chapter = 0;
     String add_factor, given_book, book_url;
@@ -76,7 +74,7 @@ public class TranslationActivity extends AppCompatActivity {
         translation_btn = findViewById(R.id.transBTN);
         translation_txt = findViewById(R.id.transTXT);
         toolbar = findViewById(R.id.toolbar);
-        the_database = TranslationDatabase.getInstance(this.getApplicationContext());
+        sql_database = TranslationDatabase.getInstance(this.getApplicationContext());
 
         // create the toolbar
         setSupportActionBar(toolbar);
@@ -108,7 +106,7 @@ public class TranslationActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.logout:
-                beforeLogout();
+                logoutDialog();
                 break;
             case R.id.favorites:
                 goToFavorites();
@@ -120,6 +118,40 @@ public class TranslationActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    /*
+      will go to the favoritesActivity
+      */
+    private void goToFavorites() {
+        Intent intent = new Intent(this, FavoriteActivity.class);
+        intent.putExtra("translation", translation);
+
+        // starts the new activity
+        startActivity(intent);
+        finish();
+    }
+
+    /*
+   handle the actual logout
+    */
+    public void logout() {
+        FirebaseAuth.getInstance().signOut();
+        Intent intent = new Intent(this, MainActivity.class);
+        // starts the new activity
+        startActivity(intent);
+        finish();
+    }
+
+    /*
+    will go back to userActivity
+     */
+    private void goBack() {
+        Intent intent = new Intent(this, UserActivity.class);
+        intent.putExtra("translation", translation);
+
+        // starts the new activity
+        startActivity(intent);
+        finish();
+    }
     /*
     will handle the onclick of the download button
     changes some parameters depending on the translation used
@@ -153,8 +185,8 @@ public class TranslationActivity extends AppCompatActivity {
 
         AlertDialog.Builder builder = new AlertDialog.Builder(TranslationActivity.this);
         builder.setMessage("do you want to switch to " + translation_txt)
-                .setNeutralButton("no", switchTranslationDialogListener)
-                .setPositiveButton("yes", switchTranslationDialogListener).show();
+                .setNeutralButton("no", switchTranslationListener)
+                .setPositiveButton("yes", switchTranslationListener).show();
     }
     /*
     actually switches the translation
@@ -184,7 +216,7 @@ public class TranslationActivity extends AppCompatActivity {
         }
         translation_txt.setVisibility(View.VISIBLE);
 
-        setText();
+        setLayout();
     }
     /*
     will set the layout depending on which translations are present
@@ -192,9 +224,9 @@ public class TranslationActivity extends AppCompatActivity {
     if the translation is already downloaded do not show a download button
     else show the download button and adapt the text accordingly
      */
-    private void setText() {
+    private void setLayout() {
 
-        if (the_database.checkChapter1Existence(given_book, translation)){
+        if (sql_database.checkChapter1Existence(given_book, translation)){
             translation_btn.setVisibility(View.INVISIBLE);
             if (translation == 0){
                 translation_txt.setText(" WEB version of " + given_book + " is already downloaded");
@@ -222,36 +254,13 @@ public class TranslationActivity extends AppCompatActivity {
     /*
     asks the user if the user really wants to logout, if yes logout
      */
-    public void beforeLogout(){
+    public void logoutDialog(){
 
 
         AlertDialog.Builder builder = new AlertDialog.Builder(TranslationActivity.this);
         builder.setMessage("Do you want to log out?")
-                .setPositiveButton("Yes", beforeLogoutClickListener)
-                .setNegativeButton("No", beforeLogoutClickListener).show();
-    }
-
-    /*
-    handle the actual logout
-     */
-    public void logout() {
-        FirebaseAuth.getInstance().signOut();
-        Intent intent = new Intent(this, MainActivity.class);
-        // starts the new activity
-        startActivity(intent);
-        finish();
-    }
-
-    /*
-    will go back to userActivity
-     */
-    private void goBack() {
-        Intent intent = new Intent(this, UserActivity.class);
-        intent.putExtra("translation", translation);
-
-        // starts the new activity
-        startActivity(intent);
-        finish();
+                .setPositiveButton("Yes", logoutListener)
+                .setNegativeButton("No", logoutListener).show();
     }
 
     /*
@@ -351,14 +360,14 @@ public class TranslationActivity extends AppCompatActivity {
 
         // if all chapters are downloaded put it in the database
         if (load_chapter == chapters){
-            setInDatabase(bible_book);
+            setBookInDatabase(bible_book);
         }
     }
 
     /*
-    will set the whole class in the SQL database
+    will set the whole book at once in the SQL database
      */
-    private void setInDatabase(ArrayList<ChapterClass> book) {
+    private void setBookInDatabase(ArrayList<ChapterClass> book) {
         Toast.makeText(TranslationActivity.this, "Finished downloading",
                        Toast.LENGTH_SHORT).show();
 
@@ -366,7 +375,7 @@ public class TranslationActivity extends AppCompatActivity {
         // the database
         for (int i = 0 ; i < book.size(); i ++) {
             for (int j = 0 ; j < book.get(i).verses.size(); j ++) {
-                the_database.addItem(given_book, book.get(i).chapter,j + 1,
+                sql_database.addItem(given_book, book.get(i).chapter,j + 1,
                                      book.get(i).verses.get(j), translation );
             }
         }
@@ -377,17 +386,7 @@ public class TranslationActivity extends AppCompatActivity {
     }
 
 
-    /*
-   will go to the favoritesActivity
-   */
-    private void goToFavorites() {
-        Intent intent = new Intent(this, FavoriteActivity.class);
-        intent.putExtra("translation", translation);
 
-        // starts the new activity
-        startActivity(intent);
-        finish();
-    }
     /*
     if the navigation backButton is pressed go one step back
      */
@@ -402,7 +401,7 @@ public class TranslationActivity extends AppCompatActivity {
     the click listener for the beforeLogout function
     if clicked yes the user will logout
      */
-    DialogInterface.OnClickListener beforeLogoutClickListener = new DialogInterface.OnClickListener() {
+    DialogInterface.OnClickListener logoutListener = new DialogInterface.OnClickListener() {
         @Override
         public void onClick(DialogInterface dialog, int choice) {
             switch (choice) {
@@ -418,7 +417,7 @@ public class TranslationActivity extends AppCompatActivity {
     /*
     dialogonclicklisteer to switch translation
      */
-    DialogInterface.OnClickListener switchTranslationDialogListener = new DialogInterface.OnClickListener() {
+    DialogInterface.OnClickListener switchTranslationListener = new DialogInterface.OnClickListener() {
         @Override
         public void onClick(DialogInterface dialog, int choice) {
             switch (choice) {
