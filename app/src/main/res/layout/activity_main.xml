@@ -32,7 +32,7 @@
         android:ems="10"
         android:hint="username"
         android:inputType="textPersonName"
-        android:text="lol@lol.nl"
+        android:text=""
         app:layout_constraintBottom_toTopOf="@+id/passwordED"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -48,7 +48,7 @@
         android:ems="10"
         android:hint="password"
         android:inputType="textPassword"
-        android:text="1234567"
+        android:text=""
         app:layout_constraintBottom_toTopOf="@+id/loginBTN"
         app:layout_constraintEnd_toEndOf="@+id/usernameED"
         app:layout_constraintStart_toStartOf="@+id/usernameED" />
