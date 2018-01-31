@@ -27,6 +27,7 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.google.firebase.auth.FirebaseAuth;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -36,14 +37,13 @@ import java.util.ArrayList;
 
 public class TranslationActivity extends AppCompatActivity {
 
-    TextView title_txt, translation_txt;
+    TextView translation_txt;
     Button translation_btn;
     Toolbar toolbar;
     TranslationDatabase the_database;
     JSONArray books_json;
     Integer chapters, translation, given_book_int, load_chapter = 0;
     String add_factor, given_book, book_url;
-    ProgressBar spinner;
     ProgressDialog progress_dialog;
     ArrayList <ChapterClass> bible_book = new ArrayList<ChapterClass>();
 
@@ -58,12 +58,12 @@ public class TranslationActivity extends AppCompatActivity {
         given_book = intent.getStringExtra("book");
         given_book_int = intent.getIntExtra("book_int", 0);
         translation = intent.getIntExtra("translation", 0);
-        String jsonArray = intent.getStringExtra("jsonArray");
+        String json_array = intent.getStringExtra("json_array");
 
         //  make books_json to enable getting the right values again
         // and make the given book to a good url
         try {
-            books_json = new JSONArray(jsonArray);
+            books_json = new JSONArray(json_array);
             book_url = URLEncoder.encode(given_book, "utf-8");
 
         } catch (JSONException e) {
@@ -72,16 +72,11 @@ public class TranslationActivity extends AppCompatActivity {
             e.printStackTrace();
         }
 
-
-
         // creating references
         translation_btn = findViewById(R.id.transBTN);
-        title_txt = findViewById(R.id.titleTXT);
         translation_txt = findViewById(R.id.transTXT);
         toolbar = findViewById(R.id.toolbar);
         the_database = TranslationDatabase.getInstance(this.getApplicationContext());
-        spinner = findViewById(R.id.progressBar1);
-
 
         // create the toolbar
         setSupportActionBar(toolbar);
@@ -90,19 +85,16 @@ public class TranslationActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
 
-        // initialize the spinner at invisible
-        spinner.setVisibility(View.GONE);
+        // sets the layout ready for use
+        showDownload();
 
         // set an onclicklistener on the navigationbackbutton
         toolbar.setNavigationOnClickListener(new navigationBackClicked());
-
-        // sets the layout ready for use
-        showDownload();
     }
 
     /*
-       enables custom menu
-        */
+   enables custom menu
+   */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_main, menu);
@@ -130,30 +122,28 @@ public class TranslationActivity extends AppCompatActivity {
 
     /*
     will handle the onclick of the download button
+    changes some parameters depending on the translation used
      */
     public void download (View view){
         if (translation == 0){
             add_factor = "";
-            try {
-                volleyTranslation0Books();
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
         }
         else if (translation == 1){
             add_factor = "?translation=kjv";
             translation = 1;
-            try {
-                volleyTranslation0Books();
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
+        }
+
+        // start preperations for the volley
+        try {
+            volleyPreperations();
+        } catch (JSONException e) {
+            e.printStackTrace();
         }
     }
 
 
     /*
-    will switch translation depending on the selected part
+    will create a dialog which enables the user to swithc translation
      */
     public void switchTranslationDialog(){
         String translation_txt = "WEB";
@@ -170,7 +160,6 @@ public class TranslationActivity extends AppCompatActivity {
     actually switches the translation
      */
     private void switchTranslation() {
-        String translation_txt;
         if( translation == 0){
             translation = 1;
         }
@@ -194,7 +183,7 @@ public class TranslationActivity extends AppCompatActivity {
             getSupportActionBar().setTitle("Current translation = WEB");
         }
         translation_txt.setVisibility(View.VISIBLE);
-        title_txt.setVisibility(View.VISIBLE);
+
         setText();
     }
     /*
@@ -202,7 +191,6 @@ public class TranslationActivity extends AppCompatActivity {
 
     if the translation is already downloaded do not show a download button
     else show the download button and adapt the text accordingly
-    todo test this function
      */
     private void setText() {
 
@@ -224,7 +212,6 @@ public class TranslationActivity extends AppCompatActivity {
                 translation_txt.setText(given_book + "(KJV)");
             }
         }
-        title_txt.setText("KJV = King James Version and WEB = World English Bible");
 
         translation_txt.setVisibility(View.VISIBLE);
 
@@ -233,7 +220,6 @@ public class TranslationActivity extends AppCompatActivity {
 
 
     /*
-
     asks the user if the user really wants to logout, if yes logout
      */
     public void beforeLogout(){
@@ -244,6 +230,7 @@ public class TranslationActivity extends AppCompatActivity {
                 .setPositiveButton("Yes", beforeLogoutClickListener)
                 .setNegativeButton("No", beforeLogoutClickListener).show();
     }
+
     /*
     handle the actual logout
      */
@@ -270,34 +257,40 @@ public class TranslationActivity extends AppCompatActivity {
     /*
     preperation of the volley which will get the biblebook
      */
-    public void volleyTranslation0Books() throws JSONException {
+    public void volleyPreperations() throws JSONException {
         progress_dialog = new ProgressDialog(this);
         progress_dialog.setMessage("loading");
         progress_dialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
         progress_dialog.setIndeterminate(false);
+
+        // get the amount of chapters and set this as the max of the progressbar
         chapters = books_json.getJSONObject(given_book_int).getInt("val");
         progress_dialog.setMax(chapters);
         progress_dialog.show();
-        volleyTranslation1Chapters();
+
+
+        volleyChapterByChapter();
     }
+
     /*
     function that will volley all chapters of the book one by one
      */
-    public void volleyTranslation1Chapters( ) throws JSONException {
+    public void volleyChapterByChapter( ) throws JSONException {
 
         for (int i = 0; i < chapters; i++) {
             int chapter = i + 1;
-            volleyTranslation2Chapter(chapter);
+            volleyChapter(chapter);
         }
     }
 
 
 
     /*
-    TODO can crash while downloading and only having half of the book
-    will volley the chapter given by volleyTranslation1
+    will volley the chapter of the book and save it in json_array
+    each volley sets the progressbar one further
+    each chapter is stored with use of the function setChapterInDatabase
      */
-    public void volleyTranslation2Chapter( final int chapter) {
+    public void volleyChapter( final int chapter) {
         // Initialize a new RequestQueue instance
         RequestQueue requestQueue = Volley.newRequestQueue(getApplicationContext());
         String mJSONURLString = "https://bible-api.com/" + book_url + "%20" + chapter + add_factor;
@@ -310,11 +303,14 @@ public class TranslationActivity extends AppCompatActivity {
                     public void onResponse(JSONObject response) {
 
                         try {
+
+                            // set the current progress
                             load_chapter += 1;
                             progress_dialog.setProgress(load_chapter);
 
-                            JSONArray jsonArray = response.getJSONArray("verses");
-                            volleyTranslation3Database(jsonArray, chapter);
+                            // saves the chapter in a JSONArray and sets it in the database
+                            JSONArray json_array = response.getJSONArray("verses");
+                            setChapterInDatabase(json_array, chapter);
                         } catch (JSONException ignored) {}
                     }
                 },
@@ -337,17 +333,23 @@ public class TranslationActivity extends AppCompatActivity {
     will set the textresult in the database verse by verse
     chapter needs to be passed on because chapter 1 does not need to get here first
      */
-    public void volleyTranslation3Database(JSONArray jsonArray, int chapter)throws JSONException{
+    public void setChapterInDatabase(JSONArray json_array, int chapter)throws JSONException{
 
+        // make a list to store all verses
         ArrayList<String> verses = new ArrayList<>();
 
+        // set all verses in the list
         String text;
-        for (int i = 0; i < jsonArray.length(); i++) {
-            text =  jsonArray.getJSONObject(i).getString("text");
+        for (int i = 0; i < json_array.length(); i++) {
+            text =  json_array.getJSONObject(i).getString("text");
             verses.add(text);
         }
+
+        // saves the chapter and adds it to the bible book
         ChapterClass chapter_text = new ChapterClass(chapter, verses);
         bible_book.add(chapter_text);
+
+        // if all chapters are downloaded put it in the database
         if (load_chapter == chapters){
             setInDatabase(bible_book);
         }
@@ -357,13 +359,19 @@ public class TranslationActivity extends AppCompatActivity {
     will set the whole class in the SQL database
      */
     private void setInDatabase(ArrayList<ChapterClass> book) {
-        Integer size_book = book.size() + 1;
-        Toast.makeText(TranslationActivity.this, "Finished downloading" + size_book.toString(), Toast.LENGTH_SHORT).show();
+        Toast.makeText(TranslationActivity.this, "Finished downloading",
+                       Toast.LENGTH_SHORT).show();
+
+        // first loop over the chapters then over the verses and add each verse one by one in
+        // the database
         for (int i = 0 ; i < book.size(); i ++) {
             for (int j = 0 ; j < book.get(i).verses.size(); j ++) {
-                the_database.addItem(given_book, book.get(i).chapter,j + 1, book.get(i).verses.get(j), translation );
+                the_database.addItem(given_book, book.get(i).chapter,j + 1,
+                                     book.get(i).verses.get(j), translation );
             }
         }
+
+        // dismiss the progressbar and go back to userActivity to enable reading again
         progress_dialog.dismiss();
         goBack();
     }
