@@ -411,8 +411,6 @@ public class TranslationActivity extends AppCompatActivity {
                 case DialogInterface.BUTTON_POSITIVE:
                     switchTranslation();
                     break;
-                case DialogInterface.BUTTON_NEUTRAL:
-                    break;
             }
         }
     };

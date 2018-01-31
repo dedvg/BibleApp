@@ -115,15 +115,6 @@ public class UserActivity extends AppCompatActivity {
     }
 
     /*
-    will enable the use of a custom toolbar
-    */
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
-    }
-
-    /*
     handeles the on click events from the custom toolbar
     */
     @Override
@@ -142,6 +133,15 @@ public class UserActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    /*
+    will enable the use of a custom toolbar
+    */
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
+    }
+    
     /*
     will handle the leftbutton on click events
     sets the previous chapter as readable
