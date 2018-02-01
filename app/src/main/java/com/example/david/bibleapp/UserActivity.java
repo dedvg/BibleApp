@@ -466,6 +466,18 @@ public class UserActivity extends AppCompatActivity {
     public void layer3Layout() {
         list_text.clear();
 
+        // initialize the list in the correct length
+        Integer max_verse = 0;
+        Cursor max_cursor = sql_databse.getMaxVerse(navigatorClass.selected_book,
+                navigatorClass.selected_chapter);
+        while (max_cursor.moveToNext()) {
+            max_verse = max_cursor.getInt(0);
+        }
+
+        for (int i = 0; i < max_verse; i++){
+            list_text.add("");
+        }
+
         // set the title to the selcted book and chapter
         getSupportActionBar().setTitle(navigatorClass.selected_book + " " +
                                        navigatorClass.selected_chapter.toString());
@@ -484,8 +496,11 @@ public class UserActivity extends AppCompatActivity {
         // add al verses and correspondending verse numbers to the list_text
         while (theCursor.moveToNext()) {
             String number = theCursor.getString(2);
+            Integer index = Integer.parseInt(number) - 1;
             String verse = theCursor.getString(verse_column);
-            list_text.add(number + ":  " + verse);
+
+            // make sure the right verse gets at the right index in the list
+            list_text.set(index,number + ":  " + verse);
         }
 
         // will create an empty listview or full with verses
