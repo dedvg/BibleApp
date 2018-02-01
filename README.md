@@ -1,6 +1,8 @@
 # BibleApp
 David van Grinsven
 
+© 2018 David Some Rights Reserved
+
 ### Usage of the app
 This app is used for reading the bible. It can be done in two translations, the King James Version (KJV) and the World English Bible (WEB). The Bible contains 66 books which can be devided in Old testament books and New testament books. Each book may contain multiple chapters and each chapter contains multiple verses.
 
@@ -37,16 +39,6 @@ With use of logging in the user will never lose it's Favorites and is able to re
   ![screenshot](/doc/screenshot%20(4).png)
   ![screenshot](/doc/screenshot%20(5).png)
   
- 
-  
- 
-
-
-### external sources
-* two different bible API sources
-  * https://bible-api.com/
-* the ability to login/register a user and keep track of their favorites (firebase)
-  * https://firebase.google.com/
   
 
 
