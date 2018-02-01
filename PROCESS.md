@@ -154,3 +154,11 @@ __progress__
 * when fast clicking the next chapter button it will not go past the available chapters anymore
 * excess code removed
 * all code is now commented and ordered
+
+# day 14 (1 -2-2018)
+__decicions__
+
+      
+
+__progress__
+* making README, LICENSE, REPORT ect ready to commit
