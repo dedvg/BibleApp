@@ -1,6 +1,8 @@
 package com.example.david.bibleapp;
 
 /*
+By David van Grinsven, Minor Programmeren, 2018, UvA
+
 This Activity allows the user to login.
 If the user already logged in previously, the user will be redirected to UserActivity.
 If the user has no account the user can click on the text:

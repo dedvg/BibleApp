@@ -1,6 +1,8 @@
 package com.example.david.bibleapp;
 
 /*
+By David van Grinsven, Minor Programmeren, 2018, UvA
+
 This will handle the SQL database behind the app.
 All text which is downloaded is stored in this database and read from this database.
 */

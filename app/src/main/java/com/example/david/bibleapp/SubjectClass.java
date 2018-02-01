@@ -1,6 +1,8 @@
 package com.example.david.bibleapp;
 
 /*
+By David van Grinsven, Minor Programmeren, 2018, UvA
+
 each subject has a name and the belonging list of verses in it
 this is used for the favorites of the user in firebase
  */

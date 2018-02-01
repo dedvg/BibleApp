@@ -1,6 +1,8 @@
 package com.example.david.bibleapp;
 
 /*
+By David van Grinsven, Minor Programmeren, 2018, UvA
+
 This class will make sure the navigation in UserActivity will be easy.
 It removes a lot of variables which would else be needed in UserActivity.
 */

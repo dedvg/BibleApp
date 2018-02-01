@@ -1,6 +1,8 @@
 package com.example.david.bibleapp;
 
 /*
+By David van Grinsven, Minor Programmeren, 2018, UvA
+
 This Activity allows the user to download a book they do not own yet.
 The user is able to go back to UserActivity with use of the back button provided,
 is able to switch translation and if needed logout.

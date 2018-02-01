@@ -30,7 +30,7 @@
         android:layout_marginTop="120dp"
         android:background="@drawable/common_google_signin_btn_icon_light_normal_background"
         android:ems="10"
-        android:hint="username"
+        android:hint="email"
         android:inputType="textPersonName"
         android:text=""
         app:layout_constraintBottom_toTopOf="@+id/passwordED"

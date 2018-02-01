@@ -1,6 +1,8 @@
 package com.example.david.bibleapp;
 
 /*
+By David van Grinsven, Minor Programmeren, 2018, UvA
+
 This Activity is the Main Activity the user will use.
 This activity allows the user to logout, switch translation, read the bible (if already downloaded),
 and navigate to favorites.

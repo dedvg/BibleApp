@@ -1,6 +1,8 @@
 package com.example.david.bibleapp;
 
 /*
+By David van Grinsven, Minor Programmeren, 2018, UvA
+
 This Activity allows the user to read their subjects they have added.
 By clicking on a subject the belonging verses will be shown and from where the verses are (book, chapter, begin verse, end verse).
 The user is able go back to UserActivity to continue reading

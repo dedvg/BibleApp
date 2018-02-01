@@ -21,10 +21,10 @@
         android:layout_marginBottom="8dp"
         android:layout_marginTop="8dp"
         android:background="@drawable/button_next_chapter"
+        android:onClick="previousChapter"
         android:shadowColor="#000000"
         android:shadowDx="0"
         android:shadowDy="0"
-        android:onClick="previousChapter"
         android:shadowRadius="5"
         android:text="@string/left_btn"
         android:textColor="#FFFFFF"
@@ -41,10 +41,10 @@
         android:layout_marginBottom="8dp"
         android:layout_marginTop="8dp"
         android:background="@drawable/button_next_chapter"
+        android:onClick="nextChapter"
         android:shadowColor="#000000"
         android:shadowDx="0"
         android:shadowDy="0"
-        android:onClick="nextChapter"
         android:shadowRadius="5"
         android:text="@string/right_btn"
         android:textColor="#FFFFFF"
@@ -53,19 +53,24 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <ListView
-        android:id="@+id/listView"
-        android:layout_width="322dp"
-        android:layout_height="502dp"
-        android:layout_marginBottom="4dp"
-
-        android:layout_marginTop="8dp"
+    <android.support.constraint.ConstraintLayout
+        android:id="@+id/constraintLayout"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/rightBTN"
-        app:layout_constraintHeight_default="wrap"
-        app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toEndOf="@+id/leftBTN"
-        app:layout_constraintTop_toBottomOf="@+id/toolbar"
-        app:layout_constraintVertical_bias="0.333" />
+        app:layout_constraintTop_toBottomOf="@+id/toolbar">
+
+        <ListView
+            android:id="@+id/listView"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+
+            android:layout_marginTop="8dp"
+            app:layout_constraintEnd_toStartOf="@+id/rightBTN"
+            app:layout_constraintHeight_default="wrap"
+            app:layout_constraintTop_toTopOf="parent" />
+    </android.support.constraint.ConstraintLayout>
 
 </android.support.constraint.ConstraintLayout>
