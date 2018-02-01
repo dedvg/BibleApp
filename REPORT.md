@@ -6,7 +6,7 @@ made by David van Grinsven
 ___Short App description___
 
 This app alows the user to read the Bible and add verses to his Favorites beneath a chosen name.
-By logging in the user can acces this everywhere. The user is also able to switch betweek King James Version and World English Bible.
+By logging in the user can acces this everywhere. The user is also able to switch between King James Version and World English Bible.
   ![screenshot](/doc/screenshot%20(6).png)
   
 ___technical design___
@@ -21,18 +21,14 @@ If the user has no account the user can click on the text:
 "click here if you have no account"
 And if clicked the user will be redirected to RegisterActivity to register.
 
-Related classes and notable features:
-
 * login with use of firebase
 
 _RegisterActivity_
 
 This Activity will allow the user to register a new account or go back to MainActivity.
 
-Related classes and notable features:
-
 * register with use of firebase
-* the user is instantly saved in the database with use of a UserClass which is mostly empty at start
+* the user is instantly saved in the database(Firebase) with use of a UserClass which is mostly empty at start
 
 
 _TranslationActivity_
@@ -40,8 +36,6 @@ _TranslationActivity_
 This Activity allows the user to download a book they do not own yet.
 The user is able to go back to UserActivity with use of the back button provided,
 is able to switch translation and if needed logout.
-
-Related classes and notable features:
 
 * will volley the bible book chapter by chapter with use of to https://bible-api.com/ 
 * a list of ChapterClasses is used to store the bible book in a local SQL database
@@ -52,10 +46,9 @@ This Activity allows the user to read their subjects they have added.
 By clicking on a subject the belonging verses will be shown and from where the verses are (book, chapter, begin verse, end verse).
 The user is able go back to UserActivity to continue reading.
 
-Related classes and notable features:
-
  * use of a custom adapter to set the list layout
  * use of a database from Firebase
+ * use of classes to navigate trough subjects and delete parts of a subject or a subject from the database(Firebase)
 
 _UserActivity_
 
@@ -67,8 +60,6 @@ When reading a chapter the user can navigate to the next chapter and previous ch
 with use of the provided buttons beside the list in the middle of the Activity.
 When long tapping a verse the user can add a selection of verses from that chapter to their
 favorites with a name they can fill in.
-
-Related classes and notable features:
 
 * all book names and the amount of chapers each bible book has are stored in a local json
 * use of a custom adapter to set the list layout
@@ -94,7 +85,7 @@ _changes_
 * animations are used for clicking the arrow buttons while reading a chapter
 * Instead of only using an api to read a chapter use of a SQL database is made so the user can read a book offline.
 
-Due to the API only sending a chapter it was not possible to volley the complete bible. Also the api had no list with bible books that are present. So to know which books are able to be read a solution was needed. When saving multiple verses just a SubjectClass was not enough to store them so another Class was needed. The standard listview layout was not a nice way of reading the bible. This gave the following changes:
+Due to the API only sending a chapter at most it was not possible to volley the complete bible. Also the api had no list with bible books that are present. So to know which books are able to be read a solution was needed. When saving multiple verses just a SubjectClass was not enough to store them so another Class was needed. The standard listview layout was not a nice way of reading the bible. This gave the following changes:
 
 * instead of just downloading a chapter a whole book is dowloaded, because downloading each chapter seperatly will take a long time for the user. 
 * use of a local json is used to get all book names and amount of chapters they have
